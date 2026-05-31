@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\do_an_CSharp\\DoAnC_sharp\\API\\API.csproj": {}
+    "D:\\Work_Project\\DoAnC_sharp\\API\\API.csproj": {}
   },
   "projects": {
-    "D:\\do_an_CSharp\\DoAnC_sharp\\API\\API.csproj": {
+    "D:\\Work_Project\\DoAnC_sharp\\API\\API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\do_an_CSharp\\DoAnC_sharp\\API\\API.csproj",
+        "projectUniqueName": "D:\\Work_Project\\DoAnC_sharp\\API\\API.csproj",
         "projectName": "API",
-        "projectPath": "D:\\do_an_CSharp\\DoAnC_sharp\\API\\API.csproj",
+        "projectPath": "D:\\Work_Project\\DoAnC_sharp\\API\\API.csproj",
         "packagesPath": "C:\\Users\\chena\\.nuget\\packages\\",
-        "outputPath": "D:\\do_an_CSharp\\DoAnC_sharp\\API\\obj\\",
+        "outputPath": "D:\\Work_Project\\DoAnC_sharp\\API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\chena\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -26,11 +26,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\do_an_CSharp\\DoAnC_sharp\\Application\\Application.csproj": {
-                "projectPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Application\\Application.csproj"
+              "D:\\Work_Project\\DoAnC_sharp\\Application\\Application.csproj": {
+                "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Application\\Application.csproj"
               },
-              "D:\\do_an_CSharp\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj": {
-                "projectPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj"
+              "D:\\Work_Project\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj": {
+                "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj"
               }
             }
           }
@@ -58,11 +58,9 @@
               "target": "Package",
               "version": "[8.0.26, )"
             },
-            "Microsoft.EntityFrameworkCore.Design": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
+            "MySqlConnector": {
               "target": "Package",
-              "version": "[8.0.11, )"
+              "version": "[2.5.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
@@ -92,14 +90,14 @@
         }
       }
     },
-    "D:\\do_an_CSharp\\DoAnC_sharp\\Application\\Application.csproj": {
+    "D:\\Work_Project\\DoAnC_sharp\\Application\\Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\do_an_CSharp\\DoAnC_sharp\\Application\\Application.csproj",
+        "projectUniqueName": "D:\\Work_Project\\DoAnC_sharp\\Application\\Application.csproj",
         "projectName": "Application",
-        "projectPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Application\\Application.csproj",
+        "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Application\\Application.csproj",
         "packagesPath": "C:\\Users\\chena\\.nuget\\packages\\",
-        "outputPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Application\\obj\\",
+        "outputPath": "D:\\Work_Project\\DoAnC_sharp\\Application\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\chena\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -114,8 +112,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\Domain.csproj": {
-                "projectPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\Domain.csproj"
+              "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj": {
+                "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj"
               }
             }
           }
@@ -135,9 +133,13 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
-            "Microsoft.EntityFrameworkCore": {
+            "Dapper": {
               "target": "Package",
-              "version": "[8.0.11, )"
+              "version": "[2.1.79, )"
+            },
+            "MySqlConnector": {
+              "target": "Package",
+              "version": "[2.5.0, )"
             }
           },
           "imports": [
@@ -160,14 +162,14 @@
         }
       }
     },
-    "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\Domain.csproj": {
+    "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\Domain.csproj",
+        "projectUniqueName": "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj",
         "projectName": "Domain",
-        "projectPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\Domain.csproj",
+        "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj",
         "packagesPath": "C:\\Users\\chena\\.nuget\\packages\\",
-        "outputPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\obj\\",
+        "outputPath": "D:\\Work_Project\\DoAnC_sharp\\Domain\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\chena\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -218,14 +220,14 @@
         }
       }
     },
-    "D:\\do_an_CSharp\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj": {
+    "D:\\Work_Project\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\do_an_CSharp\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj",
+        "projectUniqueName": "D:\\Work_Project\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj",
         "projectName": "Infrastructure",
-        "projectPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj",
+        "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj",
         "packagesPath": "C:\\Users\\chena\\.nuget\\packages\\",
-        "outputPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Infrastructure\\obj\\",
+        "outputPath": "D:\\Work_Project\\DoAnC_sharp\\Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\chena\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -240,11 +242,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\do_an_CSharp\\DoAnC_sharp\\Application\\Application.csproj": {
-                "projectPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Application\\Application.csproj"
+              "D:\\Work_Project\\DoAnC_sharp\\Application\\Application.csproj": {
+                "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Application\\Application.csproj"
               },
-              "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\Domain.csproj": {
-                "projectPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\Domain.csproj"
+              "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj": {
+                "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj"
               }
             }
           }
@@ -264,9 +266,17 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
-            "Pomelo.EntityFrameworkCore.MySql": {
+            "Dapper": {
               "target": "Package",
-              "version": "[8.0.2, )"
+              "version": "[2.1.79, )"
+            },
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "MySqlConnector": {
+              "target": "Package",
+              "version": "[2.5.0, )"
             }
           },
           "imports": [

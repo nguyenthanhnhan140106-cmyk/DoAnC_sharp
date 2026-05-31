@@ -1,43 +1,34 @@
 using Application.Interfaces;
 using Application.DTOs;
-using Microsoft.EntityFrameworkCore;
+using Dapper;
+using MySqlConnector;
 
 namespace Application.Services
 {
     public class ArtistService : IArtistService
     {
-        private readonly IAppDbContext _context;
+        private readonly string _connectionString;
 
-        public ArtistService(IAppDbContext context)
+        public ArtistService(string connectionString)
         {
-            _context = context;
+            _connectionString = connectionString;
         }
 
         public async Task<IEnumerable<ArtistDTO>> GetAllArtistsAsync()
         {
-            return await _context.Artists
-                .Select(a => new ArtistDTO
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Bio = a.Bio,
-                    ImageUrl = a.ImageUrl
-                })
-                .ToListAsync();
+            using var conn = new MySqlConnection(_connectionString);
+            return await conn.QueryAsync<ArtistDTO>(
+                "SELECT Id, Name, Bio, ImageUrl FROM artists"
+            );
         }
 
         public async Task<ArtistDTO?> GetArtistByIdAsync(int id)
         {
-            return await _context.Artists
-                .Where(a => a.Id == id)
-                .Select(a => new ArtistDTO
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Bio = a.Bio,
-                    ImageUrl = a.ImageUrl
-                })
-                .FirstOrDefaultAsync();
+            using var conn = new MySqlConnection(_connectionString);
+            return await conn.QueryFirstOrDefaultAsync<ArtistDTO>(
+                "SELECT Id, Name, Bio, ImageUrl FROM artists WHERE Id = @Id",
+                new { Id = id }
+            );
         }
     }
 }

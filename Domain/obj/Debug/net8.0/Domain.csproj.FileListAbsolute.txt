@@ -10,3 +10,15 @@ D:\do_an_CSharp\DoAnC_sharp\Domain\obj\Debug\net8.0\Domain.dll
 D:\do_an_CSharp\DoAnC_sharp\Domain\obj\Debug\net8.0\refint\Domain.dll
 D:\do_an_CSharp\DoAnC_sharp\Domain\obj\Debug\net8.0\Domain.pdb
 D:\do_an_CSharp\DoAnC_sharp\Domain\obj\Debug\net8.0\ref\Domain.dll
+D:\Work_Project\DoAnC_sharp\Domain\bin\Debug\net8.0\Domain.deps.json
+D:\Work_Project\DoAnC_sharp\Domain\bin\Debug\net8.0\Domain.dll
+D:\Work_Project\DoAnC_sharp\Domain\bin\Debug\net8.0\Domain.pdb
+D:\Work_Project\DoAnC_sharp\Domain\obj\Debug\net8.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\Work_Project\DoAnC_sharp\Domain\obj\Debug\net8.0\Domain.AssemblyInfoInputs.cache
+D:\Work_Project\DoAnC_sharp\Domain\obj\Debug\net8.0\Domain.AssemblyInfo.cs
+D:\Work_Project\DoAnC_sharp\Domain\obj\Debug\net8.0\Domain.csproj.CoreCompileInputs.cache
+D:\Work_Project\DoAnC_sharp\Domain\obj\Debug\net8.0\Domain.sourcelink.json
+D:\Work_Project\DoAnC_sharp\Domain\obj\Debug\net8.0\Domain.dll
+D:\Work_Project\DoAnC_sharp\Domain\obj\Debug\net8.0\refint\Domain.dll
+D:\Work_Project\DoAnC_sharp\Domain\obj\Debug\net8.0\Domain.pdb
+D:\Work_Project\DoAnC_sharp\Domain\obj\Debug\net8.0\ref\Domain.dll

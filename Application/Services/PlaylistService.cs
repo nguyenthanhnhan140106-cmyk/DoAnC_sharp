@@ -1,47 +1,41 @@
 using Application.Interfaces;
 using Application.DTOs;
-using Microsoft.EntityFrameworkCore;
+using Dapper;
+using MySqlConnector;
 
 namespace Application.Services
 {
     public class PlaylistService : IPlaylistService
     {
-        private readonly IAppDbContext _context;
+        private readonly string _connectionString;
 
-        public PlaylistService(IAppDbContext context)
+        public PlaylistService(string connectionString)
         {
-            _context = context;
+            _connectionString = connectionString;
         }
 
         public async Task<IEnumerable<PlaylistDTO>> GetAllPlaylistsAsync()
         {
-            return await _context.Playlists
-                .Include(p => p.User) // Include bảng User để lấy tên người tạo
-                .Select(p => new PlaylistDTO
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    UserId = p.UserId,
-                    CreatorName = p.User != null ? p.User.Username : "Ẩn danh"
-                })
-                .ToListAsync();
+            using var conn = new MySqlConnection(_connectionString);
+            return await conn.QueryAsync<PlaylistDTO>(@"
+                SELECT p.Id, p.Name, p.Description, p.UserId,
+                       COALESCE(u.Username, 'Ẩn danh') AS CreatorName
+                FROM playlists p
+                LEFT JOIN users u ON p.UserId = u.Id"
+            );
         }
 
         public async Task<IEnumerable<PlaylistDTO>> GetPlaylistsByUserIdAsync(int userId)
         {
-            return await _context.Playlists
-                .Where(p => p.UserId == userId)
-                .Include(p => p.User)
-                .Select(p => new PlaylistDTO
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    UserId = p.UserId,
-                    CreatorName = p.User != null ? p.User.Username : "Ẩn danh"
-                })
-                .ToListAsync();
+            using var conn = new MySqlConnection(_connectionString);
+            return await conn.QueryAsync<PlaylistDTO>(@"
+                SELECT p.Id, p.Name, p.Description, p.UserId,
+                       COALESCE(u.Username, 'Ẩn danh') AS CreatorName
+                FROM playlists p
+                LEFT JOIN users u ON p.UserId = u.Id
+                WHERE p.UserId = @UserId",
+                new { UserId = userId }
+            );
         }
     }
 }

@@ -1,5 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
+// API/Controllers/SongsController.cs
+using Application.DTOs;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
@@ -9,25 +11,45 @@ namespace API.Controllers
     {
         private readonly ISongService _songService;
 
-        // Inject ISongService vào thông qua cơ chế Dependency Injection
         public SongsController(ISongService songService)
         {
             _songService = songService;
         }
 
-        // API: GET http://localhost:5104/api/Songs
         [HttpGet]
-        public async Task<IActionResult> GetSongs()
+        public async Task<IActionResult> GetAll() =>
+            Ok(await _songService.GetAllSongsAsync());
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var songs = await _songService.GetAllSongsAsync();
-                return Ok(songs); // Trả về mã 200 kèm danh sách bài hát dạng JSON
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, $"Lỗi hệ thống Backend: {ex.Message}");
-            }
+            var song = await _songService.GetByIdAsync(id);
+            return song == null ? NotFound() : Ok(song);
+        }
+
+        [HttpGet("category/{category}")]
+        public async Task<IActionResult> GetByCategory(string category) =>
+            Ok(await _songService.GetByCategoryAsync(category));
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateSongDTO dto)
+        {
+            var song = await _songService.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = song.Id }, song);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateSongDTO dto)
+        {
+            var song = await _songService.UpdateAsync(id, dto);
+            return song == null ? NotFound() : Ok(song);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _songService.DeleteAsync(id);
+            return result ? NoContent() : NotFound();
         }
     }
 }
