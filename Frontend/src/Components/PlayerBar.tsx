@@ -1,13 +1,44 @@
+import { useMusic } from '../Contexts/MusicContext';
+
 export default function PlayerBar() {
+  const { currentSong, isPlaying, togglePlay, currentTime, duration, seek, volume, setVolume } = useMusic();
+
+  const formatTime = (s: number) => {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  // Tính toán chuẩn xác tỷ lệ phần trăm theo thời gian thực
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const volumePercent = volume * 100;
+
   return (
     <footer className="spotify-player">
-      
-      {/* 1. GÓC TRÁI: Khu vực thông tin bài hát (Hiện tại để trống) */}
-      <div className="player-left">
-        {/* Sau này khi có nhạc, hình Cover và tên bài hát sẽ nằm ở đây */}
+
+      {/* GÓC TRÁI: Thông tin bài hát */}
+      <div className="player-left" style={{ gap: '12px', display: 'flex', alignItems: 'center' }}>
+        {currentSong && (
+          <>
+            <img
+              src={currentSong.coverUrl || `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50&h=50&fit=crop`}
+              alt={currentSong.title}
+              style={{ width: 48, height: 48, borderRadius: 4, objectFit: 'cover' }}
+            />
+            <div>
+              <p style={{ margin: 0, fontSize: 14, color: '#fff', fontWeight: 500 }}>
+                {currentSong.title}
+              </p>
+              <p style={{ margin: 0, fontSize: 12, color: '#b3b3b3' }}>
+                {currentSong.artist}
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* 2. GÓC GIỮA: Cụm nút điều khiển và thanh thời gian */}
+      {/* GÓC GIỮA: Controls + Progress */}
       <div className="player-center">
         <div className="player-controls">
           <button className="control-btn" title="Trộn bài">
@@ -16,12 +47,14 @@ export default function PlayerBar() {
           <button className="control-btn" title="Bài trước">
             <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M3.3 1a.7.7 0 0 1 .7.7v5.15l9.95-5.744a.7.7 0 0 1 1.05.606v12.575a.7.7 0 0 1-1.05.607L4 9.149V14.3a.7.7 0 0 1-1.4 0V1.7a.7.7 0 0 1 .7-.7z"/></svg>
           </button>
-          
-          {/* Nút Play/Pause hình tròn nổi bật */}
-          <button className="play-pause-btn" title="Tạm dừng">
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"/></svg>
+
+          <button className="play-pause-btn" title="Play/Pause" onClick={togglePlay}>
+            {isPlaying
+              ? <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"/></svg>
+              : <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M3 1.713a.7.7 0 0 1 1.05-.607l10.89 6.288a.7.7 0 0 1 0 1.212L4.05 14.894A.7.7 0 0 1 3 14.288V1.713z"/></svg>
+            }
           </button>
-          
+
           <button className="control-btn" title="Bài tiếp">
             <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M12.7 1a.7.7 0 0 0-.7.7v5.15L2.05 1.107A.7.7 0 0 0 1 1.712v12.575a.7.7 0 0 0 1.05.607L12 9.149V14.3a.7.7 0 0 0 1.4 0V1.7a.7.7 0 0 0-.7-.7z"/></svg>
           </button>
@@ -29,25 +62,57 @@ export default function PlayerBar() {
             <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M0 4.75A3.75 3.75 0 0 1 3.75 1h8.5A3.75 3.75 0 0 1 16 4.75v5a3.75 3.75 0 0 1-3.75 3.75H9.81l1.018 1.018a.75.75 0 1 1-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 1 1 1.06 1.06L9.811 12h2.439a2.25 2.25 0 0 0 2.25-2.25v-5a2.25 2.25 0 0 0-2.25-2.25h-8.5A2.25 2.25 0 0 0 1.5 4.75v5A2.25 2.25 0 0 0 3.75 12H5v1.5H3.75A3.75 3.75 0 0 1 0 9.75v-5z"/></svg>
           </button>
         </div>
-        
-        {/* Thanh tua nhạc (Progress Bar) */}
+
+        {/* Thanh progress thời gian */}
         <div className="player-playback">
-          <span className="time-text">-:--</span>
-          <div className="progress-bar-container">
-            <div className="progress-bg"></div>
+          <span className="time-text">{formatTime(currentTime)}</span>
+          <div
+            className="progress-bar-container"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const ratio = (e.clientX - rect.left) / rect.width;
+              seek(ratio * duration);
+            }}
+            style={{ cursor: 'pointer', padding: '10px 0', width: '100%', display: 'flex', alignItems: 'center' }}
+          >
+            <div className="progress-bg" style={{ width: '100%', height: '4px', background: '#4d4d4d', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{
+                width: `${progressPercent}% !important`, // 🟢 Ép ghi đè CSS cứng bằng !important
+                maxWidth: `${progressPercent}%`,        // 🟢 Cưỡng bức độ rộng chạy theo đúng tiến trình bài hát
+                height: '100%',
+                background: '#1db954',
+                borderRadius: '2px',
+                transition: 'width 0.1s linear'
+              }} />
+            </div>
           </div>
-          <span className="time-text">-:--</span>
+          <span className="time-text">{formatTime(duration)}</span>
         </div>
       </div>
 
-      {/* 3. GÓC PHẢI: Các nút công cụ và thanh âm lượng */}
-      <div className="player-right">
-        <button className="control-btn" title="Đang phát"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M11.196 8 6 5v6l5.196-3z"/><path d="M15.002 1.75A1.75 1.75 0 0 0 13.252 0h-10.5a1.75 1.75 0 0 0-1.75 1.75v12.5c0 .966.783 1.75 1.75 1.75h10.5a1.75 1.75 0 0 0 1.75-1.75V1.75zm-1.75-.25a.25.25 0 0 1 .25.25v12.5a.25.25 0 0 1-.25.25h-10.5a.25.25 0 0 1-.25-.25V1.75a.25.25 0 0 1 .25-.25h10.5z"/></svg></button>
-        <button className="control-btn" title="Danh sách chờ"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15 15H1v-1.5h14V15zm0-4.5H1V9h14v1.5zm-14-7A2.5 2.5 0 0 1 3.5 1h9a2.5 2.5 0 0 1 0 5h-9A2.5 2.5 0 0 1 1 3.5zm2.5-1a1 1 0 0 0 0 2h9a1 1 0 1 0 0-2h-9z"/></svg></button>
-        <button className="control-btn" title="Thiết bị"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M6 2.75C6 1.784 6.784 1 7.75 1h6.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15h-6.5A1.75 1.75 0 0 1 6 13.25V2.75zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h6.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25h-6.5zm-6 0a.25.25 0 0 0-.25.25v6.5c0 .138.112.25.25.25H4V11H1.75A1.75 1.75 0 0 1 0 9.25v-6.5C0 1.784.784 1 1.75 1H4v1.5H1.75zM4 15H2v-1.5h2V15z"/></svg></button>
-        <button className="control-btn" title="Âm lượng"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.332l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35zm8.683 4.29V5.56a2.75 2.75 0 0 1 0 4.88z"/></svg></button>
-        <div className="volume-bar-container">
-           <div className="progress-bg"></div>
+      {/* GÓC PHẢI: Volume */}
+      <div className="player-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <button className="control-btn" title="Âm lượng">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.332l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35zm8.683 4.29V5.56a2.75 2.75 0 0 1 0 4.88z"/></svg>
+        </button>
+        <div
+          className="volume-bar-container"
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const ratio = (e.clientX - rect.left) / rect.width;
+            setVolume(Math.max(0, Math.min(1, ratio)));
+          }}
+          style={{ cursor: 'pointer', padding: '10px 0', width: '100px', display: 'flex', alignItems: 'center' }}
+        >
+          <div className="progress-bg" style={{ width: '100%', height: '4px', background: '#4d4d4d', borderRadius: '2px', overflow: 'hidden' }}>
+            <div style={{
+              width: `${volumePercent}% !important`, // 🟢 Ép ghi đè CSS cho thanh Volume
+              maxWidth: `${volumePercent}%`,        // 🟢 Khống chế cứng vạch xanh theo phần trăm volume thật
+              height: '100%',
+              background: '#1db954',
+              borderRadius: '2px'
+            }} />
+          </div>
         </div>
       </div>
 

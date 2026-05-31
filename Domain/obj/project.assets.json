@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\Domain.csproj",
+      "projectUniqueName": "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj",
       "projectName": "Domain",
-      "projectPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\Domain.csproj",
+      "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj",
       "packagesPath": "C:\\Users\\chena\\.nuget\\packages\\",
-      "outputPath": "D:\\do_an_CSharp\\DoAnC_sharp\\Domain\\obj\\",
+      "outputPath": "D:\\Work_Project\\DoAnC_sharp\\Domain\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\chena\\AppData\\Roaming\\NuGet\\NuGet.Config"

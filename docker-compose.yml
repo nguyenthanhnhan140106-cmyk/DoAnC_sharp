@@ -1,0 +1,51 @@
+services:
+  # 1. Container Cơ sở dữ liệu (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: tunevault-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: DoAnNhom_Db
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+      interval: 3s
+
+  # 2. Container Backend
+  backend:
+    build:
+      context: .
+      dockerfile: API/Dockerfile
+    container_name: tunevault-backend
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=server=db;port=3306;database=DoAnNhom_Db;user=root;password=
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 3. Container Frontend
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:5000/api
+    container_name: tunevault-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:        # ← dòng này
+    driver: local    # ← thụt vào 4 spaces

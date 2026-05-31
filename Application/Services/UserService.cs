@@ -1,30 +1,25 @@
 using Application.Interfaces;
 using Application.DTOs;
-using Microsoft.EntityFrameworkCore;
+using Dapper;
+using MySqlConnector;
 
 namespace Application.Services
 {
     public class UserService : IUserService
     {
-        private readonly IAppDbContext _context;
+        private readonly string _connectionString;
 
-        public UserService(IAppDbContext context)
+        public UserService(string connectionString)
         {
-            _context = context;
+            _connectionString = connectionString;
         }
 
         public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
         {
-            // Bốc dữ liệu từ bảng users lên và chuyển sang UserDTO (bỏ đi trường mật khẩu)
-            return await _context.Users
-                .Select(u => new UserDTO
-                {
-                    Id = u.Id,
-                    Username = u.Username,
-                    Email = u.Email,
-                    Role = u.Role
-                })
-                .ToListAsync();
+            using var conn = new MySqlConnection(_connectionString);
+            return await conn.QueryAsync<UserDTO>(
+                "SELECT Id, Username, Email, Role FROM users"
+            );
         }
     }
 }

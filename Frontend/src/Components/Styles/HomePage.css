@@ -531,6 +531,35 @@ grid-template-columns: 280px 1fr 280px;
   background-color: #1db954; /* Màu xanh lá chuẩn Spotify khi hover thanh nhạc */
 }
 
+/* Loại bỏ giao diện mặc định xám xịt của trình duyệt */
+.progress-slider, .volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px; /* Độ dày thanh kéo chuẩn Spotify */
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Định hình cái nút tròn nhỏ khi kéo */
+.progress-slider::-webkit-slider-thumb, .volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.progress-bar-container .progress-bg div,
+.volume-bar-container .progress-bg div {
+  display: block !important;
+  flex: none !important;
+  /* max-width: 100% !important; 🟢 Khai phóng giới hạn, cho phép chạm mốc 100% */
+}
+
 /* =========================================================
    8. CHI TIẾT RIGHT SIDEBAR COMPONENTS
    ========================================================= */
@@ -662,4 +691,91 @@ grid-template-columns: 280px 1fr 280px;
   margin: 4px 0 0 0;
   color: #b3b3b3;
   font-size: 14px;
+}
+
+.icon-btn:hover {
+  color: #ffffff !important;
+  transform: scale(1.05);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  width: 100%; /* ← thêm dòng này */
+}
+
+.show-all-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: #b3b3b3;
+  font-size: 13px;
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.show-all-btn:hover {
+  text-decoration: underline;
+  color: #ffffff;
+}
+/* Thêm vào HomePage.css */
+
+/* ── Ảnh bo góc + shadow ── */
+.song-card-img {
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Card nằm ngang đúng chuẩn ── */
+.songs-grid {
+  display: flex;
+  flex-direction: row;   /* ← ngang, không phải dọc */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 12px;
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;
+}
+
+.song-card-item {
+  min-width: 160px;
+  max-width: 160px;
+  background: #181818;
+  padding: 14px;
+  border-radius: 8px;    /* ← bo góc card */
+  cursor: pointer;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.song-card-item:hover {
+  background: #282828;
+}
+
+/* ── Wrapper ảnh bo góc ── */
+.song-card-img-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  margin-bottom: 12px;
+  border-radius: 8px;    /* ← bo góc wrapper */
+  overflow: hidden;      /* ← cắt ảnh đúng góc bo */
+}
+
+.song-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;      /* reset — dùng overflow:hidden của wrapper */
+  display: block;
+  transition: filter 0.3s ease;
+}
+
+.song-card-item:hover .song-card-img {
+  filter: brightness(0.75);
 }
