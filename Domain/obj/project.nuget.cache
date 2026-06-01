@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "QTCdj6NJJnw=",
+  "dgSpecHash": "O5s7D//vGts=",
   "success": true,
-  "projectFilePath": "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "D:\\do_an_C_sharp\\DoAnC_sharp\\Domain\\Domain.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Thanh Nhan\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.27\\microsoft.netcore.app.ref.8.0.27.nupkg.sha512",
+    "C:\\Users\\Thanh Nhan\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.27\\microsoft.windowsdesktop.app.ref.8.0.27.nupkg.sha512",
+    "C:\\Users\\Thanh Nhan\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.27\\microsoft.aspnetcore.app.ref.8.0.27.nupkg.sha512"
+  ],
   "logs": []
 }

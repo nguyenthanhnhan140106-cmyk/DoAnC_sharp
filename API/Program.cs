@@ -32,6 +32,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("AllowReact");
 app.UseAuthorization();
+app.UseStaticFiles();
 app.MapControllers();
 
 // ── Auto seed khi DB rỗng ────────────────────────────────
