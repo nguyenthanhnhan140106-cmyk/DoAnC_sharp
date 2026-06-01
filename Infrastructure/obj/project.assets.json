@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
     "net8.0": {
       "Dapper/2.1.79": {
@@ -368,19 +368,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\chena\\.nuget\\packages\\": {}
+    "C:\\Users\\Thanh Nhan\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Work_Project\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj",
+      "projectUniqueName": "D:\\do_an_C_sharp\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj",
       "projectName": "Infrastructure",
-      "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\chena\\.nuget\\packages\\",
-      "outputPath": "D:\\Work_Project\\DoAnC_sharp\\Infrastructure\\obj\\",
+      "projectPath": "D:\\do_an_C_sharp\\DoAnC_sharp\\Infrastructure\\Infrastructure.csproj",
+      "packagesPath": "C:\\Users\\Thanh Nhan\\.nuget\\packages\\",
+      "outputPath": "D:\\do_an_C_sharp\\DoAnC_sharp\\Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\chena\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Thanh Nhan\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -390,13 +390,14 @@
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\Work_Project\\DoAnC_sharp\\Application\\Application.csproj": {
-              "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Application\\Application.csproj"
+            "D:\\do_an_C_sharp\\DoAnC_sharp\\Application\\Application.csproj": {
+              "projectPath": "D:\\do_an_C_sharp\\DoAnC_sharp\\Application\\Application.csproj"
             },
-            "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj": {
-              "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj"
+            "D:\\do_an_C_sharp\\DoAnC_sharp\\Domain\\Domain.csproj": {
+              "projectPath": "D:\\do_an_C_sharp\\DoAnC_sharp\\Domain\\Domain.csproj"
             }
           }
         }
@@ -410,10 +411,12 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "10.0.300"
     },
     "frameworks": {
       "net8.0": {
+        "framework": "net8.0",
         "targetAlias": "net8.0",
         "dependencies": {
           "Dapper": {
@@ -440,12 +443,26 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.27, 8.0.27]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.27, 8.0.27]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[8.0.27, 8.0.27]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.420/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

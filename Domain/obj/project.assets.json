@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
     "net8.0": {}
   },
@@ -8,19 +8,19 @@
     "net8.0": []
   },
   "packageFolders": {
-    "C:\\Users\\chena\\.nuget\\packages\\": {}
+    "C:\\Users\\Thanh Nhan\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj",
+      "projectUniqueName": "D:\\do_an_C_sharp\\DoAnC_sharp\\Domain\\Domain.csproj",
       "projectName": "Domain",
-      "projectPath": "D:\\Work_Project\\DoAnC_sharp\\Domain\\Domain.csproj",
-      "packagesPath": "C:\\Users\\chena\\.nuget\\packages\\",
-      "outputPath": "D:\\Work_Project\\DoAnC_sharp\\Domain\\obj\\",
+      "projectPath": "D:\\do_an_C_sharp\\DoAnC_sharp\\Domain\\Domain.csproj",
+      "packagesPath": "C:\\Users\\Thanh Nhan\\.nuget\\packages\\",
+      "outputPath": "D:\\do_an_C_sharp\\DoAnC_sharp\\Domain\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\chena\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Thanh Nhan\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -30,6 +30,7 @@
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "projectReferences": {}
         }
@@ -43,10 +44,12 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "10.0.300"
     },
     "frameworks": {
       "net8.0": {
+        "framework": "net8.0",
         "targetAlias": "net8.0",
         "imports": [
           "net461",
@@ -59,12 +62,26 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.27, 8.0.27]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.27, 8.0.27]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[8.0.27, 8.0.27]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.420/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
