@@ -1,22 +1,110 @@
--- 1. Xóa sạch bách 5 bài cũ đang hiện trên web
 DELETE FROM songs;
 ALTER TABLE songs AUTO_INCREMENT = 1;
 
--- 2. Chỉ chèn duy nhất 2 bài hát Nam muốn
-INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, Category, CreatedAt) VALUES
+INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, Category, CreatedAt) 
+VALUES 
 (
-    'Xuất Phát Điểm', 
-    'Obito, Shiki', 
-    'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop', 
-    'https://raw.githubusercontent.com/vannam52/music/main/Obito%20-%20Xu%E1%BA%A5t%20Ph%C3%A1t%20%C4%90i%E1%BB%83m.mp3', 
-    'friday', 
+    'Thanh Tân',
+    'VƯƠNG BÌNH',
+    'http://localhost:5000/images/thanhtan.jpg',
+    'http://localhost:5000/audio/thanhtan.mp3',
+    'friday',
     NOW()
 ),
 (
-    'Tell The Truth', 
-    'Obito', 
-    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 
-    'https://raw.githubusercontent.com/vannam52/music/main/Obito%20-%20Tell%20The%20Truth.mp3', 
-    'vsound', 
+    'Về bên anh',
+    'Jack-J97',
+    'http://localhost:5000/images/vebenanh.jpg',
+    'http://localhost:5000/audio/vebenanh.mp3',
+    'vsound',
     NOW()
-);
+),
+(
+    'Sóng gió',
+    'Jack-J97,K-ICM,ICM',
+    'http://localhost:5000/images/songgio.jpg',
+    'http://localhost:5000/audio/songgio.mp3',
+    'vsound',
+    NOW()
+),
+(
+    'Nơi này có anh',
+    'Sơn Tùng M-TP',
+    'http://localhost:5000/images/noinaycoanh.jpg',
+    'http://localhost:5000/audio/noinaycoanh.mp3',
+    'vsound',
+    NOW()
+),
+(
+    'Ngày rời chuyến bay',
+    'Minh Huy, Pinny',
+    'http://localhost:5000/images/ngayroichuyenbay.jpg',
+    'http://localhost:5000/audio/ngayroichuyenbay.mp3',
+    'friday',
+    NOW()
+),
+(
+    'Mất kết nối',
+    'Dương Domic',
+    'http://localhost:5000/images/matketnoi.jpg',
+    'http://localhost:5000/audio/matketnoi.mp3',
+    'vsound',
+    NOW()
+),
+(
+    'Hồng nhan',
+    'Jack-J97, K-ICM, ICM',
+    'http://localhost:5000/images/hongnhan.jpg',
+    'http://localhost:5000/audio/hongnhan.mp3',
+    'vsound',
+    NOW()
+),
+(
+    'Em thua cô ta',
+    'Thiên Đình',
+    'http://localhost:5000/images/emthuacota.jpg',
+    'http://localhost:5000/audio/emthuacota.mp3',
+    'friday',
+    NOW()
+),
+(
+    'Em',
+    'Binz, SOONBIN',
+    'http://localhost:5000/images/em.jpg',
+    'http://localhost:5000/audio/em.mp3',
+    'vsound',
+    NOW()
+),
+(
+    'Đớn đau vô cùng',
+    'DatKaa',
+    'http://localhost:5000/images/dondauvocung.jpg',
+    'http://localhost:5000/audio/dondauvocung.mp3',
+    'friday',
+    NOW()
+),
+(
+    'Chờ anh về',
+    'ANH TRAI SAY HI',
+    'http://localhost:5000/images/choanhve.jpg',
+    'http://localhost:5000/audio/choanhve.mp3',
+    'rap',
+    NOW()
+),
+(
+    'Chất gây hại',
+    'Quang Hùng MasterD',
+    'http://localhost:5000/images/chatgayhai.jpg',
+    'http://localhost:5000/audio/chatgayhai.mp3',
+    'vsound',
+    NOW()
+),
+(
+    'Bạc phận',
+    'Jack-J97, K-ICM, ICM',
+    'http://localhost:5000/images/bacphan.jpg',
+    'http://localhost:5000/audio/bacphan.mp3',
+    'vsound',
+    NOW()
+)
+;
