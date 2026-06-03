@@ -18,6 +18,12 @@ interface Song {
 
 export default function HomePage() {
   const [songs, setSongs] = useState<Song[]>([]);
+  
+  // Trạng thái thu gọn Left Sidebar (Cũ)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  
+  // 🟢 1. KHAI BÁO THÊM: Trạng thái thu gọn Right Sidebar (Mới)
+  const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
   useEffect(() => {
     API.get('/songs')
@@ -29,15 +35,21 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="spotify-layout">
+    // 🟢 2. CẬP NHẬT: Ép thêm class 'right-hidden' động dựa vào state mới
+    <div className={`spotify-layout ${isSidebarCollapsed ? 'sidebar-hidden' : ''} ${isRightCollapsed ? 'right-hidden' : ''}`}>
       <Header />
-      <Sidebar />
+      
+      <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
+      
       <div className="main-view">
         <div className="content-wrapper">
           <MainContent songs={songs} />
         </div>
       </div>
-      <RightSidebar />
+      
+      {/* 🟢 3. CẬP NHẬT: Truyền State và hàm Thay đổi xuống cho RightSidebar */}
+      <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />
+      
       <PlayerBar />
     </div>
   );

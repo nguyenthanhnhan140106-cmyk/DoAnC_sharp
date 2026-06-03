@@ -14,7 +14,7 @@ interface Props {
   songs: Song[];
 }
 
-// 🟢 Thay đổi cách lấy ảnh fallback bằng LoremFlickr theo ID để không bao giờ bị lặp ảnh
+// Lấy ảnh bằng LoremFlickr theo ID nếu không có cover thật từ DB
 const getCover = (song: Song) =>
   song.coverUrl || `https://loremflickr.com/160/160/music?lock=${song.id}`;
 
@@ -22,14 +22,14 @@ const SongCard = ({ song }: { song: Song }) => {
   const { playSong, currentSong, isPlaying } = useMusic();
   const isActive = currentSong?.id === song.id;
 
-  // 🟢 Hàm kích hoạt phát nhạc cưỡng bức, chấp mọi loại kẹt Context
+  // Hàm kích hoạt phát nhạc cưỡng bức
   const handleForcePlay = (e: React.MouseEvent) => {
     e.stopPropagation(); // Chặn lag sự kiện
 
-    // 1. Gọi hàm Context của nhóm Nam để đồng bộ giao diện đổi màu xanh, hiện nút pause
+    // 1. Đồng bộ giao diện qua Context
     playSong(song);
 
-    // 2. Tìm tất cả các thẻ <audio> đang có trên toàn bộ trang web và ép nó phát link nhạc này luôn
+    // 2. Ép các thẻ <audio> phát link nhạc này luôn
     setTimeout(() => {
       const allAudios = document.getElementsByTagName("audio");
       if (allAudios.length > 0 && song.audioUrl) {
@@ -42,7 +42,7 @@ const SongCard = ({ song }: { song: Song }) => {
             .catch((err) => console.log("Trình duyệt chờ tương tác:", err));
         }
       }
-    }, 100); // Chờ 100ms cho Context nạp xong là ép chạy luôn!
+    }, 100);
   };
 
   return (
@@ -63,7 +63,7 @@ const SongCard = ({ song }: { song: Song }) => {
         <button
           className={`card-play-btn ${isActive && isPlaying ? "playing" : ""}`}
           aria-label={`Phát ${song.title}`}
-          onClick={handleForcePlay} // 🟢 Gán hàm ép phát nhạc vào nút tròn nhỏ luôn
+          onClick={handleForcePlay}
         />
       </div>
       <h4
@@ -78,7 +78,13 @@ const SongCard = ({ song }: { song: Song }) => {
 };
 
 export default function MainContent({ songs }: Props) {
-  // 🟢 Thêm .toLowerCase() để ép chữ hoa hay chữ thường dưới DB lên đều khớp chuẩn 100%
+  const { currentSong } = useMusic();
+  const songData = currentSong as any;
+
+  // 🟢 Xác định ảnh bìa hiện tại để bốc màu nền động
+  const activeCover = songData?.coverUrl || "";
+
+  // Lọc bài hát theo danh mục
   const fridaySongs = songs.filter(
     (s) => s.category?.toLowerCase() === "friday",
   );
@@ -90,71 +96,88 @@ export default function MainContent({ songs }: Props) {
 
   return (
     <div className="main-content-container">
-      {/* Chưa có category → show tất cả */}
-      {!hasCategory && songs.length > 0 && (
-        <div className="playlist-section">
-          <div className="section-header">
-            <h2 className="section-title">Tất cả bài hát</h2>
-            <button className="show-all-btn">Show all</button>
-          </div>
-          <div className="songs-grid">
-            {songs.slice(0, 10).map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </div>
+      
+      {/* 🟢 KHỐI NỀN GRADIENT ĐỘNG TƯƠNG TÁC: Tự loang màu dốc mượt mà bám theo ảnh bìa */}
+      {activeCover && (
+        <div 
+          className="main-dynamic-bg" 
+          style={{ backgroundImage: `url(${activeCover})` }}
+        />
       )}
+      {/* Lớp phủ tối chuyển dốc để bảo toàn giao diện màu đen đặc trưng của Spotify */}
+      <div className="main-dynamic-overlay" />
 
-      {/* Section Friday */}
-      {fridaySongs.length > 0 && (
-        <div className="playlist-section">
-          <div className="section-header">
-            <h2 className="section-title">It's New Music Friday!</h2>
-            <button className="show-all-btn">Show all</button>
+      {/* 🟢 BỌC NỘI DUNG VÀO LỚP INNER ĐỂ ĐẢM BẢO CHỮ LUÔN NỔI BẬT LÊN TRÊN */}
+      <div className="main-content-inner">
+        
+        {/* Chưa có category → show tất cả */}
+        {!hasCategory && songs.length > 0 && (
+          <div className="playlist-section">
+            <div className="section-header">
+              <h2 className="section-title">Tất cả bài hát</h2>
+              <button className="show-all-btn">Show all</button>
+            </div>
+            <div className="songs-grid">
+              {songs.slice(0, 10).map((song) => (
+                <SongCard key={song.id} song={song} />
+              ))}
+            </div>
           </div>
-          <div className="songs-grid">
-            {fridaySongs.slice(0, 10).map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </div>
-      )}
+        )}
 
-      {/* Section V-Sound */}
-      {vSoundSongs.length > 0 && (
-        <div className="playlist-section">
-          <div className="section-header">
-            <h2 className="section-title">V-Sound</h2>
-            <button className="show-all-btn">Show all</button>
+        {/* Section Friday */}
+        {fridaySongs.length > 0 && (
+          <div className="playlist-section">
+            <div className="section-header">
+              <h2 className="section-title">It's New Music Friday!</h2>
+              <button className="show-all-btn">Show all</button>
+            </div>
+            <div className="songs-grid">
+              {fridaySongs.slice(0, 10).map((song) => (
+                <SongCard key={song.id} song={song} />
+              ))}
+            </div>
           </div>
-          <div className="songs-grid">
-            {vSoundSongs.slice(0, 10).map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </div>
-      )}
+        )}
 
-      {rapSongs.length > 0 && (
-        <div className="playlist-section">
-          <div className="section-header">
-            <h2 className="section-title">Thế Giới Rap</h2>
-            <button className="show-all-btn">Show all</button>
+        {/* Section V-Sound */}
+        {vSoundSongs.length > 0 && (
+          <div className="playlist-section">
+            <div className="section-header">
+              <h2 className="section-title">V-Sound</h2>
+              <button className="show-all-btn">Show all</button>
+            </div>
+            <div className="songs-grid">
+              {vSoundSongs.slice(0, 10).map((song) => (
+                <SongCard key={song.id} song={song} />
+              ))}
+            </div>
           </div>
-          <div className="songs-grid">
-            {rapSongs.slice(0, 10).map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </div>
-      )}
+        )}
 
-      {/* Không có bài nào */}
-      {songs.length === 0 && (
-        <div style={{ color: "#b3b3b3", padding: "40px", textAlign: "center" }}>
-          Đang kết nối lấy nhạc từ database Dapper...
-        </div>
-      )}
+        {/* Section Rap */}
+        {rapSongs.length > 0 && (
+          <div className="playlist-section">
+            <div className="section-header">
+              <h2 className="section-title">Thế Giới Rap</h2>
+              <button className="show-all-btn">Show all</button>
+            </div>
+            <div className="songs-grid">
+              {rapSongs.slice(0, 10).map((song) => (
+                <SongCard key={song.id} song={song} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Không có bài nào */}
+        {songs.length === 0 && (
+          <div style={{ color: "#b3b3b3", padding: "40px", textAlign: "center" }}>
+            Đang kết nối lấy nhạc từ database Dapper...
+          </div>
+        )}
+        
+      </div>
     </div>
   );
 }
