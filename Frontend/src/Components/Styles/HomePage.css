@@ -1,9 +1,10 @@
 /* =========================================================
    1. BỐ CỤC CHÍNH TOÀN TRANG (CÓ KHOẢNG HỞ VÀ BO GÓC)
    ========================================================= */
+/* 1. ĐỐNG CSS GỐC CỦA NAM (Giữ nguyên không sửa một chữ nhen cậu) */
 .spotify-layout {
   display: grid;
-grid-template-columns: 280px 1fr 280px;
+  grid-template-columns: 280px 1fr 280px;
   grid-template-rows: 64px 1fr 90px;
   grid-template-areas: 
     "header header header"   
@@ -15,7 +16,78 @@ grid-template-columns: 280px 1fr 280px;
   color: #ffffff;
   overflow: hidden;
   font-family: Inter, system-ui, sans-serif;
-} 
+  transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Thêm dòng này để lúc thu phóng nó lướt mịn màng */
+}
+
+/* 2. 🟢 ĐOẠN BỔ SUNG CHÍ MẠNG KHI BẤM THU GỌN SIDEBAR */
+.spotify-layout.sidebar-hidden {
+  /* Ép cột sidebar trái rút về 72px, vùng main ở giữa (1fr) tự động phình to ra */
+  grid-template-columns: 72px 1fr 280px;
+  
+  /* 🟢 Giữ nguyên sơ đồ map vùng area để thằng main không bị dịch chuyển bậy bạ */
+  grid-template-areas: 
+    "header header header"   
+    "sidebar main right-sidebar"  
+    "player player player"; 
+}
+
+.spotify-layout.right-hidden {
+  grid-template-columns: 280px 1fr auto; 
+}
+
+/* 3. 🟢 KHI THU GỌN CẢ HAI BÊN SIDEBAR: Vùng main phình to tối đa sang cả 2 bên */
+.spotify-layout.sidebar-hidden.right-hidden {
+  grid-template-columns: 72px 1fr auto;
+}
+
+/* 4. CẬP NHẬT LẠI CLASS COLLAPSED CỦA RIGHT SIDEBAR */
+/* Trạng thái bình thường của nội dung đầy đủ */
+.right-sidebar-full-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.15s ease-in-out; 
+}
+
+/* Ẩn nút expand mặc định */
+.right-expand-btn {
+  display: none !important;
+}
+
+/* 🟢 KHI COLLAPSED: Ép thu hẹp dứt khoát và giấu ruột lập tức */
+.spotify-right-sidebar.collapsed {
+  width: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  padding: 0 !important;
+  background-color: #000000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Khi bị collapsed -> Giấu sạch ruột gan ngay lập tức, không cho delay */
+.spotify-right-sidebar.collapsed .right-sidebar-full-content,
+.spotify-right-sidebar.collapsed .right-sidebar-no-song-wrapper {
+  display: none !important;
+}
+
+/* Khi bị collapsed -> Kích hoạt cho nút mũi tên hiện ra chễm chệ */
+.spotify-right-sidebar.collapsed .right-expand-btn {
+  display: flex !important;
+  background: transparent;
+  border: none;
+  color: #b3b3b3;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 
 /* =========================================================
    2. HEADER & PLAYER (MÀU ĐEN TUYỀN)
@@ -58,17 +130,147 @@ grid-template-columns: 280px 1fr 280px;
   overflow: hidden; 
 }
 
+/* 1. Ép cứng độ rộng tối đa cho Sidebar khi có class .collapsed */
+.spotify-sidebar.collapsed {
+  width: 72px !important;
+  min-width: 72px !important;
+  max-width: 72px !important;
+  padding: 12px 0px !important; /* Bóp lề hai bên về 0 để icon có chỗ căn giữa */
+  align-items: center; /* Căn giữa toàn bộ các khối con bên trong */
+}
+
+/* 2. Xử lý khối Header chứa nút cuốn sách */
+.spotify-sidebar.collapsed .sidebar-header {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Căn giữa nút cuốn sách */
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.spotify-sidebar.collapsed .library-btn {
+  justify-content: center !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+/* Kiên quyết ẩn cái khung Tooltip chữ "Mở rộng Thư viện của bạn" mặc định nếu có */
+.spotify-sidebar.collapsed .library-text {
+  display: none !important;
+}
+
+/* 3. Xử lý khối Playlist chứa nốt nhạc */
+.spotify-sidebar.collapsed .sidebar-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 !important;
+}
+
+.spotify-sidebar.collapsed .playlist-item {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Đẩy cái ô vuông nốt nhạc ra chính giữa thanh dọc */
+  padding: 8px 0px !important;
+  margin: 0 !important;
+}
+
+/* Đảm bảo ô vuông nốt nhạc luôn giữ nguyên kích thước vuông vắn không bị bóp méo */
+.spotify-sidebar.collapsed .playlist-cover.default-cover {
+  width: 48px !important;
+  height: 48px !important;
+  flex-shrink: 0 !important;
+}
+
+/* 1. Sửa lại class của thẻ bọc ngoài cùng (file layout chính của nhóm Nam) */
 .main-view {
   grid-area: main;
-  background-color: #121212; 
-  /* Tạo khoảng hở (margin): Trên-0, Phải-8px, Dưới-8px, Trái-0 (vì đã có gap từ Sidebar) */
+  background-color: #121212; /* Giữ màu đen nền gốc khi chưa phát nhạc */
   margin: 0px 8px 8px 0px; 
-  border-radius: 8px; /* Bo góc khối Main View */
+  border-radius: 8px; 
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  position: relative; /* 🟢 BẮT BUỘC: Làm gốc để các thẻ con tuyệt đối canh theo */
+  z-index: 1;
 }
 
+/* 2. Sửa lại class Container của file MainContent */
+.main-content-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* 🟢 Chuyển sang trong suốt để lớp màu động phía dưới lọt lên được */
+  background-color: transparent !important; 
+  z-index: 1;
+}
+
+/* 3. Lớp nền động bốc ảnh bài hát (bố trí tuyệt đối theo sát .main-content-container) */
+/* 1. Lớp nền động loang màu: Khóa chặt, bao trọn diện tích nửa trên của Main */
+.main-dynamic-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;       /* 🟢 Ép chiều ngang vừa khít 100% vùng main, không cho tràn ra ngoài */
+  height: 450px;      /* 🟢 Giới hạn chiều cao loang màu vừa phải ở nửa trên trang */
+  
+  /* Quay lại dùng cover để ảnh bao phủ trọn vẹn khối, nhưng không dùng transform scale nữa */
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  
+  /* 🔥 BÍ THUẬT: Tăng blur lên 160px để triệt tiêu hoàn toàn vệt sọc ngang kỳ quặc */
+  filter: blur(160px) saturate(200%); 
+  
+  opacity: 0.32;      /* Độ đậm dịu nhẹ chuẩn Spotify nịnh mắt */
+  transition: background-image 0.8s ease-in-out; /* Đổi bài là màu chuyển lướt mịn màng */
+  z-index: -2;        /* Nằm chìm dưới cùng */
+  pointer-events: none;
+}
+
+/* 2. Lớp phủ dốc mờ: Khóa chặt chiều cao tương ứng để hòa vào nền đen */
+.main-dynamic-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;       /* 🟢 Khít khao theo chiều ngang của Main */
+  height: 450px;      /* 🟢 Khớp chiều cao 450px với lớp nền phía dưới */
+  
+  /* Dải màu dốc mượt mà chuyển từ trong suốt về màu đen #121212 ở mốc 100% */
+  background: linear-gradient(
+    to bottom, 
+    rgba(18, 18, 18, 0) 0%, 
+    rgba(18, 18, 18, 0.4) 60%, 
+    #121212 100% /* 🟢 Đã sửa chữ % chuẩn chỉnh */
+  );
+  z-index: -1;        /* Nằm giữa nền động và chữ */
+  pointer-events: none;
+}
+
+/* 5. Khối bọc danh sách bài hát và các section của Nam */
+.main-content-inner {
+  position: relative;
+  z-index: 2; /* 🟢 Ép nổi lên trên cùng để các nút "Show all" hay Card bấm ăn chuột 100% */
+  padding: 20px;
+}
+.library-text {
+  /* ... Giữ nguyên các thuộc tính màu sắc, font-size hiện tại của Nam ... */
+
+  /* 🟢 BA DÒNG CHÍ MẠNG GIÚP CHỮ ĐỨNG IM CHUẨN ĐÉT */
+  white-space: nowrap;       /* 1. Ép chữ luôn nằm trên 1 hàng duy nhất, cấm xuống dòng */
+  overflow: hidden;          /* 2. Ẩn phần chữ thừa đi nếu khung chưa nở đủ độ rộng */
+  display: inline-block;     /* 3. Đảm bảo trình duyệt nhận diện được khối text để ẩn mượt */
+}
+
+/* 🟢 FIX HIỆU ỨNG CHẠY TỪ TỪ CỦA NÚT LIBRARY */
+.library-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;                 /* Khoảng cách giữa Icon cuốn sách và Chữ */
+  width: auto;
+  min-width: max-content;    /* Ép nút luôn tính toán độ rộng theo kích thước chữ thật */
+}
 /* =========================================================
    4. CHI TIẾT HEADER COMPONENTS
    ========================================================= */
@@ -425,18 +627,29 @@ grid-template-columns: 280px 1fr 280px;
 /* =========================================================
    7. CHI TIẾT PLAYER COMPONENTS
    ========================================================= */
-.player-left, .player-right {
+/* 🟢 SỬA KHỐI LEFT: Thêm position và z-index để đẩy ngược lên trên lớp màu nền */
+.player-left {
   flex: 1;
   min-width: 180px;
   display: flex;
   align-items: center;
+  position: relative; /* 🟢 Gài thêm */
+  z-index: 9999 !important; /* 🟢 Ép nổi hẳn lên trên cùng */
 }
 
+/* 🟢 SỬA KHỐI RIGHT: Thêm định vị tương tự */
 .player-right {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 16px;
+  position: relative; /* 🟢 Gài thêm */
+  z-index: 9999 !important; /* 🟢 Ép nổi hẳn lên trên cùng */
 }
 
+/* 🟢 SỬA KHỐI CENTER: Khối điều khiển chính chứa nút Play/Pause */
 .player-center {
   flex: 0 1 722px; 
   max-width: 722px;
@@ -444,8 +657,18 @@ grid-template-columns: 280px 1fr 280px;
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  position: relative; /* 🟢 Gài thêm */
+  z-index: 9999 !important; /* 🟢 Ép nổi hẳn lên trên cùng */
 }
 
+/* ── MẸO TUYỆT CHIÊU: Tìm bất kỳ thẻ cha nào chứa .player-center và ép nó nổi lên ── */
+*:has(> .player-center) {
+  position: relative !important;
+  z-index: 9995 !important;
+  background-color: #121212; /* Đảm bảo thanh player giữ màu nền đen đặc trưng không bị loang màu chính tràn vào */
+}
+
+/* ── GIỮ NGUYÊN TOÀN BỘ ĐỐNG CSS CÒN LẠI PHÍA DƯỚI CỦA NAM VÌ ĐÃ QUÁ CHUẨN ĐÉT ── */
 .player-controls {
   display: flex;
   align-items: center;
@@ -528,21 +751,19 @@ grid-template-columns: 280px 1fr 280px;
 
 .progress-bar-container:hover .progress-bg,
 .volume-bar-container:hover .progress-bg {
-  background-color: #1db954; /* Màu xanh lá chuẩn Spotify khi hover thanh nhạc */
+  background-color: #1db954; 
 }
 
-/* Loại bỏ giao diện mặc định xám xịt của trình duyệt */
 .progress-slider, .volume-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 4px; /* Độ dày thanh kéo chuẩn Spotify */
+  height: 4px; 
   border-radius: 2px;
   outline: none;
   cursor: pointer;
 }
 
-/* Định hình cái nút tròn nhỏ khi kéo */
 .progress-slider::-webkit-slider-thumb, .volume-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -557,7 +778,6 @@ grid-template-columns: 280px 1fr 280px;
 .volume-bar-container .progress-bg div {
   display: block !important;
   flex: none !important;
-  /* max-width: 100% !important; 🟢 Khai phóng giới hạn, cho phép chạm mốc 100% */
 }
 
 /* =========================================================
@@ -610,6 +830,54 @@ grid-template-columns: 280px 1fr 280px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* 🟢 KHI RIGHT SIDEBAR COLLAPSED: Biến thành thanh dọc tinh gọn sát lề */
+.spotify-right-sidebar.collapsed {
+  width: 24px !important;
+  min-width: 24px !important;
+  max-width: 24px !important;
+  padding: 0 !important;
+  margin: 0px 8px 8px 0px;
+  background-color: #000000; /* Khối dọc màu đen ẩn mình sát rìa */
+  display: flex;
+  flex-direction: column;
+  align-items: center;       /* Căn giữa nút mũi tên dọc theo trục X */
+  justify-content: center;   /* Căn giữa nút mũi tên dọc theo trục Y */
+  cursor: pointer;
+  overflow: hidden;          /* Giấu sạch ruột gan cũ không cho tràn ra ngoài */
+  transition: background-color 0.2s ease;
+}
+
+/* Hiệu ứng sáng nhẹ thanh dọc khi Nam rê chuột lại gần giống Spotify */
+.spotify-right-sidebar.collapsed:hover {
+  background-color: #1a1a1a;
+}
+
+/* Nút bấm chứa mũi tên < vát dọc trải dài */
+.right-expand-btn {
+  background: transparent;
+  border: none;
+  color: #b3b3b3;            /* Màu xám tinh tế mặc định */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;              /* Độ cao vừa vặn cho vùng click chuột */
+  padding: 0;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+/* Khi Nam trỏ thẳng chuột vào biểu tượng mũi tên < */
+.right-expand-btn:hover {
+  color: #ffffff;            /* Bật sáng trắng lên rực rỡ */
+  transform: scale(1.15);    /* Phóng nhẹ mũi tên lên tạo cảm giác phản hồi tốt */
+}
+
+/* Triệt tiêu độ trễ chuyển động của khối thông tin khi đang ở trạng thái thu gọn */
+.spotify-right-sidebar.collapsed * {
+  transition: none !important;
 }
 
 .song-details {
@@ -778,4 +1046,305 @@ grid-template-columns: 280px 1fr 280px;
 
 .song-card-item:hover .song-card-img {
   filter: brightness(0.75);
+}
+
+/* ── Thanh scrollbar dọc cho main-view ── */
+.main-view {
+  scrollbar-width: none; /* Firefox */
+}
+
+.main-view::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+.main-view::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+/* Chỉ hiện khi hover vào main-view */
+.main-view:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.main-view:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ── KHỐI ABOUT THE ARTIST ĐỨNG YÊN TRONG SIDEBAR ── */
+.spotify-about-artist-box {
+  background-color: #181818;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Ảnh Banner nằm ngang */
+.about-artist-banner {
+  position: relative;
+  width: 100%;
+  height: 140px; /* Khống chế độ cao vừa vặn cột phải */
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.about-artist-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.about-artist-banner:hover img {
+  transform: scale(1.04); /* Phóng nhẹ ảnh khi di chuột */
+}
+
+/* Chữ About the artist đè lên góc trái ảnh */
+.about-artist-title-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 60%, rgba(24,24,24,0.9) 100%);
+  padding: 12px;
+}
+
+.about-artist-title-overlay span {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Thân chữ phía dưới */
+.about-artist-body {
+  padding: 12px;
+}
+
+.about-artist-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.about-monthly-listeners {
+  margin: 4px 0 0 0;
+  color: #a7a7a7;
+  font-size: 13px;
+}
+
+/* Nút Show details nhỏ xinh */
+.about-show-more-link {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.about-show-more-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* ── LAYER PHỦ MỜ KHÔNG GIAN (ĐẢM BẢO BAY RA KHỎI SIDEBAR) ── */
+.spotify-dialog-overlay {
+  position: fixed; /* Ép định vị dựa trên toàn bộ khung trình duyệt */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8); /* Lớp phủ đen tối mờ chuẩn Spotify */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999 !important; /* Cho nổi lên trên cùng, chấp mọi loại layout */
+}
+
+/* ── KHUNG HỘP THOẠI DIALOG CHÍNH ── */
+.spotify-dialog-content {
+  background-color: #121212;
+  width: 90%;
+  max-width: 680px; /* Độ rộng chuẩn đét của hộp thoại Spotify */
+  border-radius: 8px;
+  padding: 32px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+}
+
+/* Nút Đóng X ở góc phải */
+.dialog-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  color: #a7a7a7;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+.dialog-close-btn:hover { color: #fff; }
+
+/* ── ẢNH TÁC GIẢ VUÔNG TO CHÍNH GIỮA PHÍA TRÊN ── */
+.dialog-image-wrapper {
+  width: 240px;
+  height: 240px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.dialog-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── BỐ CỤC CHIA 2 CỘT PHẦN THÂN (BÊN TRONG DIALOG) ── */
+.dialog-body-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr; /* Cột trái 200px chứa số, cột phải chứa thông tin */
+  gap: 32px;
+  width: 100%;
+  text-align: left;
+}
+
+/* Cột trái: Thống kê số liệu */
+.dialog-stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Vòng tròn xanh Rank thế giới */
+.world-rank-badge {
+  background-color: #0d47a1;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+.world-rank-badge .rank-number { font-size: 20px; font-weight: 800; color: #fff; }
+.world-rank-badge .rank-text { font-size: 9px; color: #75a7ff; text-transform: uppercase; text-align: center; font-weight: bold; }
+
+.stat-group .stat-number { font-size: 24px; font-weight: 700; color: #fff; margin: 0; }
+.stat-group .stat-label { font-size: 13px; color: #a7a7a7; margin: 2px 0 0 0; }
+
+/* Cột phải: Khối tích xanh xác minh */
+.dialog-info-col {
+  display: flex;
+  flex-direction: column;
+}
+.dialog-bio-text { color: #b3b3b3; font-size: 15px; margin: 0 0 12px 0; }
+
+.posted-by-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+.posted-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+
+/* Khung xám bao bọc thông tin Verified */
+.verified-box {
+  background-color: #1e1e1e;
+  border-radius: 6px;
+  padding: 16px;
+}
+.verified-header {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.verified-desc {
+  margin: 0;
+  color: #a7a7a7;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Custom lại cái nút chứa icon cuốn sách thu gọn ở đỉnh bên phải */
+.right-close-icon-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #a7a7a7 !important; /* Màu xám nhạt */
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 6px !important;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+/* Hover vào thì icon đổi sang màu trắng và phóng to nhẹ cực chuyên nghiệp */
+.right-close-icon-btn:hover {
+  color: #ffffff !important;
+  background-color: #242424; /* Tạo vòng tròn xám bao quanh icon y chang Spotify gốc */
+  transform: scale(1.05);
+}
+
+.right-close-icon-btn svg {
+  display: block;
+}
+
+/* Container bọc các nút tab (Tất cả, Album) */
+.filter-tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 24px;
+  padding-left: 4px; /* Giúp các nút thẳng hàng với danh sách nhạc phía dưới */
+  position: relative;
+  z-index: 10; /* Đảm bảo nút luôn nổi lên trên lớp nền gradient loang màu */
+}
+
+/* Style cơ bản cho từng nút bấm viên thuốc */
+.filter-tab-btn {
+  background-color: rgba(255, 255, 255, 0.1); /* Nền tối mờ nhẹ */
+  color: #ffffff; /* Chữ màu trắng */
+  border: none;
+  padding: 8px 16px;
+  border-radius: 500px; /* Bo tròn hoàn toàn kiểu "viên thuốc" chuẩn Spotify */
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  user-select: none; /* Tránh bị bôi đen chữ khi click nhanh nhiều lần */
+}
+
+/* Hiệu ứng khi di chuột qua nút (Hover) */
+.filter-tab-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* Nền sáng lên một chút */
+}
+
+/* Hiệu ứng nhỏ khi nhấn chuột xuống (Active bấm) */
+.filter-tab-btn:active {
+  transform: scale(0.97); /* Thu nhỏ nhẹ tạo cảm giác đàn hồi chân thật */
+}
+
+/* 🟢 TRẠNG THÁI NÚT ĐANG ĐƯỢC CHỌN (Nút nào active thì sáng rực lên) */
+.filter-tab-btn.active {
+  background-color: #ffffff; /* Nền chuyển hẳn sang màu trắng */
+  color: #000000; /* Chữ chuyển sang màu đen để nổi bật */
 }

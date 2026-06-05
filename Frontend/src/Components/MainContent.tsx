@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMusic } from "../Contexts/MusicContext";
 import "./Styles/HomePage.css";
 
@@ -14,7 +15,7 @@ interface Props {
   songs: Song[];
 }
 
-// 🟢 Thay đổi cách lấy ảnh fallback bằng LoremFlickr theo ID để không bao giờ bị lặp ảnh
+// Lấy ảnh bằng LoremFlickr theo ID nếu không có cover thật từ DB
 const getCover = (song: Song) =>
   song.coverUrl || `https://loremflickr.com/160/160/music?lock=${song.id}`;
 
@@ -22,14 +23,14 @@ const SongCard = ({ song }: { song: Song }) => {
   const { playSong, currentSong, isPlaying } = useMusic();
   const isActive = currentSong?.id === song.id;
 
-  // 🟢 Hàm kích hoạt phát nhạc cưỡng bức, chấp mọi loại kẹt Context
+  // Hàm kích hoạt phát nhạc cưỡng bức
   const handleForcePlay = (e: React.MouseEvent) => {
     e.stopPropagation(); // Chặn lag sự kiện
 
-    // 1. Gọi hàm Context của nhóm Nam để đồng bộ giao diện đổi màu xanh, hiện nút pause
+    // 1. Đồng bộ giao diện qua Context
     playSong(song);
 
-    // 2. Tìm tất cả các thẻ <audio> đang có trên toàn bộ trang web và ép nó phát link nhạc này luôn
+    // 2. Ép các thẻ <audio> phát link nhạc này luôn
     setTimeout(() => {
       const allAudios = document.getElementsByTagName("audio");
       if (allAudios.length > 0 && song.audioUrl) {
@@ -42,7 +43,7 @@ const SongCard = ({ song }: { song: Song }) => {
             .catch((err) => console.log("Trình duyệt chờ tương tác:", err));
         }
       }
-    }, 100); // Chờ 100ms cho Context nạp xong là ép chạy luôn!
+    }, 100);
   };
 
   return (
@@ -63,7 +64,7 @@ const SongCard = ({ song }: { song: Song }) => {
         <button
           className={`card-play-btn ${isActive && isPlaying ? "playing" : ""}`}
           aria-label={`Phát ${song.title}`}
-          onClick={handleForcePlay} // 🟢 Gán hàm ép phát nhạc vào nút tròn nhỏ luôn
+          onClick={handleForcePlay}
         />
       </div>
       <h4
@@ -78,7 +79,16 @@ const SongCard = ({ song }: { song: Song }) => {
 };
 
 export default function MainContent({ songs }: Props) {
-  // 🟢 Thêm .toLowerCase() để ép chữ hoa hay chữ thường dưới DB lên đều khớp chuẩn 100%
+  const { currentSong } = useMusic();
+  const songData = currentSong as any;
+
+  // 🟢 SỬA TẠI ĐÂY: Đã định kiểu chuẩn xác chỉ cho phép "all" hoặc "album"
+  const [activeTab, setActiveTab] = useState<"all" | "album">("all");
+
+  // Xác định ảnh bìa hiện tại để bốc màu nền động
+  const activeCover = songData?.coverUrl || "";
+
+  // Lọc bài hát theo danh mục
   const fridaySongs = songs.filter(
     (s) => s.category?.toLowerCase() === "friday",
   );
@@ -90,71 +100,130 @@ export default function MainContent({ songs }: Props) {
 
   return (
     <div className="main-content-container">
-      {/* Chưa có category → show tất cả */}
-      {!hasCategory && songs.length > 0 && (
-        <div className="playlist-section">
-          <div className="section-header">
-            <h2 className="section-title">Tất cả bài hát</h2>
-            <button className="show-all-btn">Show all</button>
-          </div>
-          <div className="songs-grid">
-            {songs.slice(0, 10).map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </div>
+      
+      {/* KHỐI NỀN GRADIENT ĐỘNG TƯƠNG TÁC */}
+      {activeCover && (
+        <div 
+          className="main-dynamic-bg" 
+          style={{ backgroundImage: `url(${activeCover})` }}
+        />
       )}
+      <div className="main-dynamic-overlay" />
 
-      {/* Section Friday */}
-      {fridaySongs.length > 0 && (
-        <div className="playlist-section">
-          <div className="section-header">
-            <h2 className="section-title">It's New Music Friday!</h2>
-            <button className="show-all-btn">Show all</button>
-          </div>
-          <div className="songs-grid">
-            {fridaySongs.slice(0, 10).map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* BỌC NỘI DUNG VÀO LỚP INNER */}
+      <div className="main-content-inner">
 
-      {/* Section V-Sound */}
-      {vSoundSongs.length > 0 && (
-        <div className="playlist-section">
-          <div className="section-header">
-            <h2 className="section-title">V-Sound</h2>
-            <button className="show-all-btn">Show all</button>
-          </div>
-          <div className="songs-grid">
-            {vSoundSongs.slice(0, 10).map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
+        {/* THANH NÚT BẤM LOẠI BỎ CŨ - CHỈ GIỮ LẠI TẤT CẢ VÀ ALBUM */}
+        <div className="filter-tabs-container" style={{ display: "flex", gap: "8px", marginBottom: "24px" }}>
+          <button
+            className={`filter-tab-btn ${activeTab === "all" ? "active" : ""}`}
+            onClick={() => setActiveTab("all")}
+          >
+            Tất cả
+          </button>
+          <button
+            className={`filter-tab-btn ${activeTab === "album" ? "active" : ""}`}
+            onClick={() => setActiveTab("album")}
+          >
+            Album
+          </button>
         </div>
-      )}
+        
+        {/* Chỉ hiện các mục nhạc khi tab chọn là "Tất cả" */}
+        {activeTab === "all" && (
+          <>
+            {/* Chưa có category → show tất cả */}
+            {!hasCategory && songs.length > 0 && (
+              <div className="playlist-section">
+                <div className="section-header">
+                  <h2 className="section-title">Tất cả bài hát</h2>
+                  <button className="show-all-btn">Show all</button>
+                </div>
+                <div className="songs-grid">
+                  {songs.slice(0, 10).map((song) => (
+                    <SongCard key={song.id} song={song} />
+                  ))}
+                </div>
+              </div>
+            )}
 
-      {rapSongs.length > 0 && (
-        <div className="playlist-section">
-          <div className="section-header">
-            <h2 className="section-title">Thế Giới Rap</h2>
-            <button className="show-all-btn">Show all</button>
-          </div>
-          <div className="songs-grid">
-            {rapSongs.slice(0, 10).map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </div>
-      )}
+            {/* Section Friday */}
+            {fridaySongs.length > 0 && (
+              <div className="playlist-section">
+                <div className="section-header">
+                  <h2 className="section-title">It's New Music Friday!</h2>
+                  <button className="show-all-btn">Show all</button>
+                </div>
+                <div className="songs-grid">
+                  {fridaySongs.slice(0, 10).map((song) => (
+                    <SongCard key={song.id} song={song} />
+                  ))}
+                </div>
+              </div>
+            )}
 
-      {/* Không có bài nào */}
-      {songs.length === 0 && (
-        <div style={{ color: "#b3b3b3", padding: "40px", textAlign: "center" }}>
-          Đang kết nối lấy nhạc từ database Dapper...
-        </div>
-      )}
+            {/* Section V-Sound */}
+            {vSoundSongs.length > 0 && (
+              <div className="playlist-section">
+                <div className="section-header">
+                  <h2 className="section-title">V-Sound</h2>
+                  <button className="show-all-btn">Show all</button>
+                </div>
+                <div className="songs-grid">
+                  {vSoundSongs.slice(0, 10).map((song) => (
+                    <SongCard key={song.id} song={song} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Section Rap */}
+            {rapSongs.length > 0 && (
+              <div className="playlist-section">
+                <div className="section-header">
+                  <h2 className="section-title">Thế Giới Rap</h2>
+                  <button className="show-all-btn">Show all</button>
+                </div>
+                <div className="songs-grid">
+                  {rapSongs.slice(0, 10).map((song) => (
+                    <SongCard key={song.id} song={song} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Giao diện hiển thị riêng khi chọn tab Album */}
+        {activeTab === "album" && (
+          <div className="playlist-section">
+            <div className="section-header">
+              <h2 className="section-title">Album của bạn</h2>
+              <button className="show-all-btn">Show all</button>
+            </div>
+            
+            {songs.length > 0 ? (
+              <div className="songs-grid">
+                {songs.slice(0, 10).map((song) => (
+                  <SongCard key={song.id} song={song} />
+                ))}
+              </div>
+            ) : (
+              <div style={{ color: "#b3b3b3", padding: "40px", textAlign: "center" }}>
+                Chưa có Album nào được tạo.
+              </div>
+            )}
+          </div>
+        )}  
+
+        {/* Không có bài nào */}
+        {songs.length === 0 && (
+          <div style={{ color: "#b3b3b3", padding: "40px", textAlign: "center" }}>
+            Đang kết nối lấy nhạc từ database Dapper...
+          </div>
+        )}
+        
+      </div>
     </div>
   );
 }

@@ -1,70 +1,102 @@
+import { useState } from 'react';
 import { useMusic } from '../Contexts/MusicContext';
-import './Styles/HomePage.css'; // 🟢 Đường dẫn đến file CSS riêng lẻ
+import './Styles/HomePage.css';
 
-export default function RightSidebar() {
-  // 1. Gọi bài hát đang phát từ Context ra
+interface RightSidebarProps {
+  isCollapsed: boolean;
+  setIsCollapsed: (value: boolean) => void;
+}
+
+export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSidebarProps) {
   const { currentSong } = useMusic();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // 2. Nếu chưa bấm phát bài nào -> Hiện giao diện chờ chuẩn Spotify
   if (!currentSong) {
     return (
-      <aside className="spotify-right-sidebar" style={{ justifyContent: 'center', alignItems: 'center', color: '#b3b3b3' }}>
-        <div style={{ textAlign: 'center', padding: '20px' }}>
-          <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor" style={{ marginBottom: '16px', color: '#535353' }}>
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/>
-          </svg>
+      <aside className={`spotify-right-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className="right-sidebar-no-song-wrapper" style={{ textAlign: 'center', padding: '20px', color: '#b3b3b3' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 8px 0', color: '#fff' }}>Chưa phát bài nào</h3>
           <p style={{ fontSize: '14px', margin: 0 }}>Hãy chọn 1 bài hát dưới playlist nhen Nam!</p>
         </div>
+        {isCollapsed && (
+          <button className="right-expand-btn" onClick={() => setIsCollapsed(false)} title="Mở rộng">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M11.03 1.97a.75.75 0 0 1 0 1.06L5.56 8l5.47 5.47a.75.75 0 1 1-1.06 1.06l-6-6a.75.75 0 0 1 0-1.06l6-6a.75.75 0 0 1 1.06 0z"/>
+            </svg>
+          </button>
+        )}
       </aside>
     );
   }
 
-  // 3. Hàm fallback xử lý ảnh bìa nếu trường hợp link trống
-  const activeCover = currentSong.coverUrl || `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop`;
+  const songData = currentSong as any;
+  const activeCover = songData.coverUrl || `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop`;
+  const artistBanner = songData.artistBanner || `https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop`;
 
   return (
-    <aside className="spotify-right-sidebar">
+    <aside className={`spotify-right-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       
-      {/* 1. Header: Đang phát */}
-      <div className="right-sidebar-header">
-        <h3>Đang phát</h3>
-      </div>
+      {/* 🟢 NÚT MŨI TÊN KHI THU GỌN (Luôn ẩn, chỉ hiện ra bằng CSS khi dính class .collapsed) */}
+      <button className="right-expand-btn" onClick={() => setIsCollapsed(false)} title="Mở rộng bảng thông tin">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+          <path d="M11.03 1.97a.75.75 0 0 1 0 1.06L5.56 8l5.47 5.47a.75.75 0 1 1-1.06 1.06l-6-6a.75.75 0 0 1 0-1.06l6-6a.75.75 0 0 1 1.06 0z"/>
+        </svg>
+      </button>
 
-      {/* 2. Ảnh bìa bài hát to đùng bốc từ DB */}
-      <div className="right-sidebar-cover">
-        <img src={activeCover} alt={currentSong.title} />
-      </div>
-
-      {/* 3. Tên bài hát và Nút Thêm vào Thư viện */}
-      <div className="right-sidebar-info">
-        <div className="song-details">
-          <h4 className="song-title" title={currentSong.title}>{currentSong.title}</h4>
-          <p className="song-artist">{currentSong.artist}</p>
+      {/* 🟢 KHỐI CHỨA RUỘT GAN: Sẽ bị ẩn dứt khoát bằng CSS khi thu gọn */}
+      <div className="right-sidebar-full-content">
+        <div className="right-sidebar-header">
+          <h3>Đang phát</h3>
+          <button className="right-close-icon-btn" onClick={() => setIsCollapsed(true)} title="Thu gọn bảng thông tin">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H3zm1-2h16V4H4v16zm8-13v10l-5-5 5-5z"/>
+            </svg>
+          </button>
         </div>
-        <button className="icon-btn" title="Lưu vào Thư viện" style={{ background: 'none', border: 'none', color: '#b3b3b3', cursor: 'pointer' }}>
-          <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/><path d="M11.75 8a.75.75 0 0 1-.75.75H8.75V11a.75.75 0 0 1-1.5 0V8.75H4.25a.75.75 0 0 1 0-1.5h3V4.25a.75.75 0 0 1 1.5 0v3h2.25a.75.75 0 0 1 .75.75z"/></svg>
-        </button>
-      </div>
 
-      {/* 4. Khung Giới thiệu Nghệ sĩ (About the artist) */}
-      <div className="artist-card">
-        <p className="artist-card-title">Về nghệ sĩ</p>
-        <div className="artist-card-content">
-          <img 
-            src={activeCover} 
-            alt={currentSong.artist} 
-            className="artist-avatar"
-          />
-          <div className="artist-details">
-            <h4 className="artist-name">{currentSong.artist}</h4>
-            <p className="artist-listeners">
-              {currentSong.category ? `Tuyển tập: ${currentSong.category.toUpperCase()}` : 'Hệ thống Dapper SQL'}
+        <div className="right-sidebar-cover">
+          <img src={activeCover} alt={songData.title} />
+        </div>
+
+        <div className="right-sidebar-info">
+          <div className="song-details">
+            <h4 className="song-title" title={songData.title}>{songData.title}</h4>
+            <p className="song-artist">{songData.artist}</p>
+          </div>
+        </div>
+
+        <div className="spotify-about-artist-box" onClick={() => setIsDialogOpen(true)}>
+          <div className="about-artist-banner">
+            <img src={artistBanner} alt={songData.artist} />
+            <div className="about-artist-title-overlay"><span>About the artist</span></div>
+          </div>
+          <div className="about-artist-body">
+            <h4 className="about-artist-name">{songData.artist}</h4>
+            <p className="about-monthly-listeners">
+              {songData.monthlyListeners ? `${songData.monthlyListeners.toLocaleString()} monthly listeners` : 'Click để xem chi tiết'}
             </p>
           </div>
         </div>
       </div>
 
+      {/* Dialog giữ nguyên bên dưới */}
+      {isDialogOpen && (
+        <div className="spotify-dialog-overlay" onClick={() => setIsDialogOpen(false)}>
+          <div className="spotify-dialog-content" onClick={(e) => e.stopPropagation()}>
+            <button className="dialog-close-btn" onClick={() => setIsDialogOpen(false)}>✕</button>
+            <div className="dialog-image-wrapper"><img src={activeCover} alt={songData.artist} /></div>
+            <div className="dialog-body-layout">
+              <div className="dialog-stats-col">
+                {songData.worldRank > 0 && (
+                  <div className="world-rank-badge"><span className="rank-number">#{songData.worldRank}</span></div>
+                )}
+                <div className="stat-group"><p className="stat-number">{songData.followers?.toLocaleString()}</p></div>
+              </div>
+              <div className="dialog-info-col"><p className="dialog-bio-text">{songData.bio}</p></div>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
