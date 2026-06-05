@@ -1307,3 +1307,44 @@
 .right-close-icon-btn svg {
   display: block;
 }
+
+/* Container bọc các nút tab (Tất cả, Album) */
+.filter-tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 24px;
+  padding-left: 4px; /* Giúp các nút thẳng hàng với danh sách nhạc phía dưới */
+  position: relative;
+  z-index: 10; /* Đảm bảo nút luôn nổi lên trên lớp nền gradient loang màu */
+}
+
+/* Style cơ bản cho từng nút bấm viên thuốc */
+.filter-tab-btn {
+  background-color: rgba(255, 255, 255, 0.1); /* Nền tối mờ nhẹ */
+  color: #ffffff; /* Chữ màu trắng */
+  border: none;
+  padding: 8px 16px;
+  border-radius: 500px; /* Bo tròn hoàn toàn kiểu "viên thuốc" chuẩn Spotify */
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  user-select: none; /* Tránh bị bôi đen chữ khi click nhanh nhiều lần */
+}
+
+/* Hiệu ứng khi di chuột qua nút (Hover) */
+.filter-tab-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* Nền sáng lên một chút */
+}
+
+/* Hiệu ứng nhỏ khi nhấn chuột xuống (Active bấm) */
+.filter-tab-btn:active {
+  transform: scale(0.97); /* Thu nhỏ nhẹ tạo cảm giác đàn hồi chân thật */
+}
+
+/* 🟢 TRẠNG THÁI NÚT ĐANG ĐƯỢC CHỌN (Nút nào active thì sáng rực lên) */
+.filter-tab-btn.active {
+  background-color: #ffffff; /* Nền chuyển hẳn sang màu trắng */
+  color: #000000; /* Chữ chuyển sang màu đen để nổi bật */
+}
