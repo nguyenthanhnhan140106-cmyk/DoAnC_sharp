@@ -1,0 +1,19 @@
+bin/
+obj/
+
+# File nhạc & ảnh — giữ local, không push Git
+API/wwwroot/audio/
+API/wwwroot/images/
+
+# .NET
+.vs/
+*.user
+*.log
+
+# Frontend
+Frontend/node_modules/
+Frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db

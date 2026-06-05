@@ -5,6 +5,7 @@ import Header from '../Components/header';
 import PlayerBar from '../Components/PlayerBar';
 import MainContent from '../Components/MainContent';
 import RightSidebar from '../Components/RightSidebar';
+import Footer from '../Components/Footer';
 import '../Components/Styles/HomePage.css';
 
 interface Song {
@@ -44,6 +45,7 @@ export default function HomePage() {
       <div className="main-view">
         <div className="content-wrapper">
           <MainContent songs={songs} />
+          <Footer />
         </div>
       </div>
       

@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import searchIcon from '../assets/search.svg'; 
+import searchIcon from '../assets/search.svg';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export default function Header() {
     }
 
     document.addEventListener("mousedown", handleClickOutside);
-    
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -31,16 +31,16 @@ export default function Header() {
           <span className="search-icon">
             <img src={searchIcon} alt="Search" style={{ width: '18px', height: '18px' }} />
           </span>
-          <input 
-            type="text" 
-            placeholder="Bạn muốn phát gì?" 
+          <input
+            type="text"
+            placeholder="Bạn muốn phát gì?"
             className="search-input"
           />
         </div>
       </div>
 
       <div className="header-profile-container">
-        
+
         <button className="notification-btn" title="Thông báo">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -49,9 +49,9 @@ export default function Header() {
         </button>
 
         <div className="profile-dropdown-wrapper" ref={dropdownRef}>
-          
-          <div 
-            className="user-avatar" 
+
+          <div
+            className="user-avatar"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             title="My Account"
           >
