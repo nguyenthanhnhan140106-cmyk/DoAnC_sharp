@@ -11,6 +11,7 @@ namespace Domain.Entities
         public string? ArtistBanner { get; set; }
         public string? CoverUrl { get; set; }
         public string? AudioUrl { get; set; }   // URL file nhạc
+        public string VideoUrl { get; set; }    // URL video YouTube
         public string? Category { get; set; }   // "friday" | "vsound" | ...
         public DateTime CreatedAt { get; set; } // 🟢 Giữ nguyên gốc không gán gượng ép DateTime.UtcNow ở đây nhen Nam
 
