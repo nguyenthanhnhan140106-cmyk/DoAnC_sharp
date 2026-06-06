@@ -32,7 +32,8 @@ INSERT INTO artists (Id, Name, WorldRank, Followers, MonthlyListeners, Bio, IsVe
 (9,  'VƯƠNG BÌNH',         680,  125000,   980000, 'Giọng ca Indie mới nổi đầy triển vọng với những giai điệu lofi trầm buồn, sâu lắng đánh trúng tâm lý giới trẻ.', 1),
 (10, 'Minh Huy, Pinny',    720,   95000,   560000, 'Cặp đôi nghệ sĩ trẻ tự do với phong cách âm nhạc Acoustic nhẹ nhàng, mang đậm hơi thở thanh xuân.', 1),
 (11, 'Thiên Đình',         810,   45000,   310000, 'Dự án âm nhạc thể nghiệm mang màu sắc cổ trang kết hợp điện tử huyền ảo độc đáo.', 1),
-(12, 'Elly', 320, 580000, 4200000, 'Elly là nghệ sĩ Lofi Chill nổi tiếng với những giai điệu nhẹ nhàng, thư giãn mang đậm phong cách chill độc đáo.', 1);
+(12, 'Elly', 320, 580000, 4200000, 'Elly là nghệ sĩ Lofi Chill nổi tiếng với những giai điệu nhẹ nhàng, thư giãn mang đậm phong cách chill độc đáo.', 1),
+(13, 'Changg', 250, 450000, 3200000, 'Changg là một giọng ca trẻ đầy tiềm năng với những bản hit nổi bật trên các nền tảng mạng xã hội.', 1);
 
 
 -- ─────────────────────────────────────────────────────────
@@ -157,6 +158,42 @@ INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, Category, ArtistBanner
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660149/Anh_Lofi_mfw3vv.mp3',
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12, NOW()),
+(24, 'Hiểu lầm', 'Changg',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113834_dvharv.png',
+     NULL,
+     'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113834_dvharv.png', 13, NOW()),
+(25, 'Em không hiểu', 'Changg',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114001_oq3gwg.png',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720503/Em_Kh%C3%B4ng_Hi%E1%BB%83u_farjaj.mp3',
+     'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114001_oq3gwg.png', 13, NOW()),
+(26, 'Anh đang nơi đâu', 'Changg',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113920_iq4rr0.png',
+     NULL,
+     'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113920_iq4rr0.png', 13, NOW()),
+(27, 'Và thế giới đã mất đi một người cô đơn', 'Changg',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113920_iq4rr0.png',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720504/V%C3%A0_Th%E1%BA%BF_Gi%E1%BB%9Bi_%C4%90%C3%A3_M%E1%BA%A5t_%C4%90i_M%E1%BB%99t_Ng%C6%B0%E1%BB%9Di_C%C3%B4_%C4%90%C6%A1n_uyuhea.mp3',
+     'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113920_iq4rr0.png', 13, NOW()),
+(28, 'Lỡ say Bye là Bye', 'Changg',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113948_cssrtd.png',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720503/L%E1%BB%A1_Say_Bye_L%C3%A0_Bye_zumayw.mp3',
+     'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113948_cssrtd.png', 13, NOW()),
+(29, 'Hướng Dương', 'Changg',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114012_ixmbtl.png',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720503/H%C6%B0%E1%BB%9Bng_D%C6%B0%C6%A1ng_hhczmc.mp3',
+     'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114012_ixmbtl.png', 13, NOW()),
+(30, 'Sài Gòn đâu có lạnh', 'Changg',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114021_zvpewd.png',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720503/S%C3%A0i_G%C3%B2n_%C4%90%C3%A2u_C%C3%B3_L%E1%BA%A1nh_kva2qp.mp3',
+     'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114021_zvpewd.png', 13, NOW()),
+(31, 'Định mệnh tình yêu', 'Changg',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721004/Screenshot_2026-06-06_114042_dvxz4p.png',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720502/%C4%90%E1%BB%8Bnh_M%E1%BB%87nh_T%C3%ACnh_Y%C3%AAu_Theme_Song_From__Valor_Pass_38_-_Valentine__yr2ao6.mp3',
+     'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721004/Screenshot_2026-06-06_114042_dvxz4p.png', 13, NOW()),
+(32, 'Tuesday', 'Changg',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721004/Screenshot_2026-06-06_114054_gyrsup.png',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720504/Tuesday_sxsmcs.mp3',
+     'rap', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721004/Screenshot_2026-06-06_114054_gyrsup.png', 13, NOW());
 
 
 CREATE TABLE albums (
@@ -174,7 +211,10 @@ INSERT INTO albums (Id, Title, CoverUrl, ArtistId, CreatedAt) VALUES
     NULL, NOW()),
 (2, 'Tuyển Tập Album Nhạc Lofi Chill - Elly',
     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
-    12);
+    12, NOW()),
+(3, 'Tuyển Tập Album Nhạc - Changg',
+    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113834_dvharv.png',
+    13, NOW());
 
 
 -- ─────────────────────────────────────────────────────────
@@ -210,7 +250,17 @@ INSERT INTO album_songs (AlbumId, SongId, OrderNumber) VALUES
 (2, 20, 7),
 (2, 21, 8),
 (2, 22, 9),
-(2, 23, 10);
+(2, 23, 10),
+
+(3, 24, 1),
+(3, 25, 2),
+(3, 26, 3),
+(3, 27, 4),
+(3, 28, 5),
+(3, 29, 6),
+(3, 30, 7),
+(3, 31, 8),
+(3, 32, 9);
 
 
 
