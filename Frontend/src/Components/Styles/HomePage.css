@@ -1345,10 +1345,6 @@
 
 /* 🟢 TRẠNG THÁI NÚT ĐANG ĐƯỢC CHỌN (Nút nào active thì sáng rực lên) */
 .filter-tab-btn.active {
-<<<<<<< Updated upstream
-  background-color: #ffffff; /* Nền chuyển hẳn sang màu trắng */
-  color: #000000; /* Chữ chuyển sang màu đen để nổi bật */
-=======
   background-color: #ffffff;
   /* Nền chuyển hẳn sang màu trắng */
   color: #000000;
@@ -2611,5 +2607,4 @@
   width: 100%;
   height: 100%;
   border: none;
->>>>>>> Stashed changes
 }
