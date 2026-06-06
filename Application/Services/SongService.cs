@@ -45,9 +45,13 @@ namespace Application.Services
                 Artist    = dto.Artist,
                 CoverUrl  = dto.CoverUrl,
                 AudioUrl  = dto.AudioUrl,
+                
+                // 🟢 Vị trí 1: Tiếp nhận VideoUrl từ giao diện Admin khi tạo bài hát
+                VideoUrl  = dto.VideoUrl, 
+                
                 Category  = dto.Category,
                 ArtistId  = dto.ArtistId,
-                CreatedAt = DateTime.UtcNow // 🟢 Gán thời gian tạo tại đây khi khởi tạo bài mới thông qua API
+                CreatedAt = DateTime.UtcNow // Gán thời gian tạo tại đây khi khởi tạo bài mới thông qua API
             };
 
             // Dapper thực hiện lệnh Insert và nạp lại ID thực tế từ database vào thực thể
@@ -67,6 +71,10 @@ namespace Application.Services
             if (dto.Artist   != null) song.Artist   = dto.Artist;
             if (dto.CoverUrl != null) song.CoverUrl = dto.CoverUrl;
             if (dto.AudioUrl != null) song.AudioUrl = dto.AudioUrl;
+            
+            // 🟢 Vị trí 2: Cập nhật đường dẫn VideoUrl mới nếu có thay đổi
+            if (dto.VideoUrl != null) song.VideoUrl = dto.VideoUrl; 
+            
             if (dto.Category != null) song.Category = dto.Category;
             if (dto.ArtistId != null) song.ArtistId = dto.ArtistId; 
 
@@ -89,6 +97,10 @@ namespace Application.Services
             Artist           = s.Artist,
             CoverUrl         = s.CoverUrl,
             AudioUrl         = s.AudioUrl,
+            
+            // 🟢 Vị trí 3: Đóng gói thuộc tính VideoUrl từ Entity để đưa vào DTO gửi ra cho React
+            VideoUrl         = s.VideoUrl, 
+            
             Category         = s.Category,
             CreatedAt        = s.CreatedAt, // Nhận thời gian chuẩn từ DB đổ lên qua Dapper
             

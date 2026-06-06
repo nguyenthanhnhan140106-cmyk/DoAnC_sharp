@@ -57,6 +57,15 @@ for (int retry = 1; retry <= maxRetries; retry++)
                 Artist VARCHAR(255) NOT NULL,
                 CoverUrl TEXT,
                 AudioUrl TEXT,
+                VideoUrl TEXT,
+                ArtistId INT NULL,
+                WorldRank INT DEFAULT 0,
+                Followers INT DEFAULT 0,
+                MonthlyListeners INT DEFAULT 0,
+                Bio TEXT,
+                ArtistBanner TEXT,
+                IsVerified TINYINT(1) DEFAULT 1,
+
                 Category VARCHAR(100),
                 CreatedAt DATETIME DEFAULT NOW()
             );";
@@ -71,10 +80,10 @@ for (int retry = 1; retry <= maxRetries; retry++)
         {
             var seedCmd = conn.CreateCommand();
             seedCmd.CommandText = @"
-                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, Category, CreatedAt) VALUES
-                ('Xuất Phát Điểm', 'Obito, Shiki', 'https://picsum.photos/seed/1/160/160', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 'friday', NOW()),
-                ('Tell The Truth', 'Obito', 'https://picsum.photos/seed/2/160/160', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', 'vsound', NOW()),
-                ('Bài Hát Demo 3', 'Ca Sĩ C', 'https://picsum.photos/seed/3/160/160', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', 'friday', NOW());";
+                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl,VideoUrl, Category, CreatedAt) VALUES
+                ('Xuất Phát Điểm', 'Obito, Shiki', 'https://picsum.photos/seed/1/160/160', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3','', 'friday', NOW()),
+                ('Tell The Truth', 'Obito', 'https://picsum.photos/seed/2/160/160', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3','', 'vsound', NOW()),
+                ('Bài Hát Demo 3', 'Ca Sĩ C', 'https://picsum.photos/seed/3/160/160', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3','', 'friday', NOW());";
             seedCmd.ExecuteNonQuery();
             logger.LogInformation("[TuneVault DB] 🟢 Đã seed 3 bài hát mặc định.");
         }
