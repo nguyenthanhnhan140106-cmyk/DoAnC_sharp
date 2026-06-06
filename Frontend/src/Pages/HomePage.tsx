@@ -7,7 +7,8 @@ import MainContent from '../Components/MainContent';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
 import '../Components/Styles/HomePage.css';
-import TuneBot from '../Components/TuneBot';
+import ErrorBoundary from '../Components/ErrorBoundary';
+import TuneBot from '../Components/TuneBot/TuneBot';
 
 interface Song {
   id: number;
@@ -52,7 +53,12 @@ export default function HomePage() {
 
       {/* 🟢 3. CẬP NHẬT: Truyền State và hàm Thay đổi xuống cho RightSidebar */}
       <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />
-      <TuneBot />
+
+
+      {/* TuneBot wrapped in error boundary */}
+      <ErrorBoundary>
+        <TuneBot />
+      </ErrorBoundary>
 
       <PlayerBar />
     </div>

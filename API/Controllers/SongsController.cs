@@ -27,6 +27,14 @@ namespace API.Controllers
             return song == null ? NotFound() : Ok(song);
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string q)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+                return Ok(new List<SongDTO>());
+            return Ok(await _songService.SearchAsync(q));
+        }
+
         [HttpGet("category/{category}")]
         public async Task<IActionResult> GetByCategory(string category) =>
             Ok(await _songService.GetByCategoryAsync(category));

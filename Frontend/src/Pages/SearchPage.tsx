@@ -51,13 +51,9 @@ export default function SearchPage() {
     useEffect(() => {
         if (!q) return;
         setLoading(true);
-        API.get('/songs')
+        API.get(`/songs/search?q=${encodeURIComponent(q)}`)
             .then((res: any) => {
                 let list: Song[] = Array.isArray(res.data) ? res.data : [];
-                const lower = q.toLowerCase();
-                list = list.filter(
-                    s => s.title.toLowerCase().includes(lower) || s.artist.toLowerCase().includes(lower)
-                );
                 setResults(list);
             })
             .catch(() => setResults([]))

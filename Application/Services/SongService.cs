@@ -24,6 +24,12 @@ namespace Application.Services
             return songs.Select(s => ToDTO(s));
         }
 
+        public async Task<IEnumerable<SongDTO>> SearchAsync(string keyword)
+        {
+            var songs = await _songRepository.SearchAsync(keyword);
+            return songs.Select(s => ToDTO(s));
+        }
+
         public async Task<IEnumerable<SongDTO>> GetByCategoryAsync(string category)
         {
             var songs = await _songRepository.GetByCategoryAsync(category);

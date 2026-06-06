@@ -263,5 +263,14 @@ INSERT INTO album_songs (AlbumId, SongId, OrderNumber) VALUES
 (3, 32, 9);
 
 
+-- ─────────────────────────────────────────────────────────
+-- 5. BẢNG MEDIA_TAGS (Phân loại tự động)
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE media_tags (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    SongId INT NOT NULL,
+    Tag VARCHAR(50) NOT NULL,
+    FOREIGN KEY (SongId) REFERENCES songs(Id) ON DELETE CASCADE
+);
 
 COMMIT;

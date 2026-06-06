@@ -1,0 +1,95 @@
+[
+  {
+    "keywords": ["gợi ý", "vui", "phấn khích", "năng động", "gym", "tập", "upbeat", "edm", "nhạc hay", "hay", "nghe gì"],
+    "answers": [
+      "🔥 Nhạc vui/năng động tôi gợi ý:\n- Vào mục **Friday** để nghe nhạc mới nhất 🎉\n- Thử mục **Rap** để có beat sôi động 🎤\n- Tìm \"upbeat\", \"EDM\", \"pop\" trên thanh search nhé!",
+      "💃 Muốn nhạc bốc lửa? Thử ngay:\n- **Rap** trong sidebar → nhiều bài hype lắm\n- Hoặc search \"dance\", \"party\" trên thanh tìm kiếm!\nChúc bạn có playlist sôi động 🎶",
+      "🎶 Đây là một số gợi ý:\n- **Friday** – nhạc mới phát hành hàng tuần\n- **V-Sound** – nhạc Việt trữ tình\n- **Rap** – hip-hop sôi động\nBạn thích thể loại nào để tôi gợi ý thêm?"
+    ]
+  },
+  {
+    "keywords": ["buồn", "chill", "lo-fi", "lofi", "nhẹ nhàng", "thư giãn", "acoustic", "ballad", "sad", "yên tĩnh"],
+    "answers": [
+      "🎧 Nhạc chill/buồn tôi gợi ý:\n- Thử mục **V-Sound** để nghe nhạc Việt nhẹ nhàng 🌙\n- Tìm \"lo-fi\", \"acoustic\", \"ballad\" trên thanh search\n- Bật nhạc rồi thư giãn thôi!",
+      "🌙 Muốn chill thì thử:\n- **V-Sound** trong menu thể loại → nhạc Việt trữ tình\n- Search \"nhạc buồn\", \"chill vibes\" cho ra nhiều bài hay lắm 🎵"
+    ]
+  },
+  {
+    "keywords": ["thể loại", "category", "vsound", "v-sound", "friday", "rap", "danh mục", "danh sách"],
+    "answers": [
+      "📂 TuneVault có 3 thể loại chính:\n- 🇻🇳 **V-Sound**: Nhạc Việt trữ tình\n- 🎉 **Friday**: Nhạc mới phát hành mỗi tuần\n- 🎤 **Rap**: Hip‑hop & rap Việt\n\nClick vào tên thể loại trong sidebar bên trái để khám phá nhé!",
+      "🎵 Các thể loại nhạc:\n- **V-Sound** → Nhạc Việt\n- **Friday** → New releases\n- **Rap** → Hip‑hop\n\nBạn thích thể loại nào? Tôi có thể gợi ý thêm!"
+    ]
+  },
+  {
+    "keywords": ["playlist", "danh sách phát", "tạo playlist", "thêm vào", "queue", "hàng chờ"],
+    "answers": [
+      "📋 Tính năng Playlist:\n- Hiện tại click vào **Album** để xem danh sách bài 💿\n- Tính năng tạo playlist cá nhân đang được phát triển 🚧\n- Ở PlayerBar có thể shuffle và lặp lại bài!"
+    ]
+  },
+  {
+    "keywords": ["album", "ca sĩ", "nghệ sĩ", "artist", "singer", "band", "nhóm nhạc"],
+    "answers": [
+      "💿 Xem Album:\n1. Trang chủ → xem **Album nổi bật**\n2. Click vào album để xem danh sách bài\n3. Hoặc search tên nghệ sĩ trên thanh tìm kiếm 🎤",
+      "🎤 Tìm nghệ sĩ:\n- Gõ tên nghệ sĩ vào **ô tìm kiếm** ở đầu trang\n- Kết quả sẽ hiện bài hát của họ 🎵\n- Click vào **Album** trên trang chủ để xem theo album!"
+    ]
+  },
+  {
+    "keywords": ["phát", "play", "nghe", "chơi nhạc", "cách phát", "bắt đầu nghe", "mở nhạc"],
+    "answers": [
+      "▶️ Cách phát nhạc:\n1. Click vào **ảnh bìa** hoặc nút ▶ trên bài hát\n2. Thanh **PlayerBar** ở dưới cùng sẽ hiện lên\n3. Dùng nút ⏮ ⏯ ⏭ để điều khiển!\n\nVui lòng thử ngay nhé 🎶",
+      "🎵 Để nghe nhạc:\n- **Click** vào bất kỳ bài hát nào\n- PlayerBar dưới màn hình sẽ bắt đầu phát\n- Điều chỉnh âm lượng bằng thanh trượt bên phải PlayerBar!"
+    ]
+  },
+  {
+    "keywords": ["tìm", "search", "kiếm", "tìm kiếm", "tìm bài", "tìm nghệ sĩ"],
+    "answers": [
+      "🔍 Tìm bài hát:\n1. Gõ tên bài/nghệ sĩ vào **thanh search** ở đầu trang\n2. Gợi ý hiện ra ngay khi gõ ✨\n3. Nhấn **Enter** để xem đầy đủ kết quả\n\nCó bộ lọc theo thể loại và sắp xếp trên trang kết quả!",
+      "🔎 Thanh tìm kiếm ở **trên cùng trang** nhé!\n- Gõ tên bài → gợi ý tự động\n- Nhấn Enter → trang kết quả đầy đủ\n- Lọc theo V‑Sound / Friday / Rap nếu muốn 🎯"
+    ]
+  },
+  {
+    "keywords": ["trang chủ", "home", "quay lại", "về nhà", "về trang chủ"],
+    "answers": [
+      "🏠 Về trang chủ:\n- Click **logo TuneVault** ở góc trên trái\n- Hoặc click nút **🏠 ngôi nhà** cạnh thanh search!"
+    ]
+  },
+  {
+    "keywords": ["lỗi", "không chạy", "sự cố", "broken", "hỏng", "bug", "không hoạt động"],
+    "answers": [
+      "🔧 Xử lý sự cố:\n1. Thử **F5** tải lại trang\n2. Kiểm tra kết nối internet\n3. Đảm bảo **Backend Docker** đang chạy\n\nNếu vẫn lỗi, báo admin nhé!"
+    ]
+  },
+  {
+    "keywords": ["xin chào", "hello", "hi", "chào", "hey", "helo", "alo", "bắt đầu"],
+    "answers": [
+      "👋 Xin chào! Tôi là TuneBot 🎵\nTôi có thể giúp bạn:\n- 🔍 Tìm bài hát/nghệ sĩ\n- ▶️ Hướng dẫn phát nhạc\n- 📂 Khám phá thể loại\n- 💿 Xem album\n\nBạn cần hỗ trợ gì?",
+      "🎵 Chào bạn! Mình là TuneBot, trợ lý của TuneVault!\nHỏi tôi bất cứ điều gì về ứng dụng nhé 😊"
+    ]
+  },
+  {
+    "keywords": ["bạn là ai", "là ai", "tunebot là", "giới thiệu", "giới thiệu bản thân", "bạn là gì"],
+    "answers": [
+      "🤖 Tôi là **TuneBot** – trợ lý AI của TuneVault!\nTôi được tạo ra để:\n- Hướng dẫn bạn dùng ứng dụng\n- Gợi ý nhạc phù hợp tâm trạng\n- Trả lời thắc mắc về tính năng\n\nHỏi tôi bất cứ điều gì nhé! 🎶"
+    ]
+  },
+  {
+    "keywords": ["shuffle", "trộn", "ngẫu nhiên", "random", "lặp", "repeat", "loop"],
+    "answers": [
+      "🔀 Shuffle & Repeat:\n- Nút **🔀** ở PlayerBar để bật ngẫu nhiên\n- Nút **🔁** để lặp lại (click 2 lần để lặp 1 bài)\n- Đèn xanh bên dưới nút = đang bật!\n\nBạn có thể bật cả hai cùng lúc nhé 🎵"
+    ]
+  },
+  {
+    "keywords": ["âm lượng", "volume", "to", "nhỏ", "tiếng", "mute", "tắt tiếng"],
+    "answers": [
+      "🔊 Điều chỉnh âm lượng:\n- Thanh trượt **âm lượng** ở góc phải PlayerBar\n- Kéo sang phải để tăng, trái để giảm\n- Click vào icon loa để xem thêm tùy chọn!\nTip: âm lượng được lưu lại cho lần sau 🎚️"
+    ]
+  },
+  {
+    "keywords": ["cảm ơn", "thanks", "thank you", "tks", "thx", "oke", "ok", "được rồi"],
+    "answers": [
+      "😊 Không có gì! Chúc bạn nghe nhạc vui vẻ 🎶\nNếu cần thêm hỗ trợ, cứ hỏi tôi nhé!",
+      "🎵 Anytime! Cứ hỏi nếu bạn cần thêm gì nhé~ 😊"
+    ]
+  }
+]

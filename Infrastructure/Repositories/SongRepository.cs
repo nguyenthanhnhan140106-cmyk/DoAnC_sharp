@@ -37,6 +37,23 @@ namespace Infrastructure.Repositories
             return await connection.QueryAsync<Song>(query);
         }
 
+        public async Task<IEnumerable<Song>> SearchAsync(string keyword)
+        {
+            const string query = @"
+                SELECT s.*, 
+                       COALESCE(a.WorldRank, 0) as WorldRank, 
+                       COALESCE(a.Followers, 0) as Followers, 
+                       COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
+                       a.Bio, 
+                       COALESCE(a.IsVerified, 1) as IsVerified
+                FROM songs s
+                LEFT JOIN artists a ON s.ArtistId = a.Id
+                WHERE s.Title LIKE CONCAT('%', @Keyword, '%') OR s.Artist LIKE CONCAT('%', @Keyword, '%')";
+
+            using var connection = CreateConnection();
+            return await connection.QueryAsync<Song>(query, new { Keyword = keyword });
+        }
+
         public async Task<IEnumerable<Song>> GetByCategoryAsync(string category)
         {
             // 🟢 Đảm bảo các bài hát lấy theo danh mục (friday, vsound, rap) cũng được JOIN thông tin nghệ sĩ

@@ -6,6 +6,7 @@ namespace Application.Interfaces
     public interface ISongService
     {
         Task<IEnumerable<SongDTO>> GetAllSongsAsync();
+        Task<IEnumerable<SongDTO>> SearchAsync(string keyword);
         Task<IEnumerable<SongDTO>> GetByCategoryAsync(string category);
         Task<SongDTO?> GetByIdAsync(int id);
         Task<SongDTO> CreateAsync(CreateSongDTO dto);
