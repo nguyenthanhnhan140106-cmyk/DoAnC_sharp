@@ -104,6 +104,34 @@
   z-index: 100;
 }
 
+/* ── Nút Trang Chủ trên Header ── */
+.home-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #1f1f1f;
+  border: none;
+  color: #b3b3b3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.1s ease, color 0.2s ease;
+}
+
+.home-button:hover {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  transform: scale(1.04);
+}
+
+.home-button:active {
+  background-color: #000000;
+  transform: scale(0.96);
+  color: #ffffff;
+}
+
 .spotify-player {
   grid-area: player;
   height: 90px;
@@ -2125,4 +2153,665 @@
 
 .footer-copyright {
   font-size: 13px;
+}
+
+/* ── Search Dropdown Gợi Ý ── */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #282828;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  overflow: hidden;
+  animation: fadeInDown 0.15s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-suggestion-item:hover {
+  background: #3e3e3e;
+}
+
+.suggestion-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.suggestion-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.suggestion-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-artist {
+  color: #b3b3b3;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-suggestion-footer {
+  padding: 10px 14px;
+  color: #b3b3b3;
+  font-size: 13px;
+  cursor: pointer;
+  border-top: 1px solid #3e3e3e;
+  transition: background 0.15s;
+}
+
+.search-suggestion-footer:hover {
+  background: #3e3e3e;
+  color: #fff;
+}
+
+/* ── Nút tìm kiếm nâng cao bên trong search-wrapper ── */
+.search-advanced-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.search-advanced-btn:hover {
+  color: #fff;
+}
+
+/* ── Bộ lọc trong SearchPage ── */
+.search-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  color: #b3b3b3;
+  font-size: 13px;
+  min-width: 72px;
+}
+
+.filter-chip {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid #3e3e3e;
+  background: transparent;
+  color: #b3b3b3;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-chip:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+.filter-chip.active {
+  background: #fff;
+  border-color: #fff;
+  color: #000;
+  font-weight: 600;
+}
+
+/* ── L\u1ecbch s\u1eed t\u00ecm ki\u1ebfm (Search History) ── */
+.search-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b3b3b3;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.search-history-clear {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.search-history-clear:hover {
+  color: #fff;
+  background: #3e3e3e;
+}
+
+.search-history-delete {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  border-radius: 50%;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.search-history-delete:hover {
+  color: #fff;
+  background: #555;
+}
+
+.search-history-empty {
+  padding: 20px 14px;
+  text-align: center;
+  color: #6a6a6a;
+  font-size: 13px;
+}
+
+/* ── K\u1ebft qu\u1ea3 t\u00ecm ki\u1ebfm d\u1ea1ng danh s\u00e1ch ── */
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.search-result-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-result-row:hover {
+  background: #2a2a2a;
+}
+
+.search-result-row.active {
+  background: #1a2a1a;
+}
+
+/* S\u1ed1 th\u1ee9 t\u1ef1 / icon play */
+.search-result-index {
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.row-number {
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.row-play-icon {
+  display: none;
+  color: #fff;
+}
+
+.search-result-row:hover .row-number {
+  display: none;
+}
+
+.search-result-row:hover .row-play-icon {
+  display: block;
+}
+
+/* \u1ea2nh b\u00eca */
+.search-result-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Th\u00f4ng tin b\u00e0i h\u00e1t */
+.search-result-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.search-result-title {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-artist {
+  font-size: 13px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge th\u1ec3 lo\u1ea1i */
+.search-result-badge {
+  background: #2a2a2a;
+  border: 1px solid #3e3e3e;
+  color: #b3b3b3;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.search-result-row:hover .search-result-badge {
+  border-color: #fff;
+  color: #fff;
+}
+
+/* N\u00fat th\u00eam */
+.search-result-add {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: color 0.15s, background 0.15s, opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.search-result-row:hover .search-result-add {
+  opacity: 1;
+}
+
+.search-result-add:hover {
+  color: #fff;
+  background: #3e3e3e;
+}
+
+/* ══════════════════════════════════════
+   TUNEBOT - Floating AI Chat
+══════════════════════════════════════ */
+
+/* Nút FAB (Floating Action Button) */
+.tunebot-fab {
+  position: fixed;
+  bottom: 110px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 24px rgba(124, 58, 237, 0.55);
+  z-index: 1000;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: tunebotPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes tunebotPulse {
+  0%, 100% { box-shadow: 0 4px 24px rgba(124, 58, 237, 0.55); }
+  50%       { box-shadow: 0 4px 32px rgba(168, 85, 247, 0.8); }
+}
+
+.tunebot-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 32px rgba(168, 85, 247, 0.75);
+  animation: none;
+}
+
+.tunebot-fab.open {
+  background: #2a2a2a;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  animation: none;
+}
+
+/* Badge chưa đọc */
+.tunebot-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  background: #1db954;
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+/* Cửa sổ chat */
+.tunebot-window {
+  position: fixed;
+  bottom: 180px;
+  right: 24px;
+  width: 360px;
+  height: 500px;
+  background: #1a1a1a;
+  border-radius: 16px;
+  border: 1px solid #2a2a2a;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: tubeFadeIn 0.25s ease;
+}
+
+@keyframes tubeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header chat */
+.tunebot-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #FF5500, #ff7733);
+  flex-shrink: 0;
+}
+
+.tunebot-avatar {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.tunebot-header-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tunebot-name {
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.tunebot-status {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+}
+
+.tunebot-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.tunebot-close:hover {
+  color: #fff;
+}
+
+/* Vùng tin nhắn */
+.tunebot-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+/* Tin nhắn */
+.tunebot-msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.tunebot-msg.user {
+  flex-direction: row-reverse;
+}
+
+.tunebot-msg-avatar {
+  width: 28px;
+  height: 28px;
+  background: #FF5500;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.tunebot-msg-bubble {
+  max-width: 75%;
+  padding: 10px 13px;
+  border-radius: 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  position: relative;
+}
+
+.tunebot-msg.bot .tunebot-msg-bubble {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  border-bottom-left-radius: 4px;
+}
+
+.tunebot-msg.user .tunebot-msg-bubble {
+  background: linear-gradient(135deg, #FF5500, #ff7733);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.tunebot-msg-time {
+  display: block;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 4px;
+  text-align: right;
+}
+
+.tunebot-msg.bot .tunebot-msg-time {
+  color: #555;
+  text-align: left;
+}
+
+/* Typing animation */
+.tunebot-typing {
+  display: flex;
+  gap: 5px;
+  padding: 14px 16px !important;
+}
+
+.tunebot-typing span {
+  width: 7px;
+  height: 7px;
+  background: #555;
+  border-radius: 50%;
+  animation: tubeTyping 1.2s infinite;
+}
+
+.tunebot-typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.tunebot-typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes tubeTyping {
+
+  0%,
+  80%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.4;
+  }
+
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Câu hỏi nhanh */
+.tunebot-quick {
+  padding: 8px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-top: 1px solid #2a2a2a;
+  flex-shrink: 0;
+}
+
+.tunebot-quick-btn {
+  background: #2a2a2a;
+  border: 1px solid #3e3e3e;
+  color: #ccc;
+  font-size: 12px;
+  padding: 5px 11px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.tunebot-quick-btn:hover {
+  background: #FF5500;
+  border-color: #FF5500;
+  color: #fff;
+}
+
+/* Input gõ */
+.tunebot-input-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 12px;
+  border-top: 1px solid #2a2a2a;
+  flex-shrink: 0;
+}
+
+.tunebot-input {
+  flex: 1;
+  background: #2a2a2a;
+  border: 1px solid #3e3e3e;
+  border-radius: 24px;
+  color: #fff;
+  padding: 9px 16px;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.tunebot-input:focus {
+  border-color: #FF5500;
+}
+
+.tunebot-input::placeholder {
+  color: #555;
+}
+
+.tunebot-send {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #FF5500;
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.tunebot-send:hover:not(:disabled) {
+  background: #ff7733;
+  transform: scale(1.05);
+}
+
+.tunebot-send:disabled {
+  background: #333;
+  cursor: not-allowed;
 }
