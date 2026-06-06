@@ -42,3 +42,5 @@ const SongCard = ({ song }: { song: Song }) => {
     </div>
   );
 };
+
+export default SongCard;

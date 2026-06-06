@@ -29,6 +29,16 @@ builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connection
 builder.Services.AddScoped<Application.Services.AlbumService>(provider => 
     new Application.Services.AlbumService(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Đăng ký AiService — gọi Gemini API từ server để chat TuneBot
+builder.Services.AddHttpClient(); // đăng ký IHttpClientFactory
+builder.Services.AddScoped<Application.Services.AiService>(provider =>
+{
+    var http = provider.GetRequiredService<IHttpClientFactory>().CreateClient();
+    var key = builder.Configuration["GeminiApiKey"] ?? string.Empty;
+    var conn = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
+    return new Application.Services.AiService(http, key, conn);
+});
+
 var app = builder.Build();
 
 app.UseSwagger();

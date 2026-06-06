@@ -140,25 +140,18 @@ export default function PlayerBar() {
         {/* Thanh progress thời gian */}
         <div className="player-playback">
           <span className="time-text">{formatTime(currentTime)}</span>
-          <div
-            className="progress-bar-container"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const ratio = (e.clientX - rect.left) / rect.width;
-              seek(ratio * duration);
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="0.1"
+            value={duration > 0 ? progressPercent : 0}
+            onChange={(e) => seek((Number(e.target.value) / 100) * duration)}
+            className="progress-slider"
+            style={{
+              background: `linear-gradient(to right, ${activeColor} ${progressPercent}%, #4d4d4d ${progressPercent}%)`
             }}
-            style={{ cursor: 'pointer', padding: '10px 0', width: '100%', display: 'flex', alignItems: 'center' }}
-          >
-            <div className="progress-bg" style={{ width: '100%', height: '4px', background: '#4d4d4d', borderRadius: '2px', overflow: 'hidden' }}>
-              <div style={{
-                width: `${progressPercent}%`,
-                height: '100%',
-                background: activeColor,
-                borderRadius: '2px',
-                transition: 'width 0.1s linear'
-              }} />
-            </div>
-          </div>
+          />
           <span className="time-text">{formatTime(duration)}</span>
         </div>
       </div>
@@ -170,24 +163,19 @@ export default function PlayerBar() {
             <path d="M9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.332l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35zm8.683 4.29V5.56a2.75 2.75 0 0 1 0 4.88z" />
           </svg>
         </button>
-        <div
-          className="volume-bar-container"
-          onClick={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const ratio = (e.clientX - rect.left) / rect.width;
-            setVolume(Math.max(0, Math.min(1, ratio)));
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value={volumePercent}
+          onChange={(e) => setVolume(Number(e.target.value) / 100)}
+          className="volume-slider"
+          style={{
+            width: '100px',
+            background: `linear-gradient(to right, ${activeColor} ${volumePercent}%, #4d4d4d ${volumePercent}%)`
           }}
-          style={{ cursor: 'pointer', padding: '10px 0', width: '100px', display: 'flex', alignItems: 'center' }}
-        >
-          <div className="progress-bg" style={{ width: '100%', height: '4px', background: '#4d4d4d', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{
-              width: `${volumePercent}%`,
-              height: '100%',
-              background: activeColor,
-              borderRadius: '2px'
-            }} />
-          </div>
-        </div>
+        />
       </div>
 
     </footer>

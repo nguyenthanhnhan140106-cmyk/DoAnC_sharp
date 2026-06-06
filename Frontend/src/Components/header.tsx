@@ -64,13 +64,10 @@ export default function Header() {
       return;
     }
     const timer = setTimeout(() => {
-      API.get('/songs')
+      const q = encodeURIComponent(query.trim());
+      API.get(`/songs/search?q=${q}`)
         .then((res: any) => {
-          const all: Song[] = Array.isArray(res.data) ? res.data : [];
-          const q = query.toLowerCase();
-          const filtered = all
-            .filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q))
-            .slice(0, 6);
+          const filtered: Song[] = Array.isArray(res.data) ? res.data.slice(0, 6) : [];
           setSuggestions(filtered);
           setShowDropdown(filtered.length > 0);
         })
