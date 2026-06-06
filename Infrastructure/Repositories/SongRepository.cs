@@ -22,7 +22,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Song>> GetAllSongsAsync()
         {
-            // 🟢 Thay thế bằng LEFT JOIN để bốc toàn bộ thông tin nghệ sĩ thật lên một lần
+            // Sử dụng s.* đã tự động bốc được VideoUrl từ database lên Entity
             const string query = @"
                 SELECT s.*, 
                        COALESCE(a.WorldRank, 0) as WorldRank, 
@@ -39,7 +39,6 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Song>> GetByCategoryAsync(string category)
         {
-            // 🟢 Đảm bảo các bài hát lấy theo danh mục (friday, vsound, rap) cũng được JOIN thông tin nghệ sĩ
             const string query = @"
                 SELECT s.*, 
                        COALESCE(a.WorldRank, 0) as WorldRank, 
@@ -57,7 +56,6 @@ namespace Infrastructure.Repositories
 
         public async Task<Song?> GetByIdAsync(int id)
         {
-            // 🟢 Lấy chi tiết một bài hát theo ID cũng kèm theo dữ liệu nghệ sĩ thật
             const string query = @"
                 SELECT s.*, 
                        COALESCE(a.WorldRank, 0) as WorldRank, 
@@ -75,10 +73,10 @@ namespace Infrastructure.Repositories
 
         public async Task<int> CreateAsync(Song song)
         {
-            // 🟢 Bổ sung thêm cột ArtistBanner và ArtistId vào lệnh INSERT để khớp với database mới
+            // 自由 🟢 BỔ SUNG: Thêm cột VideoUrl và tham số @VideoUrl vào câu lệnh INSERT
             const string query = @"
-                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, Category, ArtistBanner, ArtistId, CreatedAt) 
-                VALUES (@Title, @Artist, @CoverUrl, @AudioUrl, @Category, @ArtistBanner, @ArtistId, @CreatedAt);
+                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, ArtistBanner, ArtistId, CreatedAt) 
+                VALUES (@Title, @Artist, @CoverUrl, @AudioUrl, @VideoUrl, @Category, @ArtistBanner, @ArtistId, @CreatedAt);
                 SELECT LAST_INSERT_ID();";
 
             using var connection = CreateConnection();
@@ -87,13 +85,14 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> UpdateAsync(Song song)
         {
-            // 🟢 Bổ sung thêm việc cập nhật ArtistBanner và ArtistId khi có chỉnh sửa bài hát
+            // 自由 🟢 BỔ SUNG: Thêm việc cập nhật VideoUrl = @VideoUrl vào câu lệnh UPDATE
             const string query = @"
                 UPDATE songs 
                 SET Title = @Title, 
                     Artist = @Artist, 
                     CoverUrl = @CoverUrl, 
                     AudioUrl = @AudioUrl, 
+                    VideoUrl = @VideoUrl,
                     Category = @Category,
                     ArtistBanner = @ArtistBanner,
                     ArtistId = @ArtistId

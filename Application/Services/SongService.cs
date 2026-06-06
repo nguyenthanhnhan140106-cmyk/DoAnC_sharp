@@ -45,6 +45,7 @@ namespace Application.Services
                 Artist    = dto.Artist,
                 CoverUrl  = dto.CoverUrl,
                 AudioUrl  = dto.AudioUrl,
+                VideoUrl  = dto.VideoUrl,
                 Category  = dto.Category,
                 ArtistId  = dto.ArtistId,
                 CreatedAt = DateTime.UtcNow // 🟢 Gán thời gian tạo tại đây khi khởi tạo bài mới thông qua API
@@ -67,6 +68,7 @@ namespace Application.Services
             if (dto.Artist   != null) song.Artist   = dto.Artist;
             if (dto.CoverUrl != null) song.CoverUrl = dto.CoverUrl;
             if (dto.AudioUrl != null) song.AudioUrl = dto.AudioUrl;
+            if (dto.VideoUrl != null) song.VideoUrl = dto.VideoUrl;
             if (dto.Category != null) song.Category = dto.Category;
             if (dto.ArtistId != null) song.ArtistId = dto.ArtistId; 
 
@@ -89,6 +91,7 @@ namespace Application.Services
             Artist           = s.Artist,
             CoverUrl         = s.CoverUrl,
             AudioUrl         = s.AudioUrl,
+            VideoUrl         = s.VideoUrl,
             Category         = s.Category,
             CreatedAt        = s.CreatedAt, // Nhận thời gian chuẩn từ DB đổ lên qua Dapper
             
