@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom"; // ← thêm dòng này
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; 
 import { useMusic } from "../Contexts/MusicContext";
 import axios from "axios";
 import "./Styles/HomePage.css";
@@ -72,7 +72,6 @@ const SongCard = ({ song, onHover }: { song: Song; onHover?: (url: string | null
   );
 };
 
-// ── AlbumCard tách riêng để dùng useNavigate ──────────────
 const AlbumCard = ({ album, onHover }: { album: Album; onHover?: (url: string | null) => void }) => {
   const navigate = useNavigate();
   return (
@@ -96,7 +95,6 @@ const AlbumCard = ({ album, onHover }: { album: Album; onHover?: (url: string | 
   );
 };
 
-// ── RecentCard: Thẻ chữ nhật nằm ngang (Nghe gần đây) ──────────────
 const RecentCard = ({ item, type, onHover }: { item: any; type: "song" | "album"; onHover?: (url: string | null) => void }) => {
   const { playSong, currentSong, isPlaying } = useMusic();
   const navigate = useNavigate();
@@ -135,7 +133,7 @@ export default function MainContent({ songs }: Props) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("/api/albums")  // ← đổi sang /api/albums để dùng Vite proxy
+    axios.get("/api/albums")
       .then((res) => {
         if (Array.isArray(res.data)) setAlbums(res.data);
       })
@@ -144,12 +142,6 @@ export default function MainContent({ songs }: Props) {
 
   const activeCover = songData?.coverUrl || "";
   const displayCover = hoveredCover || activeCover;
-
-  const prevCoverRef = useRef(displayCover);
-  useEffect(() => {
-    prevCoverRef.current = displayCover;
-  }, [displayCover]);
-
   const fridaySongs = songs.filter((s) => s.category?.toLowerCase() === "friday");
   const vSoundSongs = songs.filter((s) => s.category?.toLowerCase() === "vsound");
   const rapSongs = songs.filter((s) => s.category?.toLowerCase() === "rap");
@@ -157,15 +149,8 @@ export default function MainContent({ songs }: Props) {
 
   return (
     <div className="main-content-container">
-      {prevCoverRef.current && prevCoverRef.current !== displayCover && (
-        <div className="main-dynamic-bg" style={{ backgroundImage: `url(${prevCoverRef.current})`, zIndex: -3 }} />
-      )}
       {displayCover && (
-        <div 
-          key={displayCover} 
-          className="main-dynamic-bg bg-fade-in" 
-          style={{ backgroundImage: `url(${displayCover})`, zIndex: -2 }} 
-        />
+        <div className="main-dynamic-bg" style={{ backgroundImage: `url(${displayCover})` }} />
       )}
       <div className="main-dynamic-overlay" />
 
