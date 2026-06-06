@@ -53,179 +53,279 @@ CREATE TABLE songs (
     FOREIGN KEY (ArtistId) REFERENCES artists(Id) ON DELETE SET NULL
 );
 
+<<<<<<< HEAD
 INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, ArtistBanner, ArtistId, CreatedAt) VALUES 
 (1,  'Thanh Tân',           'VƯƠNG BÌNH',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/thanhtan_olnawd.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657507/thanhtan_tnaf1e.mp3',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727889/thanhtan_hhmggj.mp4',
+=======
+INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, Category, ArtistBanner, ArtistId, CreatedAt) VALUES 
+(1,  'Thanh Tân',           'VƯƠNG BÌNH',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/thanhtan_olnawd.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657507/thanhtan_tnaf1e.mp3',
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop', 9, NOW()),
 
 (2,  'Về bên anh',          'Jack-J97',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/vebenanh_rrpaon.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657507/vebenanh_kf3kmi.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727870/vebenanh_vipbk1.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'vsound', 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=240&fit=crop', 2, NOW()),
 
 (3,  'Sóng gió',            'Jack-J97,K-ICM,ICM',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/songgio_kb1ndq.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657506/songgio_zreqh8.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780751992/songgio_dhzhih.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'vsound', 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=240&fit=crop', 3, NOW()),
 
 (4,  'Nơi này có anh',      'Sơn Tùng M-TP',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/noinaycoanh_t4adrb.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657502/noinaycoanh_eo4kxd.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727867/nhunaycoanh_ckr2mj.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
 
 (5,  'Ngày rời chuyến bay', 'Minh Huy, Pinny',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/ngayroichuyenbay_ytirxp.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657503/ngayroichuyenbay_xovjt2.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727865/ngayroichuyenbay_kdzzl4.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=240&fit=crop', 10, NOW()),
 
 (6,  'Mất kết nối',         'Dương Domic',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/matketnoi_xr8gpa.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657504/matketnoi_otbz56.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727856/matketnoi_ueyvel.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'vsound', 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500&h=240&fit=crop', 6, NOW()),
 
 (7,  'Hồng nhan',           'Jack-J97, K-ICM, ICM',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/hongnhan_isqcez.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657499/hongnhan_f6rlrh.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727853/hongnhan_ncrnah.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'vsound', 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=240&fit=crop', 3, NOW()),
 
 (8,  'Em thua cô ta',       'Thiên Đình',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/emthuacota_uugowq.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657501/emthuacota_nbuyyp.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727873/emthuacota_k7qleq.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=240&fit=crop', 11, NOW()),
 
 (9,  'Em',                  'Binz, SOONBIN',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/em_d1ahp5.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657502/em_brfzsn.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727868/em_xsew9b.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'vsound', 'https://images.unsplash.com/photo-1516280440614-37939bbacd6a?w=500&h=240&fit=crop', 7, NOW()),
 
 (10, 'Đớn đau vô cùng',     'DatKaa',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/dondauvocung_qyamxw.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657507/dondauvocung_htprq8.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727863/dondauvocung_zlsm0e.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop', 4, NOW()),
 
 (11, 'Chờ anh về',          'ANH TRAI SAY HI',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/choanhve_xa6mtg.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657506/choanhve_zfitwt.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727879/choanhve_sc3mmn.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'rap', 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500&h=240&fit=crop', 8, NOW()),
 
 (12, 'Chất gây hại',        'Quang Hùng MasterD',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/chatgayhai_vgatml.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657502/chatgayhai_coic6r.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727871/chatgayhai_foijpe.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 5, NOW()),
 
 (13, 'Bạc phận',            'Jack-J97, K-ICM, ICM',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/bacphan_cylj9h.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657500/bacphan_mstj0s.mp3',
+<<<<<<< HEAD
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727849/bacphan_axk2ow.mp4',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'vsound', 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=240&fit=crop', 3, NOW()),
 
 (14, 'Túc Duyên Lofi',                'Elly',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660154/T%C3%BAc_Duy%C3%AAn_Lofi_uisjpw.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12, NOW()),
 (15, 'Góc Nhỏ Trong Tim Lofi',       'Elly',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660154/G%C3%B3c_Nh%E1%BB%8F_Trong_Tim_Lofi_w4njus.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12, NOW()),
 (16, 'Hoang Mang Lofi',              'Elly',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660154/Hoang_Mang_Lofi_z1hp0i.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12 , NOW()),
 (17, 'Nhường Lại Nỗi Đau Lofi',     'Elly',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660153/Nh%C6%B0%E1%BB%9Dng_L%E1%BA%A1i_N%E1%BB%97i_%C4%90au_Lofi_zr6bnn.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12, NOW()),
 (18, 'Em Thua Người Ta Nhiều Lắm Lofi', 'Elly',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660153/Em_Thua_Ng%C6%B0%E1%BB%9Di_Ta_Nhi%E1%BB%81u_L%E1%BA%AFm_Lofi_uhbest.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12, NOW()),
 (19, 'Bên Nhau Cả Đời Lofi',         'Elly',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660153/B%C3%AAn_Nhau_C%E1%BA%A3_%C4%90%E1%BB%9Di_Lofi_povrxf.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12, NOW()),
 (20, 'Ngôi Nhà Hạnh Phúc Lofi',      'Elly',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660152/Ng%C3%B4i_Nh%C3%A0_H%E1%BA%A1nh_Ph%C3%BAc_Lofi_sopoqg.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12, NOW()),
 (21, 'Dặm Trong Tim Lofi',           'Elly',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660152/D%E1%BA%B1m_Trong_Tim_Lofi_jeca4h.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12, NOW()),
 (22, 'Nửa Vầng Trăng Lofi',          'Elly',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660151/N%E1%BB%ADa_V%E1%BA%A7ng_Tr%C4%83ng_Lofi_b6nhos.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12, NOW()),
 (23, 'Anh Lofi',                     'Elly',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660149/Anh_Lofi_mfw3vv.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png', 12, NOW()),
 (24, 'Hiểu lầm', 'Changg',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113834_dvharv.png',
      NULL,
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113834_dvharv.png', 13, NOW()),
 (25, 'Em không hiểu', 'Changg',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114001_oq3gwg.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720503/Em_Kh%C3%B4ng_Hi%E1%BB%83u_farjaj.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114001_oq3gwg.png', 13, NOW()),
 (26, 'Anh đang nơi đâu', 'Changg',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113920_iq4rr0.png',
      NULL,
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113920_iq4rr0.png', 13, NOW()),
 (27, 'Và thế giới đã mất đi một người cô đơn', 'Changg',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113920_iq4rr0.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720504/V%C3%A0_Th%E1%BA%BF_Gi%E1%BB%9Bi_%C4%90%C3%A3_M%E1%BA%A5t_%C4%90i_M%E1%BB%99t_Ng%C6%B0%E1%BB%9Di_C%C3%B4_%C4%90%C6%A1n_uyuhea.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113920_iq4rr0.png', 13, NOW()),
 (28, 'Lỡ say Bye là Bye', 'Changg',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113948_cssrtd.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720503/L%E1%BB%A1_Say_Bye_L%C3%A0_Bye_zumayw.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113948_cssrtd.png', 13, NOW()),
 (29, 'Hướng Dương', 'Changg',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114012_ixmbtl.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720503/H%C6%B0%E1%BB%9Bng_D%C6%B0%C6%A1ng_hhczmc.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114012_ixmbtl.png', 13, NOW()),
 (30, 'Sài Gòn đâu có lạnh', 'Changg',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114021_zvpewd.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720503/S%C3%A0i_G%C3%B2n_%C4%90%C3%A2u_C%C3%B3_L%E1%BA%A1nh_kva2qp.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114021_zvpewd.png', 13, NOW()),
 (31, 'Định mệnh tình yêu', 'Changg',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721004/Screenshot_2026-06-06_114042_dvxz4p.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720502/%C4%90%E1%BB%8Bnh_M%E1%BB%87nh_T%C3%ACnh_Y%C3%AAu_Theme_Song_From__Valor_Pass_38_-_Valentine__yr2ao6.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721004/Screenshot_2026-06-06_114042_dvxz4p.png', 13, NOW()),
 (32, 'Tuesday', 'Changg',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721004/Screenshot_2026-06-06_114054_gyrsup.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720504/Tuesday_sxsmcs.mp3',
+<<<<<<< HEAD
      '',
+=======
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
      'rap', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721004/Screenshot_2026-06-06_114054_gyrsup.png', 13, NOW());
 
 

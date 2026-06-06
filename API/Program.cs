@@ -25,6 +25,9 @@ builder.Services.AddScoped<ISongService, SongService>(); // ← DI tự inject
 builder.Services.AddScoped<IUserService>(_ => new UserService(connectionString));
 builder.Services.AddScoped<IArtistService>(_ => new ArtistService(connectionString));
 builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connectionString));
+// Đăng ký AlbumService vào hệ thống DI của .NET Core
+builder.Services.AddScoped<Application.Services.AlbumService>(provider => 
+    new Application.Services.AlbumService(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 

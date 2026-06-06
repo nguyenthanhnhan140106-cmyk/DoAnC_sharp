@@ -1,6 +1,10 @@
 {
   "dependencies": {
+<<<<<<< HEAD
     "@google/generative-ai": "^0.24.1",
     "react-router-dom": "^7.17.0"
+=======
+    "@google/generative-ai": "^0.24.1"
+>>>>>>> 837d20ec7dd5c5c321a4d9ef50484ccb4402af41
   }
 }

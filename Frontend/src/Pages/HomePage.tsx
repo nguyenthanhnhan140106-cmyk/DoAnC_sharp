@@ -5,7 +5,9 @@ import Header from '../Components/header';
 import PlayerBar from '../Components/PlayerBar';
 import MainContent from '../Components/MainContent';
 import RightSidebar from '../Components/RightSidebar';
+import Footer from '../Components/Footer';
 import '../Components/Styles/HomePage.css';
+import TuneBot from '../Components/TuneBot';
 
 interface Song {
   id: number;
@@ -18,10 +20,10 @@ interface Song {
 
 export default function HomePage() {
   const [songs, setSongs] = useState<Song[]>([]);
-  
+
   // Trạng thái thu gọn Left Sidebar (Cũ)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  
+
   // 🟢 1. KHAI BÁO THÊM: Trạng thái thu gọn Right Sidebar (Mới)
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
@@ -38,18 +40,20 @@ export default function HomePage() {
     // 🟢 2. CẬP NHẬT: Ép thêm class 'right-hidden' động dựa vào state mới
     <div className={`spotify-layout ${isSidebarCollapsed ? 'sidebar-hidden' : ''} ${isRightCollapsed ? 'right-hidden' : ''}`}>
       <Header />
-      
+
       <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
-      
+
       <div className="main-view">
         <div className="content-wrapper">
           <MainContent songs={songs} />
+          <Footer />
         </div>
       </div>
-      
+
       {/* 🟢 3. CẬP NHẬT: Truyền State và hàm Thay đổi xuống cho RightSidebar */}
       <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />
-      
+      <TuneBot />
+
       <PlayerBar />
     </div>
   );

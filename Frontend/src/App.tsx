@@ -1,10 +1,21 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { MusicProvider } from './Contexts/MusicContext';
 import HomePage from './Pages/HomePage';
-import { MusicProvider } from '../src/Contexts/MusicContext';
+import AlbumPage from './Pages/AlbumPage';
+import CategoryPage from './Pages/CategoryPage';
+import SearchPage from './Pages/SearchPage';
+
 function App() {
   return (
     <MusicProvider>
-      {/* Gọi trang chủ Spotify vào chạy chính */}
-      <HomePage />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/album/:id" element={<AlbumPage />} />
+          <Route path="/category/:catId" element={<CategoryPage />} />
+          <Route path="/search" element={<SearchPage />} />
+        </Routes>
+      </BrowserRouter>
     </MusicProvider>
   );
 }
