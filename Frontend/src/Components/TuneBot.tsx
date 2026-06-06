@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // 🔑 Dán API Key Gemini của bạn vào đây
-const GEMINI_KEY = 'Apz'; // <-- thay bằng key thật của bạn
+const GEMINI_KEY = '[GCP_API_KEY]'; // <-- thay bằng key thật của bạn
 
 const SYSTEM_PROMPT = `Bạn là TuneBot - trợ lý AI của TuneVault, một ứng dụng nghe nhạc.
 Nhiệm vụ của bạn là giúp người dùng:
