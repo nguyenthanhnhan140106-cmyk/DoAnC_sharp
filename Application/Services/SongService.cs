@@ -90,18 +90,17 @@ namespace Application.Services
         }
 
         // ── 🟢 Mapper chuyển đổi dữ liệu an toàn sang DTO trả về cho React ──────────────────
-        private static SongDTO ToDTO(Song s) => new()
+                private static SongDTO ToDTO(Song s) => new()
         {
             Id               = s.Id,
             Title            = s.Title,
             Artist           = s.Artist,
             CoverUrl         = s.CoverUrl,
             AudioUrl         = s.AudioUrl,
-            VideoUrl         = s.VideoUrl,
+            VideoUrl         = s.VideoUrl, // <--- THÊM DÒNG NÀY ĐỂ FRONTEND NHẬN ĐƯỢC VIDEO
             Category         = s.Category,
-            CreatedAt        = s.CreatedAt, // Nhận thời gian chuẩn từ DB đổ lên qua Dapper
+            CreatedAt        = s.CreatedAt,
             
-            // Ánh xạ toàn bộ các thuộc tính nghệ sĩ từ thực thể Song sang DTO
             ArtistId         = s.ArtistId,
             WorldRank        = s.WorldRank,
             Followers        = s.Followers,

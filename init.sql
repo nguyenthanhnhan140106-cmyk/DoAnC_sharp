@@ -1,8 +1,10 @@
 -- =========================================================
 -- TUNEVAULT - SCRIPT KHỞI TẠO DATABASE VỚI CLOUDINARY LINKS
 -- =========================================================
+SET NAMES utf8mb4;
 
 DROP TABLE IF EXISTS album_songs;
+DROP TABLE IF EXISTS media_tags;
 DROP TABLE IF EXISTS albums;
 DROP TABLE IF EXISTS songs;
 DROP TABLE IF EXISTS artists;
