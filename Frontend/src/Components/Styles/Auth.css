@@ -1,0 +1,126 @@
+/* =========================================================
+   Auth.css - Hệ thống giao diện Đăng nhập / Đăng ký
+   ========================================================= */
+
+/* 1. Container bao bọc toàn bộ trang Auth */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #121212;
+  font-family: Inter, system-ui, sans-serif;
+  padding: 20px;
+}
+
+/* 2. Hộp thoại chính */
+.auth-box {
+  width: 100%;
+  max-width: 450px;
+  padding: 48px;
+  background-color: #121212;
+  text-align: center;
+}
+
+.auth-title { 
+  color: #ffffff; 
+  margin-bottom: 2rem; 
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* 3. Input fields */
+.auth-input {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  background: #121212;
+  border: 1px solid #7f7f7f;
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box; 
+  transition: border-color 0.2s;
+}
+
+.auth-input:focus {
+  border-color: #ffffff;
+  outline: none;
+}
+
+/* 4. Nút Submit (Đăng nhập/Đăng ký form) */
+.auth-submit-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  background: #1DB954;
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  color: #000;
+}
+
+.auth-submit-btn:hover { 
+  transform: scale(1.03); 
+  background-color: #1ed760;
+}
+
+/* 5. Các đường dẫn phụ */
+.auth-link { 
+  color: #b3b3b3; 
+  margin-top: 20px; 
+  font-size: 0.9rem; 
+}
+
+.auth-link a { 
+  color: #ffffff; 
+  text-decoration: underline; 
+}
+
+/* =========================================================
+   Header Auth Buttons (Dành cho Header.tsx)
+   ========================================================= */
+
+/* Container bọc ngoài cho Header */
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  white-space: nowrap; /* Chống dính chữ */
+}
+
+/* Nút Đăng nhập trên Header */
+.login-link {
+  color: #b3b3b3;
+  font-weight: 700;
+  text-decoration: none !important; /* Ép bỏ gạch chân */
+  font-size: 14px;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.login-link:hover {
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+/* Nút Đăng ký trên Header (Dạng nút tròn) */
+.signup-link {
+  background-color: #ffffff;
+  color: #000000;
+  padding: 8px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none !important; /* Ép bỏ gạch chân */
+  transition: transform 0.2s, background-color 0.2s;
+  cursor: pointer;
+}
+
+.signup-link:hover {
+  transform: scale(1.05);
+  background-color: #f0f0f0;
+}
