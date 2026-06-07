@@ -5,6 +5,7 @@ namespace Application.Interfaces
     public interface ISongRepository
     {
         Task<IEnumerable<Song>> GetAllSongsAsync();
+        Task<IEnumerable<Song>> SearchAsync(string keyword);
         Task<IEnumerable<Song>> GetByCategoryAsync(string category);
         Task<Song?> GetByIdAsync(int id);
         Task<int> CreateAsync(Song song);       // Trả về ID của bài hát vừa tạo

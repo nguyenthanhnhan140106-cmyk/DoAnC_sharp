@@ -37,6 +37,23 @@ namespace Infrastructure.Repositories
             return await connection.QueryAsync<Song>(query);
         }
 
+        public async Task<IEnumerable<Song>> SearchAsync(string keyword)
+        {
+            const string query = @"
+                SELECT s.*, 
+                       COALESCE(a.WorldRank, 0) as WorldRank, 
+                       COALESCE(a.Followers, 0) as Followers, 
+                       COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
+                       a.Bio, 
+                       COALESCE(a.IsVerified, 1) as IsVerified
+                FROM songs s
+                LEFT JOIN artists a ON s.ArtistId = a.Id
+                WHERE s.Title LIKE CONCAT('%', @Keyword, '%') OR s.Artist LIKE CONCAT('%', @Keyword, '%')";
+
+            using var connection = CreateConnection();
+            return await connection.QueryAsync<Song>(query, new { Keyword = keyword });
+        }
+
         public async Task<IEnumerable<Song>> GetByCategoryAsync(string category)
         {
             const string query = @"
@@ -73,11 +90,11 @@ namespace Infrastructure.Repositories
 
         public async Task<int> CreateAsync(Song song)
         {
-            // 自由 🟢 BỔ SUNG: Thêm cột VideoUrl và tham số @VideoUrl vào câu lệnh INSERT
-            const string query = @"
+                        const string query = @"
                 INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, ArtistBanner, ArtistId, CreatedAt) 
                 VALUES (@Title, @Artist, @CoverUrl, @AudioUrl, @VideoUrl, @Category, @ArtistBanner, @ArtistId, @CreatedAt);
                 SELECT LAST_INSERT_ID();";
+
 
             using var connection = CreateConnection();
             return await connection.ExecuteScalarAsync<int>(query, song);

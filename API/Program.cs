@@ -29,6 +29,16 @@ builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connection
 builder.Services.AddScoped<Application.Services.AlbumService>(provider => 
     new Application.Services.AlbumService(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Đăng ký AiService — gọi Gemini API từ server để chat TuneBot
+builder.Services.AddHttpClient(); // đăng ký IHttpClientFactory
+builder.Services.AddScoped<Application.Services.AiService>(provider =>
+{
+    var http = provider.GetRequiredService<IHttpClientFactory>().CreateClient();
+    var key = builder.Configuration["GeminiApiKey"] ?? string.Empty;
+    var conn = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
+    return new Application.Services.AiService(http, key, conn);
+});
+
 var app = builder.Build();
 
 app.UseSwagger();
@@ -83,7 +93,7 @@ for (int retry = 1; retry <= maxRetries; retry++)
         {
             var seedCmd = conn.CreateCommand();
             seedCmd.CommandText = @"
-                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl,Video, Category, CreatedAt) VALUES
+                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, CreatedAt) VALUES
                 ('Xuất Phát Điểm', 'Obito, Shiki', 'https://picsum.photos/seed/1/160/160', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3','', 'friday', NOW()),
                 ('Tell The Truth', 'Obito', 'https://picsum.photos/seed/2/160/160', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3','', 'vsound', NOW()),
                 ('Bài Hát Demo 3', 'Ca Sĩ C', 'https://picsum.photos/seed/3/160/160', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3','', 'friday', NOW());";
