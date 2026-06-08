@@ -1624,72 +1624,7 @@
   font-size: 12px;
   line-height: 1.5;
 }
-/* ── TIẾP NỐI PHẦN VERIFIED-BOX ── */
-.verified-box {
-  background-color: #1e1e1e;
-  border-radius: 6px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
 
-.verified-box-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-/* Icon tích xanh Spotify */
-.verified-icon {
-  color: #1db954;
-  font-size: 16px;
-}
-
-.verified-box p {
-  margin: 0;
-  font-size: 13px;
-  color: #b3b3b3;
-  line-height: 1.5;
-}
-
-/* 🟢 CÁC ĐIỀU CHỈNH ĐỂ TỐI ƯU HÓA HIỂN THỊ */
-
-/* Đảm bảo các khối Sidebar không bị "giật" khi thay đổi kích thước */
-.spotify-right-sidebar,
-.spotify-sidebar {
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-              padding 0.3s ease;
-}
-
-/* Đảm bảo vùng Main không bị bóp méo quá mức khi cả 2 sidebar cùng mở */
-.main-view {
-  min-width: 300px; 
-}
-
-/* Tăng cường hiệu ứng mờ cho dialog */
-.spotify-dialog-overlay {
-  backdrop-filter: blur(4px); /* Làm mờ nền phía sau dialog */
-}
-
-/* Đảm bảo nút đóng luôn nổi bật */
-.dialog-close-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.dialog-close-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
 /* Custom lại cái nút chứa icon cuốn sách thu gọn ở đỉnh bên phải */
 .right-close-icon-btn {
   background: transparent !important;
@@ -1839,7 +1774,7 @@
 }
 
 /* Nút Play sẽ hiện lên khi hover vào thẻ Card chứa nó */
-.song-card-item:hover .card-play-btn {
+.song-card-item:hover .card-play-btn, .video-card-item:hover .card-play-btn {
   opacity: 1;
   transform: translateY(0);
 }
@@ -2031,6 +1966,7 @@
   height: 1px;
   background-color: #3e3e3e;
   margin: 4px 0;
+  padding: 0 !important;
 }
 
 /* ========================================================= */
@@ -2578,70 +2514,36 @@
 .search-result-add:hover {
   color: #fff;
   background: #3e3e3e;
-}/* =========================================================
-   8. HOÀN THIỆN CHI TIẾT RIGHT SIDEBAR & DIALOG (Tiếp theo)
-   ========================================================= */
-
-/* Khung xám bao bọc thông tin Verified */
-.verified-box {
-  background-color: #1e1e1e;
-  border-radius: 6px;
+}/* ── Video Card Styles ── */
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding-bottom: 24px;
+}
+.video-card-item {
+  background: #181818;
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  width: 100%;
 }
-
-.verified-box-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #ffffff;
+.video-card-item:hover {
+  background: #282828;
 }
-
-/* Icon tích xanh Spotify */
-.verified-icon {
-  color: #1db954;
-  font-size: 16px;
+.video-card-img-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
-
-.verified-box p {
-  margin: 0;
-  font-size: 13px;
-  color: #b3b3b3;
-  line-height: 1.5;
-}
-
-/* 🟢 ĐẢM BẢO KHÔNG BỊ TRÀN KHI THU GỌN */
-.spotify-right-sidebar,
-.spotify-sidebar {
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-              padding 0.3s ease;
-}
-
-/* 🟢 FIX BẢO VỆ LAYOUT: Đảm bảo Main luôn giữ khoảng cách an toàn */
-.main-view {
-  min-width: 300px; /* Tránh việc main bị bóp quá nhỏ khi mở cả 2 sidebar */
-}
-
-/* 🟢 THÊM HIỆU ỨNG LOADING NHẸ KHI ẢNH NỀN THAY ĐỔI */
-.main-dynamic-bg {
-  transition: background-image 0.5s ease-in-out, opacity 0.5s ease;
-}
-
-/* 🟢 FIX NÚT ĐÓNG DIALOG KHÔNG BỊ MẤT */
-.dialog-close-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dialog-close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+.video-card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }

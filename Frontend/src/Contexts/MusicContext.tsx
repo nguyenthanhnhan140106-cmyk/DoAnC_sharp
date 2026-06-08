@@ -30,6 +30,10 @@ interface MusicContextType {
   cycleRepeat: () => void;
   playNext: () => void;
   playPrev: () => void;
+  isQueueViewOpen: boolean;
+  toggleQueueView: () => void;
+  isLyricsViewOpen: boolean;
+  toggleLyricsView: () => void;
 }
 
 const MusicContext = createContext<MusicContextType | null>(null);
@@ -49,6 +53,18 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
   const [queue, setQueueState] = useState<Song[]>([]);
   const [isShuffle, setIsShuffle] = useState(false);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>('none');
+  const [isQueueViewOpen, setIsQueueViewOpen] = useState(false);
+  const [isLyricsViewOpen, setIsLyricsViewOpen] = useState(false);
+
+  const toggleQueueView = () => {
+    setIsQueueViewOpen(prev => !prev);
+    // Auto close lyrics if opening queue
+    if (!isQueueViewOpen) setIsLyricsViewOpen(false);
+  };
+
+  const toggleLyricsView = () => {
+    setIsLyricsViewOpen(prev => !prev);
+  };
 
   const audioRef = useRef<HTMLAudioElement>(new Audio());
 
@@ -101,13 +117,34 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
   };
 
   // ── playSong: gọi từ UI khi click vào bài ──
-  const playSong = (song: Song) => {
+  const playSong = async (song: Song) => {
     if (currentSong?.id === song.id) {
       togglePlay();
       return;
     }
     const idx = queueRef.current.findIndex(s => s.id === song.id);
-    internalPlay(song, idx !== -1 ? idx : currentIndexRef.current);
+    if (idx !== -1) {
+      internalPlay(song, idx);
+    } else {
+      // Auto-generate a queue starting with this song if it's played outside a playlist
+      setQueueState([song]);
+      queueRef.current = [song];
+      originalQueueRef.current = [song];
+      internalPlay(song, 0);
+
+      try {
+        const res = await fetch('/api/songs').then(r => r.json());
+        const allSongs = res as Song[];
+        const otherSongs = allSongs.filter(s => s.id !== song.id);
+        const shuffled = otherSongs.sort(() => 0.5 - Math.random()).slice(0, 15);
+        const newQueue = [song, ...shuffled];
+        setQueueState(newQueue);
+        queueRef.current = newQueue;
+        originalQueueRef.current = newQueue;
+      } catch (e) {
+        console.error("Lỗi fetch random queue:", e);
+      }
+    }
   };
 
   const togglePlay = () => {
@@ -216,6 +253,8 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
       isShuffle, toggleShuffle,
       repeatMode, cycleRepeat,
       playNext, playPrev,
+      isQueueViewOpen, toggleQueueView,
+      isLyricsViewOpen, toggleLyricsView
     }}>
       {children}
     </MusicContext.Provider>
