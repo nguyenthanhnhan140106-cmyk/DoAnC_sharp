@@ -13,6 +13,7 @@ namespace Domain.Entities
         public string? AudioUrl { get; set; }   // URL file nhạc
         public string VideoUrl { get; set; }    // URL video YouTube
         public string? Category { get; set; }   // "friday" | "vsound" | ...
+        public string? Lyrics { get; set; }     // Dữ liệu lời bài hát (JSON chuỗi)
         public DateTime CreatedAt { get; set; } // 🟢 Giữ nguyên gốc không gán gượng ép DateTime.UtcNow ở đây nhen Nam
 
         // 🟢 BỔ SUNG CÁC THUỘC TÍNH ĐÓN DỮ LIỆU NGHỆ SĨ THẬT (HỨNG LỆNH JOIN DAPPER)

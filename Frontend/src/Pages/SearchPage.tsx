@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import API from '../Services/api';
 import Sidebar from '../Components/Sidebar';
 import Header from '../Components/header';
 import PlayerBar from '../Components/PlayerBar';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
 import { useMusic } from '../Contexts/MusicContext';
+import { useAuth } from '../Contexts/AuthContext';
+import { songService } from '../Services/songService';
+import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
 
 interface Song {
@@ -45,18 +47,19 @@ export default function SearchPage() {
     const [loading, setLoading] = useState(false);
 
     const { playSong, currentSong, isPlaying } = useMusic();
+    const { isLoggedIn } = useAuth();
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
     useEffect(() => {
         if (!q) return;
         setLoading(true);
-        API.get(`/songs/search?q=${encodeURIComponent(q)}`)
-            .then((res: any) => {
-                let list: Song[] = Array.isArray(res.data) ? res.data : [];
-                setResults(list);
+        songService.searchSongs(q)
+            .then((list: any) => {
+                let songList: Song[] = Array.isArray(list) ? list : [];
+                setResults(songList);
             })
-            .catch(() => setResults([]))
+            .catch((err: any) => console.error("Lỗi search:", err))
             .finally(() => setLoading(false));
     }, [q]);
 
@@ -82,7 +85,7 @@ export default function SearchPage() {
     };
 
     return (
-        <div className={`spotify-layout ${isSidebarCollapsed ? 'sidebar-hidden' : ''} ${isRightCollapsed ? 'right-hidden' : ''}`}>
+        <div className={`spotify-layout ${isSidebarCollapsed ? 'sidebar-hidden' : ''} ${isRightCollapsed || !isLoggedIn ? 'right-hidden' : ''}`}>
             <Header />
             <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
 
@@ -191,8 +194,9 @@ export default function SearchPage() {
                 </div>
             </div>
 
-            <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />
-            <PlayerBar />
+
+            {isLoggedIn && <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />}
+            {isLoggedIn ? <PlayerBar /> : <AuthBanner />}
         </div>
     );
 }

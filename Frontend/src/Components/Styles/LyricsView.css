@@ -1,0 +1,47 @@
+.spotify-lyrics-view {
+  width: 100%;
+  height: 100%;
+  background-color: #032b43;
+  /* Màu xanh đen như hình */
+  border-radius: 8px;
+  overflow-y: auto;
+  padding: 40px 60px;
+  box-sizing: border-box;
+}
+
+.lyrics-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 800px;
+}
+
+.lyrics-spacer {
+  height: 30vh;
+}
+
+.lyric-line {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.4;
+  color: #729ebc;
+  /* Màu xanh dương nhạt cho dòng chưa hát */
+  transition: color 0.3s ease, transform 0.3s ease;
+  letter-spacing: -0.5px;
+  cursor: pointer;
+}
+
+.lyric-line:hover {
+  color: #a1c6de;
+}
+
+.lyric-line.active {
+  color: #ffffff;
+  /* Dòng hiện tại sáng trắng */
+}
+
+/* Hiệu ứng gạch dưới cho đoạn nổi bật */
+.lyric-line.active:nth-child(5) {
+  text-decoration: underline;
+}

@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useMusic } from '../Contexts/MusicContext';
+import { albumService } from '../Services/albumService';
 import Sidebar from '../Components/Sidebar';
 import Header from '../Components/header';
 import PlayerBar from '../Components/PlayerBar';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
+import { useAuth } from '../Contexts/AuthContext';
+import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
 
 interface Song {
@@ -29,6 +31,7 @@ export default function AlbumPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { playSong, currentSong, isPlaying, togglePlay, setQueue } = useMusic();
+  const { isLoggedIn } = useAuth();
   const [album, setAlbum] = useState<Album | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -47,9 +50,11 @@ export default function AlbumPage() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    axios.get(`/api/albums/${id}`)
-      .then(res => setAlbum(res.data))
-      .catch(err => console.error(err));
+    if (id) {
+      albumService.getAlbumById(id)
+        .then((res: any) => setAlbum(res))
+        .catch((err: any) => console.error(err));
+    }
   }, [id]);
 
   const handlePlayClick = (song: Song, index: number) => {
@@ -64,7 +69,7 @@ export default function AlbumPage() {
   };
 
   return (
-    <div className="spotify-layout">
+    <div className={`spotify-layout ${!isLoggedIn ? 'right-hidden' : ''}`}>
       <Header />
       <Sidebar isCollapsed={false} setIsCollapsed={() => { }} />
       <div className="main-view">
@@ -151,11 +156,7 @@ export default function AlbumPage() {
                           <svg viewBox="0 0 16 16"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 017.187 3H14V1.5H7.187a5.484 5.484 0 01.779-1.5H16v6H7.966zM2 2V.5h3.5v6H2v-1.5H.5V2H2z" /></svg>
                           Add to queue
                         </li>
-                        <div className="album-dropdown-divider"></div>
-                        <li>
-                          <svg viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zM8 4.5A3.5 3.5 0 108 11.5 3.5 3.5 0 008 4.5zM6.5 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" /></svg>
-                          Go to artist radio
-                        </li>
+                        <li className="album-dropdown-divider"></li>
                         <li className="has-submenu">
                           <svg viewBox="0 0 16 16"><path d="M14 7v1.5h-4.5V13h-1.5V8.5H3.5V7h4.5V2.5h1.5V7H14z" /></svg>
                           <span>Add to playlist</span>
@@ -174,19 +175,15 @@ export default function AlbumPage() {
                               New playlist
                             </div>
 
-                            <div className="album-dropdown-divider"></div>
+                            <li className="album-dropdown-divider"></li>
 
                             {/* Danh sách playlist sẽ được gọi từ API sau này */}
                           </div>
                         </li>
-                        <div className="album-dropdown-divider"></div>
+                        <li className="album-dropdown-divider"></li>
                         <li>
                           <svg viewBox="0 0 16 16"><path d="M12.5 2.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM9 5a3.5 3.5 0 116.5 1.95L11.57 9.87a4.5 4.5 0 11-4.04-6.84L9 5z" /></svg>
                           Share
-                        </li>
-                        <li>
-                          <svg viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8z" /></svg>
-                          Open in Desktop app
                         </li>
                       </ul>
                     )}
@@ -239,8 +236,8 @@ export default function AlbumPage() {
           )}
         </div>
       </div>
-      <RightSidebar isCollapsed={false} setIsCollapsed={() => { }} />
-      <PlayerBar />
+      {isLoggedIn && <RightSidebar isCollapsed={false} setIsCollapsed={() => { }} />}
+      {isLoggedIn ? <PlayerBar /> : <AuthBanner />}
     </div>
   );
 }

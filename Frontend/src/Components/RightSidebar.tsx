@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useMusic } from '../Contexts/MusicContext';
+import LyricsView from './LyricsView';
+import type { Song } from '../hooks/useAudioPlayer';
 import './Styles/HomePage.css';
 
 interface RightSidebarProps {
@@ -14,12 +16,43 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const isPlaying = musicContext?.isPlaying;
   const togglePlay = musicContext?.togglePlay;
   const pauseSong = musicContext?.pauseSong; // Lấy thêm hàm pause chủ động nếu có
+  const queue = musicContext?.queue || [];
+  const isQueueViewOpen = musicContext?.isQueueViewOpen || false;
+  const toggleQueueView = musicContext?.toggleQueueView;
+  const isLyricsViewOpen = musicContext?.isLyricsViewOpen || false;
+  const toggleLyricsView = musicContext?.toggleLyricsView;
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close more menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setIsMoreMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Sử dụng ref để nhớ trạng thái nhạc trước khi bật MV
   const wasPlayingBeforeVideo = useRef(false);
+
+  // 🟢 Lắng nghe sự kiện bật Video từ các nơi khác (như trang chủ)
+  useEffect(() => {
+    const handleOpenVideoModal = () => {
+      wasPlayingBeforeVideo.current = true; // Lưu cờ
+      setIsVideoOpen(true);
+    };
+    window.addEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
+    return () => window.removeEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
+  }, []);
 
   if (!currentSong) {
     return (
@@ -35,6 +68,60 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
             </svg>
           </button>
         )}
+      </aside>
+    );
+  }
+
+  if (isQueueViewOpen || isLyricsViewOpen) {
+    const currentIndex = queue.findIndex((s: any) => s?.id === currentSong?.id);
+    const nextUpQueue = currentIndex !== -1 ? queue.slice(currentIndex + 1) : queue;
+
+    return (
+      <aside className={`spotify-right-sidebar ${isCollapsed ? 'collapsed' : ''}`} style={{ padding: '24px 16px', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#fff' }}>Queue</h3>
+          <button onClick={toggleQueueView} style={{ background: 'transparent', border: 'none', color: '#b3b3b3', cursor: 'pointer', padding: '4px' }}>
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Now playing */}
+        <div style={{ marginBottom: '32px' }}>
+          <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 700, color: '#fff' }}>Now playing</h4>
+          {currentSong && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <img src={currentSong.coverUrl || `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50&h=50&fit=crop`} alt={currentSong.title} style={{ width: '48px', height: '48px', borderRadius: '4px', objectFit: 'cover' }} />
+              <div>
+                <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#1db954' }}>{currentSong.title}</p>
+                <p style={{ margin: 0, fontSize: '13px', color: '#b3b3b3' }}>{currentSong.artist}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Next up */}
+        <div>
+          <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 700, color: '#fff' }}>Next up</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {nextUpQueue?.map((song: any, idx: number) => {
+              if (!song) return null;
+              return (
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '4px 0' }} onClick={() => musicContext?.playSong(song)}>
+                  <img src={song?.coverUrl || `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50&h=50&fit=crop`} alt={song?.title || 'Unknown'} style={{ width: '48px', height: '48px', borderRadius: '4px', objectFit: 'cover' }} />
+                  <div>
+                    <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#fff' }}>{song?.title || 'Unknown Song'}</p>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#b3b3b3' }}>{song?.artist || 'Unknown Artist'}</p>
+                  </div>
+                </div>
+              );
+            })}
+            {(!nextUpQueue || nextUpQueue.length === 0) && (
+              <p style={{ fontSize: '14px', color: '#b3b3b3' }}>Không có bài hát nào tiếp theo.</p>
+            )}
+          </div>
+        </div>
       </aside>
     );
   }
@@ -57,16 +144,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     }, 50);
   };
 
-  // 🟢 Lắng nghe sự kiện bật Video từ các nơi khác (như trang chủ)
-  useEffect(() => {
-    const handleOpenVideoModal = () => {
-      wasPlayingBeforeVideo.current = true; // Lưu cờ
-      setIsVideoOpen(true);
-    };
-    window.addEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
-    return () => window.removeEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
-  }, []);
-
   return (
     <aside className={`spotify-right-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
 
@@ -81,11 +158,62 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
       <div className="right-sidebar-full-content">
         <div className="right-sidebar-header">
           <h3>Đang phát</h3>
-          <button className="right-close-icon-btn" onClick={() => setIsCollapsed(true)} title="Thu gọn bảng thông tin">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <path d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H3zm1-2h16V4H4v16zm8-13v10l-5-5 5-5z" />
-            </svg>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }} ref={moreMenuRef}>
+            <button 
+              className="right-more-icon-btn" 
+              onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)} 
+              title="Khác"
+              style={{ background: 'transparent', border: 'none', color: '#b3b3b3', cursor: 'pointer', padding: '4px' }}
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M4.5 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm7.5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm7.5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
+              </svg>
+            </button>
+
+            {/* DROPDOWN MENU 3 CHẤM GIỐNG TRANG ALBUM */}
+            {isMoreMenuOpen && (
+              <ul 
+                className="album-dropdown-menu" 
+                style={{ 
+                  position: 'absolute', 
+                  top: '100%', 
+                  right: 0, 
+                  left: 'auto', // Quan trọng: ghi đè left: 0 của CSS gốc
+                  marginTop: '8px', 
+                  zIndex: 1000,
+                  width: '240px'
+                }}
+              >
+                <li>
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/><path d="M11.75 8a.75.75 0 0 1-.75.75H8.75V11.5a.75.75 0 0 1-1.5 0V8.75H4.5a.75.75 0 0 1 0-1.5h2.75V4.5a.75.75 0 0 1 1.5 0v2.75h2.75a.75.75 0 0 1 .75.75z"/></svg>
+                  <span>Add to Your Library</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 0 1 7.187 6H13.5a.75.75 0 0 0 0-1.5H7.187a5.484 5.484 0 0 1 .779-1.5h5.534a.75.75 0 0 0 0-1.5H6.984a6.967 6.967 0 0 0-1.28-1.077L4.496.643a.75.75 0 0 0-1.06 1.06l1.284 1.284A6.974 6.974 0 0 0 .5 8c0 3.866 3.134 7 7 7 2.1 0 4.02-.924 5.334-2.392l-1.121-1.015A5.483 5.483 0 0 1 7.5 13.5a5.5 5.5 0 1 1 0-11c1.332 0 2.554.474 3.512 1.26l-1.26 1.26a.75.75 0 0 0 .531 1.28h3.5a.75.75 0 0 0 .75-.75v-3.5a.75.75 0 0 0-1.28-.53l-1.287 1.287zM7.5 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+                  <span>Add to queue</span>
+                </li>
+                <li className="album-dropdown-divider"></li>
+                <li className="has-submenu" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15.25 8a.75.75 0 0 1-.75.75H8.75v5.75a.75.75 0 0 1-1.5 0V8.75H1.5a.75.75 0 0 1 0-1.5h5.75V1.5a.75.75 0 0 1 1.5 0v5.75h5.75a.75.75 0 0 1 .75.75z"/></svg>
+                    <span>Add to playlist</span>
+                  </div>
+                  <svg className="submenu-arrow" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M5.5 13.5l5.5-5.5-5.5-5.5v11z"/></svg>
+                </li>
+                <li className="album-dropdown-divider"></li>
+                <li>
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M12.5 2.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-3.5 2a3.5 3.5 0 1 1 6.5 1.77L9.57 10.3A3.492 3.492 0 0 1 10.5 12a3.5 3.5 0 1 1-6.196-2.247l2.844-3.555A3.493 3.493 0 0 1 6.5 4.5a3.5 3.5 0 0 1 2.5-1.02v1.02a2 2 0 1 0-1.748 3.01l3.056 3.82a2 2 0 1 0 1.636-2.73l-2.944-3.68v.58z"/></svg>
+                  <span>Share</span>
+                </li>
+              </ul>
+            )}
+
+            <button className="right-close-icon-btn" onClick={() => setIsCollapsed(true)} title="Thu gọn bảng thông tin">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H3zm1-2h16V4H4v16zm8-13v10l-5-5 5-5z" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="right-sidebar-cover">
@@ -159,6 +287,66 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
             </p>
           </div>
         </div>
+
+        {/* KHỐI CREDITS */}
+        <div className="spotify-right-sidebar-box" style={{ backgroundColor: '#242424', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#fff' }}>Credits</h4>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: '#b3b3b3', cursor: 'pointer' }}>Show all</span>
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#fff' }}>{songData.artist}</p>
+              <p style={{ margin: 0, fontSize: '13px', color: '#b3b3b3' }}>Main Artist • Producer</p>
+            </div>
+            <button style={{ background: 'transparent', border: '1px solid #727272', borderRadius: '500px', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '4px 14px', cursor: 'pointer' }}>
+              Follow
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#fff' }}>Trần Tất Thiện Tâm</p>
+              <p style={{ margin: 0, fontSize: '13px', color: '#b3b3b3' }}>Composer • Lyricist</p>
+            </div>
+          </div>
+        </div>
+
+        {/* KHỐI NEXT IN QUEUE */}
+        <div className="spotify-right-sidebar-box" style={{ backgroundColor: '#242424', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#fff' }}>Next in queue</h4>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: '#b3b3b3', cursor: 'pointer' }}>Open queue</span>
+          </div>
+          
+          {(() => {
+            let nextSong = null;
+            if (queue.length > 0 && currentSong) {
+              const currentIndex = queue.findIndex((s: any) => s.id === currentSong.id);
+              if (currentIndex !== -1 && currentIndex < queue.length - 1) {
+                nextSong = queue[currentIndex + 1];
+              }
+            }
+            
+            if (nextSong) {
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '8px 0' }} onClick={() => musicContext?.playSong(nextSong)}>
+                  <img src={nextSong.coverUrl || `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50&h=50&fit=crop`} alt={nextSong.title} style={{ width: '48px', height: '48px', borderRadius: '4px', objectFit: 'cover' }} />
+                  <div>
+                    <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#fff' }}>{nextSong.title}</p>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#b3b3b3' }}>{nextSong.artist}</p>
+                  </div>
+                </div>
+              );
+            } else {
+              return (
+                <p style={{ margin: 0, fontSize: '14px', color: '#b3b3b3' }}>No next song</p>
+              );
+            }
+          })()}
+        </div>
+
       </div>
 
       {/* 🟢 DIALOG POPUP XEM VIDEO MV XỊN SÒ */}

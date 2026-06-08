@@ -7,6 +7,8 @@ export default function PlayerBar() {
     isShuffle, toggleShuffle,
     repeatMode, cycleRepeat,
     playNext, playPrev,
+    isQueueViewOpen, toggleQueueView,
+    isLyricsViewOpen, toggleLyricsView,
   } = useMusic();
 
   const formatTime = (s: number) => {
@@ -140,24 +142,63 @@ export default function PlayerBar() {
         {/* Thanh progress thời gian */}
         <div className="player-playback">
           <span className="time-text">{formatTime(currentTime)}</span>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="0.1"
-            value={duration > 0 ? progressPercent : 0}
-            onChange={(e) => seek((Number(e.target.value) / 100) * duration)}
-            className="progress-slider"
-            style={{
-              background: `linear-gradient(to right, ${activeColor} ${progressPercent}%, #4d4d4d ${progressPercent}%)`
+          <div 
+            className="progress-bar-container"
+            onClick={(e) => {
+              if (duration > 0) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const ratio = (e.clientX - rect.left) / rect.width;
+                seek(ratio * duration);
+              }
             }}
-          />
+            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', flexGrow: 1 }}
+          >
+            <div className="progress-bg" style={{ width: '100%', height: '4px', background: '#4d4d4d', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{
+                width: `${progressPercent}%`,
+                height: '100%',
+                background: '#fff',
+                borderRadius: '2px'
+              }} />
+            </div>
+          </div>
           <span className="time-text">{formatTime(duration)}</span>
         </div>
       </div>
 
       {/* GÓC PHẢI: Volume */}
       <div className="player-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        
+        {/* Lời bài hát (Lyrics) */}
+        <button 
+          className="control-btn" 
+          title="Lời bài hát"
+          onClick={() => {
+            if (toggleLyricsView) toggleLyricsView();
+          }}
+          style={{ position: 'relative', color: isLyricsViewOpen ? '#1db954' : 'currentColor' }}
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M11.666 4.707a2.535 2.535 0 0 0-3.585 0l-.634.633-1.042-1.041 1.258-1.259a4.035 4.035 0 0 1 5.707 0l1.258 1.259-1.041 1.042-1.259-1.258a1.035 1.035 0 0 0-1.464 0l-1.259 1.259 1.042 1.041.633-.634a2.535 2.535 0 0 0 0-3.585zm-4.707 5.251a2.535 2.535 0 0 0 3.585 0l.633-.634 1.042 1.042-1.259 1.258a4.035 4.035 0 0 1-5.707 0L4.015 9.385l1.042-1.042 1.258 1.259a1.035 1.035 0 0 0 1.464 0l1.259-1.259-1.041-1.042-.634.633a2.535 2.535 0 0 0 0 3.585zM4.015 2.815a1.035 1.035 0 0 0-1.464 0l-1.258 1.259 1.041 1.041 1.259-1.258a2.535 2.535 0 0 1 3.585 0l.634.633-1.042 1.042-1.258-1.259a4.035 4.035 0 0 0-5.707 0L.563 5.49l1.042 1.042 1.259-1.259a1.035 1.035 0 0 1 1.464 0l1.258 1.259-1.041 1.041-.634-.633a2.535 2.535 0 0 1 0-3.585z"/>
+          </svg>
+          {isLyricsViewOpen && <div className="active-dot" style={{ position: 'absolute', bottom: '-4px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', backgroundColor: '#1db954', borderRadius: '50%' }}></div>}
+        </button>
+
+        {/* Danh sách chờ (Queue) */}
+        <button 
+          className="control-btn" 
+          title="Danh sách chờ" 
+          onClick={() => {
+            if (toggleQueueView) toggleQueueView();
+          }}
+          style={{ position: 'relative', color: isQueueViewOpen ? '#1db954' : 'currentColor' }}
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M15 15H1v-1.5h14V15zm0-4.5H1V9h14v1.5zm-8-6A4.5 4.5 0 0 1 2.5 0v1.5a3 3 0 1 0 0 6V9a4.5 4.5 0 0 1 4.5-4.5z"/>
+          </svg>
+          {isQueueViewOpen && <div className="active-dot" style={{ position: 'absolute', bottom: '-4px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', backgroundColor: '#1db954', borderRadius: '50%' }}></div>}
+        </button>
+
         <button className="control-btn" title="Âm lượng">
           <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
             <path d="M9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.332l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35zm8.683 4.29V5.56a2.75 2.75 0 0 1 0 4.88z" />
