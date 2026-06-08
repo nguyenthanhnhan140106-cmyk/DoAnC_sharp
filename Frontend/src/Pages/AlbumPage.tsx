@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useMusic } from '../Contexts/MusicContext';
+import { albumService } from '../Services/albumService';
 import Sidebar from '../Components/Sidebar';
 import Header from '../Components/header';
 import PlayerBar from '../Components/PlayerBar';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
+import { useAuth } from '../Contexts/AuthContext';
+import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
 
 interface Song {
@@ -29,6 +31,7 @@ export default function AlbumPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { playSong, currentSong, isPlaying, togglePlay, setQueue } = useMusic();
+  const { isLoggedIn } = useAuth();
   const [album, setAlbum] = useState<Album | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -47,9 +50,11 @@ export default function AlbumPage() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    axios.get(`/api/albums/${id}`)
-      .then(res => setAlbum(res.data))
-      .catch(err => console.error(err));
+    if (id) {
+      albumService.getAlbumById(id)
+        .then((res: any) => setAlbum(res))
+        .catch((err: any) => console.error(err));
+    }
   }, [id]);
 
   const handlePlayClick = (song: Song, index: number) => {
@@ -64,7 +69,7 @@ export default function AlbumPage() {
   };
 
   return (
-    <div className="spotify-layout">
+    <div className={`spotify-layout ${!isLoggedIn ? 'right-hidden' : ''}`}>
       <Header />
       <Sidebar isCollapsed={false} setIsCollapsed={() => { }} />
       <div className="main-view">
@@ -231,8 +236,8 @@ export default function AlbumPage() {
           )}
         </div>
       </div>
-      <RightSidebar isCollapsed={false} setIsCollapsed={() => { }} />
-      <PlayerBar />
+      {isLoggedIn && <RightSidebar isCollapsed={false} setIsCollapsed={() => { }} />}
+      {isLoggedIn ? <PlayerBar /> : <AuthBanner />}
     </div>
   );
 }

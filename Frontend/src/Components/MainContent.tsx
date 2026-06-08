@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMusic } from "../Contexts/MusicContext";
-import axios from "axios";
+import { useAuth } from "../Contexts/AuthContext";
+import { albumService } from "../Services/albumService";
 import "./Styles/HomePage.css";
 
 interface Song {
@@ -171,7 +172,8 @@ const RecentCard = ({ item, type, onHover }: { item: any; type: "song" | "album"
 };
 
 export default function MainContent({ songs }: Props) {
-  const { currentSong } = useMusic();
+  const { currentSong, recentlyPlayed } = useMusic();
+  const { isLoggedIn } = useAuth();
   const songData = currentSong as any;
   const [activeTab, setActiveTab] = useState<"all" | "album" | "video">("all");
   const [hoveredCover, setHoveredCover] = useState<string | null>(null);
@@ -179,11 +181,11 @@ export default function MainContent({ songs }: Props) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("/api/albums")
-      .then((res) => {
-        if (Array.isArray(res.data)) setAlbums(res.data);
+    albumService.getAllAlbums()
+      .then((list: any) => {
+        if (Array.isArray(list)) setAlbums(list);
       })
-      .catch((err) => console.error("❌ Không lấy được Album:", err));
+      .catch((err: any) => console.error("❌ Không lấy được Album:", err));
   }, []);
 
   useEffect(() => {
@@ -234,14 +236,34 @@ export default function MainContent({ songs }: Props) {
         {activeTab === "all" && (
           <>
             {/* ── KHỐI NGHE GẦN ĐÂY (RECENTLY PLAYED) ── */}
-            {songs.length > 0 && (
+            {isLoggedIn && (recentlyPlayed.length > 0 || songs.length > 0 || albums.length > 0) && (
               <div className="recent-grid">
-                {albums.slice(0, 2).map((album) => (
-                  <RecentCard key={`rec-alb-${album.id}`} item={album} type="album" onHover={setHoveredCover} />
-                ))}
-                {songs.slice(0, 2).map((song) => (
-                  <RecentCard key={`rec-song-${song.id}`} item={song} type="song" onHover={setHoveredCover} />
-                ))}
+                {recentlyPlayed.length > 0 ? (
+                  recentlyPlayed.slice(0, 4).map((song) => (
+                    <RecentCard key={`rec-played-${song.id}`} item={song} type="song" onHover={setHoveredCover} />
+                  ))
+                ) : (
+                  (() => {
+                    const defaultAlbums = albums.slice(0, 2).map(a => ({ item: a, type: 'album' as const }));
+                    const defaultSongs = songs.slice(0, 4 - defaultAlbums.length).map(s => ({ item: s, type: 'song' as const }));
+                    const combined = [...defaultAlbums, ...defaultSongs];
+                    
+                    // Nếu vẫn thiếu (do ít bài hát), lấy bù thêm album
+                    if (combined.length < 4) {
+                      const moreAlbums = albums.slice(2, 2 + (4 - combined.length)).map(a => ({ item: a, type: 'album' as const }));
+                      combined.push(...moreAlbums);
+                    }
+
+                    return combined.map((obj, idx) => (
+                      <RecentCard 
+                        key={`default-${obj.type}-${obj.item.id}-${idx}`} 
+                        item={obj.item} 
+                        type={obj.type} 
+                        onHover={setHoveredCover} 
+                      />
+                    ));
+                  })()
+                )}
               </div>
             )}
 
@@ -266,7 +288,7 @@ export default function MainContent({ songs }: Props) {
                   </button>
                 </div>
                 <div className="songs-grid">
-                  {songs.slice(0, 10).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
+                  {songs.slice(0, 20).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
                 </div>
               </div>
             )}
@@ -280,7 +302,7 @@ export default function MainContent({ songs }: Props) {
                   </button>
                 </div>
                 <div className="songs-grid">
-                  {fridaySongs.slice(0, 10).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
+                  {fridaySongs.slice(0, 20).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
                 </div>
               </div>
             )}
@@ -294,7 +316,7 @@ export default function MainContent({ songs }: Props) {
                   </button>
                 </div>
                 <div className="songs-grid">
-                  {vSoundSongs.slice(0, 10).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
+                  {vSoundSongs.slice(0, 20).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
                 </div>
               </div>
             )}
@@ -308,7 +330,7 @@ export default function MainContent({ songs }: Props) {
                   </button>
                 </div>
                 <div className="songs-grid">
-                  {rapSongs.slice(0, 10).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
+                  {rapSongs.slice(0, 20).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
                 </div>
               </div>
             )}
