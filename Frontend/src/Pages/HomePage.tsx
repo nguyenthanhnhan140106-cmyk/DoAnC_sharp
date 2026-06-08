@@ -6,6 +6,8 @@ import PlayerBar from '../Components/PlayerBar';
 import MainContent from '../Components/MainContent';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
+import LyricsView from '../Components/LyricsView';
+import { useMusic } from '../Contexts/MusicContext';
 import '../Components/Styles/HomePage.css';
 import ErrorBoundary from '../Components/ErrorBoundary';
 import TuneBot from '../Components/TuneBot/TuneBot';
@@ -21,6 +23,7 @@ interface Song {
 
 export default function HomePage() {
   const [songs, setSongs] = useState<Song[]>([]);
+  const { isLyricsViewOpen } = useMusic();
 
   // Trạng thái thu gọn Left Sidebar (Cũ)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -45,15 +48,18 @@ export default function HomePage() {
       <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
 
       <div className="main-view">
-        <div className="content-wrapper">
-          <MainContent songs={songs} />
-          <Footer />
-        </div>
+        {isLyricsViewOpen ? (
+          <LyricsView />
+        ) : (
+          <div className="content-wrapper">
+            <MainContent songs={songs} />
+            <Footer />
+          </div>
+        )}
       </div>
 
       {/* 🟢 3. CẬP NHẬT: Truyền State và hàm Thay đổi xuống cho RightSidebar */}
       <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />
-
 
       {/* TuneBot wrapped in error boundary */}
       <ErrorBoundary>

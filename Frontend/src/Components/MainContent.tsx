@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMusic } from "../Contexts/MusicContext";
 import axios from "axios";
@@ -10,6 +10,7 @@ interface Song {
   artist: string;
   coverUrl?: string;
   audioUrl?: string;
+  videoUrl?: string;
   category?: string;
 }
 
@@ -56,6 +57,51 @@ const SongCard = ({ song, onHover }: { song: Song; onHover?: (url: string | null
           className="song-card-img"
           onError={(e) => {
             e.currentTarget.src = `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop`;
+          }}
+        />
+        <button
+          className={`card-play-btn ${isActive && isPlaying ? "playing" : ""}`}
+          aria-label={`Phát ${song.title}`}
+          onClick={handleForcePlay}
+        />
+      </div>
+      <h4 className="song-card-title" style={{ color: isActive ? "#1db954" : "#fff" }}>
+        {song.title}
+      </h4>
+      <p className="song-card-artist">{song.artist}</p>
+    </div>
+  );
+};
+
+const VideoCard = ({ song, onHover }: { song: Song; onHover?: (url: string | null) => void }) => {
+  const { playSong, currentSong, isPlaying, togglePlay } = useMusic();
+  const isActive = currentSong?.id === song.id;
+
+  const handleForcePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    playSong(song);
+
+    // Tạm dừng audio và mở modal video
+    setTimeout(() => {
+      const allAudios = document.getElementsByTagName("audio");
+      for (let i = 0; i < allAudios.length; i++) {
+        allAudios[i].pause();
+      }
+      if (isPlaying && togglePlay) togglePlay(); // Đồng bộ state
+      window.dispatchEvent(new CustomEvent('OPEN_VIDEO_MODAL'));
+    }, 50);
+  };
+
+  return (
+    <div className="video-card-item" onClick={handleForcePlay} onMouseEnter={() => onHover && onHover(getCover(song))} onMouseLeave={() => onHover && onHover(null)}>
+      <div className="video-card-img-wrapper">
+        <img
+          src={getCover(song)}
+          alt={song.title}
+          className="video-card-img"
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          onError={(e) => {
+            e.currentTarget.src = `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=225&fit=crop`;
           }}
         />
         <button
@@ -127,7 +173,7 @@ const RecentCard = ({ item, type, onHover }: { item: any; type: "song" | "album"
 export default function MainContent({ songs }: Props) {
   const { currentSong } = useMusic();
   const songData = currentSong as any;
-  const [activeTab, setActiveTab] = useState<"all" | "album">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "album" | "video">("all");
   const [hoveredCover, setHoveredCover] = useState<string | null>(null);
   const [albums, setAlbums] = useState<Album[]>([]);
   const navigate = useNavigate();
@@ -140,11 +186,29 @@ export default function MainContent({ songs }: Props) {
       .catch((err) => console.error("❌ Không lấy được Album:", err));
   }, []);
 
+  useEffect(() => {
+    const handleResetTab = () => setActiveTab("all");
+    window.addEventListener("RESET_HOME_TAB", handleResetTab);
+    return () => window.removeEventListener("RESET_HOME_TAB", handleResetTab);
+  }, []);
+
+  // Hàm xáo trộn mảng để nhạc không bị lặp thứ tự
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+  };
+
+  const shuffledSongs = useMemo(() => shuffleArray(songs), [songs]);
+
   const activeCover = songData?.coverUrl || "";
   const displayCover = hoveredCover || activeCover;
-  const fridaySongs = songs.filter((s) => s.category?.toLowerCase() === "friday");
-  const vSoundSongs = songs.filter((s) => s.category?.toLowerCase() === "vsound");
-  const rapSongs = songs.filter((s) => s.category?.toLowerCase() === "rap");
+  const fridaySongs = shuffledSongs.filter((s) => s.category?.toLowerCase() === "friday");
+  const vSoundSongs = shuffledSongs.filter((s) => s.category?.toLowerCase() === "vsound");
+  const rapSongs = shuffledSongs.filter((s) => s.category?.toLowerCase() === "rap");
   const hasCategory = fridaySongs.length > 0 || vSoundSongs.length > 0 || rapSongs.length > 0;
 
   return (
@@ -161,6 +225,9 @@ export default function MainContent({ songs }: Props) {
           </button>
           <button className={`filter-tab-btn ${activeTab === "album" ? "active" : ""}`} onClick={() => setActiveTab("album")}>
             Album
+          </button>
+          <button className={`filter-tab-btn ${activeTab === "video" ? "active" : ""}`} onClick={() => setActiveTab("video")}>
+            Video
           </button>
         </div>
 
@@ -193,7 +260,7 @@ export default function MainContent({ songs }: Props) {
             {!hasCategory && songs.length > 0 && (
               <div className="playlist-section">
                 <div className="section-header">
-                  <h2 className="section-title">Tất cả bài hát</h2>
+                  <h2 className="section-title">Đề Xuất Cho Bạn</h2>
                   <button className="show-all-btn" onClick={() => navigate('/category/all')}>
                     Show all
                   </button>
@@ -207,7 +274,7 @@ export default function MainContent({ songs }: Props) {
             {fridaySongs.length > 0 && (
               <div className="playlist-section">
                 <div className="section-header">
-                  <h2 className="section-title">It's New Music Friday!</h2>
+                  <h2 className="section-title">Góc Nhạc Chill</h2>
                   <button className="show-all-btn" onClick={() => navigate('/category/friday')}>
                     Show all
                   </button>
@@ -221,7 +288,7 @@ export default function MainContent({ songs }: Props) {
             {vSoundSongs.length > 0 && (
               <div className="playlist-section">
                 <div className="section-header">
-                  <h2 className="section-title">V-Sound</h2>
+                  <h2 className="section-title">Nhạc V-Pop Nổi Bật</h2>
                   <button className="show-all-btn" onClick={() => navigate('/category/vsound')}>
                     Show all
                   </button>
@@ -235,7 +302,7 @@ export default function MainContent({ songs }: Props) {
             {rapSongs.length > 0 && (
               <div className="playlist-section">
                 <div className="section-header">
-                  <h2 className="section-title">Thế Giới Rap</h2>
+                  <h2 className="section-title">Thế Giới Rap / Hiphop</h2>
                   <button className="show-all-btn" onClick={() => navigate('/category/rap')}>
                     Show all
                   </button>
@@ -261,6 +328,25 @@ export default function MainContent({ songs }: Props) {
             ) : (
               <div style={{ color: "#b3b3b3", padding: "40px", textAlign: "center" }}>
                 Chưa có Album nào trong cơ sở dữ liệu!
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "video" && (
+          <div className="playlist-section">
+            <div className="section-header">
+              <h2 className="section-title">Video Âm Nhạc</h2>
+            </div>
+            {songs.filter(s => s.videoUrl && s.videoUrl.trim() !== "").length > 0 ? (
+              <div className="videos-grid">
+                {songs.filter(s => s.videoUrl && s.videoUrl.trim() !== "").map((song) => (
+                  <VideoCard key={`video-${song.id}`} song={song} onHover={setHoveredCover} />
+                ))}
+              </div>
+            ) : (
+              <div style={{ color: "#b3b3b3", padding: "40px", textAlign: "center" }}>
+                Chưa có Video Âm Nhạc nào!
               </div>
             )}
           </div>

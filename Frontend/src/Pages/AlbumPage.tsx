@@ -151,11 +151,7 @@ export default function AlbumPage() {
                           <svg viewBox="0 0 16 16"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 017.187 3H14V1.5H7.187a5.484 5.484 0 01.779-1.5H16v6H7.966zM2 2V.5h3.5v6H2v-1.5H.5V2H2z" /></svg>
                           Add to queue
                         </li>
-                        <div className="album-dropdown-divider"></div>
-                        <li>
-                          <svg viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zM8 4.5A3.5 3.5 0 108 11.5 3.5 3.5 0 008 4.5zM6.5 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" /></svg>
-                          Go to artist radio
-                        </li>
+                        <li className="album-dropdown-divider"></li>
                         <li className="has-submenu">
                           <svg viewBox="0 0 16 16"><path d="M14 7v1.5h-4.5V13h-1.5V8.5H3.5V7h4.5V2.5h1.5V7H14z" /></svg>
                           <span>Add to playlist</span>
@@ -174,19 +170,15 @@ export default function AlbumPage() {
                               New playlist
                             </div>
 
-                            <div className="album-dropdown-divider"></div>
+                            <li className="album-dropdown-divider"></li>
 
                             {/* Danh sách playlist sẽ được gọi từ API sau này */}
                           </div>
                         </li>
-                        <div className="album-dropdown-divider"></div>
+                        <li className="album-dropdown-divider"></li>
                         <li>
                           <svg viewBox="0 0 16 16"><path d="M12.5 2.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM9 5a3.5 3.5 0 116.5 1.95L11.57 9.87a4.5 4.5 0 11-4.04-6.84L9 5z" /></svg>
                           Share
-                        </li>
-                        <li>
-                          <svg viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8z" /></svg>
-                          Open in Desktop app
                         </li>
                       </ul>
                     )}
