@@ -9,7 +9,9 @@ export default function PlayerBar() {
     playNext, playPrev,
     isQueueViewOpen, toggleQueueView,
     isLyricsViewOpen, toggleLyricsView,
-  } = useMusic();
+    isSongLiked, toggleLikeSong,
+    openAddToPlaylistModal
+  } = useMusic() as any;
 
   const formatTime = (s: number) => {
     if (!s || isNaN(s)) return '0:00';
@@ -45,11 +47,29 @@ export default function PlayerBar() {
                 {currentSong.artist}
               </p>
             </div>
-            <button className="control-btn" title="Lưu vào Thư viện" style={{ marginLeft: '16px' }}>
-              <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path>
-                <path d="M11.75 8a.75.75 0 0 1-.75.75H8.75V11a.75.75 0 0 1-1.5 0V8.75H4.25a.75.75 0 0 1 0-1.5h3V4.25a.75.75 0 0 1 1.5 0v3h2.25a.75.75 0 0 1 .75.75z"></path>
-              </svg>
+            <button 
+              className="control-btn" 
+              title={isSongLiked(currentSong.id) ? "Đã lưu vào Liked Songs" : "Thêm vào danh sách phát"} 
+              style={{ marginLeft: '16px', color: isSongLiked(currentSong.id) ? '#1db954' : '' }}
+              onClick={(e) => {
+                if (isSongLiked(currentSong.id)) {
+                  openAddToPlaylistModal(currentSong, e);
+                } else {
+                  toggleLikeSong(currentSong);
+                }
+              }}
+            >
+              {isSongLiked(currentSong.id) ? (
+                <svg viewBox="0 0 16 16" width="16" height="16">
+                  <circle cx="8" cy="8" r="8" fill="#1ed760" />
+                  <path d="M11.466 5.255a.75.75 0 0 1 1.05 1.048l-5.602 5.862a.75.75 0 0 1-1.077.018l-2.45-2.585a.75.75 0 0 1 1.085-1.026l1.928 2.034 5.066-5.351z" fill="#000" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                  <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path>
+                  <path d="M11.75 8a.75.75 0 0 1-.75.75H8.75V11a.75.75 0 0 1-1.5 0V8.75H4.25a.75.75 0 0 1 0-1.5h3V4.25a.75.75 0 0 1 1.5 0v3h2.25a.75.75 0 0 1 .75.75z"></path>
+                </svg>
+              )}
             </button>
           </>
         )}

@@ -30,7 +30,7 @@ interface Album {
 export default function AlbumPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { playSong, currentSong, isPlaying, togglePlay, setQueue } = useMusic();
+  const { playSong, currentSong, isPlaying, togglePlay, setQueue, toggleLikeSong, isSongLiked, openAddToPlaylistModal } = useMusic() as any;
   const { isLoggedIn } = useAuth();
   const [album, setAlbum] = useState<Album | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -175,7 +175,7 @@ export default function AlbumPage() {
                               New playlist
                             </div>
 
-                            <li className="album-dropdown-divider"></li>
+                            <div className="album-dropdown-divider"></div>
 
                             {/* Danh sách playlist sẽ được gọi từ API sau này */}
                           </div>
@@ -223,12 +223,37 @@ export default function AlbumPage() {
                       <img src={song.coverUrl || `https://picsum.photos/seed/${song.id}/40/40`}
                         alt={song.title}
                         style={{ width: 40, height: 40, borderRadius: 4, objectFit: 'cover' }} />
-                      <div style={{ flex: 1 }}>
-                        <p style={{ margin: 0, fontSize: 15, color: isActive ? '#1db954' : '#fff' }}>{song.title}</p>
-                        <p style={{ margin: 0, fontSize: 13, color: '#b3b3b3' }}>{song.artist}</p>
+                        <div style={{ flex: 1 }}>
+                          <p style={{ margin: 0, fontSize: 15, color: isActive ? '#1db954' : '#fff' }}>{song.title}</p>
+                          <p style={{ margin: 0, fontSize: 13, color: '#b3b3b3' }}>{song.artist}</p>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8, gap: 16 }}>
+                          {(isHovered || isSongLiked(song.id)) && (
+                            <button style={{ background: 'none', border: 'none', color: isSongLiked(song.id) ? '#1db954' : '#b3b3b3', cursor: 'pointer', padding: 4 }} title={isSongLiked(song.id) ? "Đã lưu vào Liked Songs" : "Thêm vào danh sách phát"}
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                if (isSongLiked(song.id)) {
+                                  openAddToPlaylistModal(song, e);
+                                } else {
+                                  toggleLikeSong(song);
+                                }
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.color = isSongLiked(song.id) ? '#1ed760' : '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = isSongLiked(song.id) ? '#1db954' : '#b3b3b3'}>
+                              {isSongLiked(song.id) ? (
+                                <svg viewBox="0 0 16 16" width="16" height="16">
+                                  <circle cx="8" cy="8" r="8" fill="#1ed760" />
+                                  <path d="M11.466 5.255a.75.75 0 0 1 1.05 1.048l-5.602 5.862a.75.75 0 0 1-1.077.018l-2.45-2.585a.75.75 0 0 1 1.085-1.026l1.928 2.034 5.066-5.351z" fill="#000" />
+                                </svg>
+                              ) : (
+                                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                                  <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm8.5-3.5v3h3v1.5h-3v3h-1.5v-3h-3v-1.5h3v-3h1.5z"/>
+                                </svg>
+                              )}
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
+                    );
                 })}
               </div>
               <Footer />
