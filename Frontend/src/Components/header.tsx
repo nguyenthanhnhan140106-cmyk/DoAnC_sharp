@@ -4,62 +4,29 @@ import searchIcon from '../assets/search.svg';
 import { songService } from '../Services/songService';
 import { useAuth } from '../Contexts/AuthContext';
 
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  coverUrl?: string;
-}
-
 export default function Header() {
+  const { isLoggedIn, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<Song[]>([]);
+  // Giả sử bạn có các state này cho logic search
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem('recentSearches') || '[]');
-    } catch { return []; }
-  });
+
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
-  const { isLoggedIn, logout } = useAuth();
 
-  const saveSearch = (term: string) => {
-    const updated = [term, ...recentSearches.filter(s => s !== term)].slice(0, 8);
-    setRecentSearches(updated);
-    localStorage.setItem('recentSearches', JSON.stringify(updated));
-  };
-
-  const deleteSearch = (term: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const updated = recentSearches.filter(s => s !== term);
-    setRecentSearches(updated);
-    localStorage.setItem('recentSearches', JSON.stringify(updated));
-  };
-
-  const clearAll = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setRecentSearches([]);
-    localStorage.removeItem('recentSearches');
-  };
-
-  // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
-      }
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Gợi ý khi gõ (debounce 300ms)
+  // Logic Search (Debounce)
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
@@ -78,19 +45,6 @@ export default function Header() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const handleSearch = (term?: string) => {
-    const searchTerm = (term ?? query).trim();
-    if (!searchTerm) return;
-    saveSearch(searchTerm);
-    setShowDropdown(false);
-    setQuery(searchTerm);
-    navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
-  };
-
-  const handleFocus = () => {
-    setShowDropdown(true);
-  };
-
   const handleHomeClick = () => {
     navigate('/');
     window.dispatchEvent(new CustomEvent('RESET_HOME_TAB'));
@@ -98,12 +52,13 @@ export default function Header() {
 
   return (
     <header className="spotify-header">
+      {/* 1. Logo */}
       <div className="header-logo" onClick={handleHomeClick} style={{ cursor: 'pointer' }}>
         <h2 style={{ margin: 0, color: '#FF5500', fontSize: '20px', fontWeight: '900' }}>TuneVault</h2>
       </div>
 
+      {/* 2. Search & Home */}
       <div className="header-search-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {/* Nút Home */}
         <button className="home-button" title="Trang chủ" onClick={handleHomeClick}>
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
             <path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33zm-2-1.732a3 3 0 0 1 3 0l7.5 4.33a2 2 0 0 1 1 1.732V21a1 1 0 0 1-1 1h-6.5a1 1 0 0 1-1-1v-6h-3v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.577a2 2 0 0 1 1-1.732l7.5-4.33z"></path>

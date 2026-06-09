@@ -5,4 +5,17 @@ const API = axios.create({
   timeout: 5000,
 });
 
-export default API;
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    const isAuthRequest = config.url?.includes('/auth/register') || config.url?.includes('/auth/login');
+    
+    if (token && !isAuthRequest) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export default API; // Xuất khẩu mặc định

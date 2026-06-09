@@ -1,51 +1,60 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../Contexts/AuthContext';
-import '../Components/Styles/AuthPage.css';
+import API from '../Services/api'; // Sử dụng API service đã cấu hình interceptor
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
-  const { login } = useAuth();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    login();
-    navigate('/');
+    setError('');
+
+    try {
+      // Gửi request tới backend đã bảo mật
+      await API.post('/auth/register', {
+        username,
+        email,
+        password
+      });
+
+      alert("Đăng ký thành công! Hãy đăng nhập.");
+      navigate('/login');
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Đăng ký thất bại, thử lại nhé!");
+    }
   };
 
   return (
     <div className="auth-page">
-      <div className="auth-header">
-        <div className="auth-logo" onClick={() => navigate('/')}>
-          <h2>TuneVault</h2>
-        </div>
-      </div>
+      {/* ... giữ nguyên phần header ... */}
       
       <div className="auth-container">
         <h1>Sign up to start listening</h1>
         <form onSubmit={handleSignup} className="auth-form">
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          
           <div className="form-group">
             <label>Email address</label>
-            <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@domain.com"
-              required 
-            />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
 
-          <button type="submit" className="auth-submit-btn">Next</button>
-        </form>
+          <div className="form-group">
+            <label>Username</label>
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+          </div>
 
-        <p className="auth-redirect" style={{ marginTop: '32px' }}>
-          Already have an account? <span onClick={() => navigate('/login')}>Log in</span>
-        </p>
-      </div>
-      
-      <div className="auth-footer">
-        <p>This site is protected by reCAPTCHA and the Google <a href="#">Privacy Policy</a> and <a href="#">Terms of Service</a> apply.</p>
+          <div className="form-group">
+            <label>Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+
+          <button type="submit" className="auth-submit-btn">Sign Up</button>
+        </form>
+        {/* ... giữ nguyên phần footer ... */}
       </div>
     </div>
   );

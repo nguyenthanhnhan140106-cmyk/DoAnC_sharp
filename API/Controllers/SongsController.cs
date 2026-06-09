@@ -2,9 +2,10 @@
 using Application.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 namespace API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class SongsController : ControllerBase
@@ -17,10 +18,12 @@ namespace API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll() =>
             Ok(await _songService.GetAllSongsAsync());
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var song = await _songService.GetByIdAsync(id);
@@ -28,6 +31,7 @@ namespace API.Controllers
         }
 
         [HttpGet("search")]
+        [AllowAnonymous]
         public async Task<IActionResult> Search([FromQuery] string q)
         {
             if (string.IsNullOrWhiteSpace(q))
@@ -36,6 +40,7 @@ namespace API.Controllers
         }
 
         [HttpGet("category/{category}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetByCategory(string category) =>
             Ok(await _songService.GetByCategoryAsync(category));
 

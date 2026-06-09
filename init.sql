@@ -12,6 +12,14 @@ DROP TABLE IF EXISTS artists;
 -- ─────────────────────────────────────────────────────────
 -- 1. BẢNG NGHỆ SĨ
 -- ─────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS users (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 CREATE TABLE artists (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL UNIQUE,
