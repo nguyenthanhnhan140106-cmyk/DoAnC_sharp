@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import searchIcon from '../assets/search.svg';
 import { songService } from '../Services/songService';
 import { useAuth } from '../Contexts/AuthContext';
+import type { Song } from '../hooks/useAudioPlayer';
 
 export default function Header() {
   const { isLoggedIn, logout } = useAuth();
@@ -48,6 +49,20 @@ export default function Header() {
   const handleHomeClick = () => {
     navigate('/');
     window.dispatchEvent(new CustomEvent('RESET_HOME_TAB'));
+  };
+
+  const handleSearch = (searchQuery?: string) => {
+    const q = searchQuery !== undefined ? searchQuery : query;
+    if (q.trim()) {
+      navigate(`/search?q=${encodeURIComponent(q.trim())}`);
+      setShowDropdown(false);
+    }
+  };
+
+  const handleFocus = () => {
+    if (suggestions.length > 0) {
+      setShowDropdown(true);
+    }
   };
 
   return (
