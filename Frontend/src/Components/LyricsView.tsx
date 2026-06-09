@@ -1,29 +1,45 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useMusic } from '../Contexts/MusicContext';
 import './Styles/LyricsView.css';
 
-const DUMMY_LYRICS = [
-  { time: 0, text: "Nhìn anh thấy cô đơn nên là em cho phép anh thương" },
-  { time: 4, text: "Mong anh hiểu em hơn, bởi vì em lúc yêu rất là bất thường" },
-  { time: 8, text: "Dù chưa rõ nông sâu, nhưng mà anh cứ mãi trong đầu" },
-  { time: 12, text: "Bởi người xưa mới hay có câu" },
-  { time: 15, text: "Có công mài sắc có ngày" },
-  { time: 18, text: "Mình gặp nhau cũng lâu lắm rồi" },
-  { time: 21, text: "Cứ dứt khoát một lần đi thôi" },
-  { time: 25, text: "Để cho đôi ta thuộc về nhau, mãi đến mai sau" }
-];
+interface LyricLine {
+  time: number;
+  text: string;
+}
 
 export default function LyricsView() {
-  const { isLyricsViewOpen, currentTime } = useMusic();
+  const { isLyricsViewOpen, currentTime, currentSong } = useMusic();
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Parse lyrics từ JSON string của bài hát hiện tại, hoặc hiển thị dạng text
+  const parsedLyrics = useMemo<LyricLine[]>(() => {
+    const rawLyrics = currentSong?.lyrics || (currentSong as any)?.Lyrics;
+    if (!rawLyrics) return [];
+    
+    try {
+      const parsed = JSON.parse(rawLyrics);
+      if (Array.isArray(parsed)) return parsed as LyricLine[];
+      return [];
+    } catch (e) {
+      // Nếu không phải JSON, tách thành các dòng text bình thường
+      console.warn("Lyrics is not JSON, treating as plain text.");
+      const lines = rawLyrics.split('\n');
+      return lines.map((text: string, idx: number) => ({
+        time: idx * 3, // Giả lập thời gian mỗi dòng 3 giây nếu là text trơn
+        text: text.trim()
+      })).filter((l: LyricLine) => l.text.length > 0);
+    }
+  }, [currentSong]);
+
   // Tìm dòng lời bài hát hiện tại dựa trên currentTime
-  let activeIndex = 0;
-  for (let i = 0; i < DUMMY_LYRICS.length; i++) {
-    if (currentTime >= DUMMY_LYRICS[i].time) {
-      activeIndex = i;
-    } else {
-      break;
+  let activeIndex = -1;
+  if (parsedLyrics.length > 0) {
+    for (let i = 0; i < parsedLyrics.length; i++) {
+      if (currentTime >= parsedLyrics[i].time) {
+        activeIndex = i;
+      } else {
+        break;
+      }
     }
   }
 
@@ -43,14 +59,30 @@ export default function LyricsView() {
     <div className="spotify-lyrics-view">
       <div className="lyrics-content-wrapper" ref={containerRef}>
         <div className="lyrics-spacer" />
-        {DUMMY_LYRICS.map((line, idx) => (
-          <p 
-            key={idx} 
-            className={`lyric-line ${idx === activeIndex ? 'active' : ''}`}
-          >
-            {line.text}
-          </p>
-        ))}
+        
+        {parsedLyrics.length > 0 ? (
+          parsedLyrics.map((line, idx) => (
+            <p 
+              key={idx} 
+              className={`lyric-line ${idx === activeIndex ? 'active' : ''}`}
+            >
+              {line.text}
+            </p>
+          ))
+        ) : (
+          <div style={{ padding: '20px', color: '#fff', textAlign: 'center' }}>
+            <p className="lyric-line active" style={{ opacity: 0.7 }}>
+              ( Lời bài hát đang được cập nhật... )
+            </p>
+            <div style={{ marginTop: '20px', fontSize: '12px', color: 'yellow', textAlign: 'left', background: '#222', padding: '10px', borderRadius: '8px' }}>
+              <p><b>🔍 Debug: Dữ liệu bài hát Backend đang gửi về:</b></p>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                {JSON.stringify(currentSong, null, 2)}
+              </pre>
+            </div>
+          </div>
+        )}
+
         <div className="lyrics-spacer" />
       </div>
     </div>

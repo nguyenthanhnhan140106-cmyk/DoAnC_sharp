@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import API from '../Services/api';
 import Sidebar from '../Components/Sidebar';
 import Header from '../Components/header';
 import PlayerBar from '../Components/PlayerBar';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
 import { useMusic } from '../Contexts/MusicContext';
+import { useAuth } from '../Contexts/AuthContext';
+import { songService } from '../Services/songService';
+import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
 
 interface Song {
@@ -26,26 +28,27 @@ const CategoryPage = () => {
   const navigate = useNavigate();
   const [songs, setSongs] = useState<Song[]>([]);
   const { playSong, currentSong, isPlaying } = useMusic();
+  const { isLoggedIn } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
   useEffect(() => {
-    API.get('/songs')
-      .then((res: any) => {
-        let list: Song[] = res.data || [];
-        if (!Array.isArray(list)) return;
+    songService.getAllSongs()
+      .then((list: any) => {
+        let songList: Song[] = list || [];
+        if (!Array.isArray(songList)) return;
 
         // Lọc danh sách theo catId
         if (catId === 'friday') {
-          list = list.filter(s => s.category?.toLowerCase() === 'friday');
+          songList = songList.filter(s => s.category?.toLowerCase() === 'friday');
         } else if (catId === 'vsound') {
-          list = list.filter(s => s.category?.toLowerCase() === 'vsound');
+          songList = songList.filter(s => s.category?.toLowerCase() === 'vsound');
         } else if (catId === 'rap') {
-          list = list.filter(s => s.category?.toLowerCase() === 'rap');
+          songList = songList.filter(s => s.category?.toLowerCase() === 'rap');
         }
         // Nếu catId là 'all' thì hiển thị toàn bộ
 
-        setSongs(list);
+        setSongs(songList);
       })
       .catch((err) => console.error('❌ Lỗi:', err));
   }, [catId]);
@@ -72,7 +75,7 @@ const CategoryPage = () => {
   };
 
   return (
-    <div className={`spotify-layout ${isSidebarCollapsed ? 'sidebar-hidden' : ''} ${isRightCollapsed ? 'right-hidden' : ''}`}>
+    <div className={`spotify-layout ${isSidebarCollapsed ? 'sidebar-hidden' : ''} ${isRightCollapsed || !isLoggedIn ? 'right-hidden' : ''}`}>
       <Header />
       <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
 
@@ -109,8 +112,8 @@ const CategoryPage = () => {
         </div>
       </div>
 
-      <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />
-      <PlayerBar />
+      {isLoggedIn && <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />}
+      {isLoggedIn ? <PlayerBar /> : <AuthBanner />}
     </div>
   );
 };

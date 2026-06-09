@@ -4,6 +4,6 @@ namespace Application.Interfaces
 {
     public interface IUserService
     {
-        Task<IEnumerable<UserDTO>> GetAllUsersAsync();
+     Task<IEnumerable<Application.DTOs.UserResponseDTO>> GetAllUsersAsync();
     }
 }

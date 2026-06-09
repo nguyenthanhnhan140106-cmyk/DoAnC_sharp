@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useMusic } from '../Contexts/MusicContext';
+import LyricsView from './LyricsView';
+import type { Song } from '../hooks/useAudioPlayer';
 import './Styles/HomePage.css';
 
 interface RightSidebarProps {
@@ -17,6 +19,8 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const queue = musicContext?.queue || [];
   const isQueueViewOpen = musicContext?.isQueueViewOpen || false;
   const toggleQueueView = musicContext?.toggleQueueView;
+  const isLyricsViewOpen = musicContext?.isLyricsViewOpen || false;
+  const toggleLyricsView = musicContext?.toggleLyricsView;
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
@@ -68,7 +72,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     );
   }
 
-  if (isQueueViewOpen) {
+  if (isQueueViewOpen || isLyricsViewOpen) {
     const currentIndex = queue.findIndex((s: any) => s?.id === currentSong?.id);
     const nextUpQueue = currentIndex !== -1 ? queue.slice(currentIndex + 1) : queue;
 

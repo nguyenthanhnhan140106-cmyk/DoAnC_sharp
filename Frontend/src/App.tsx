@@ -1,16 +1,17 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MusicProvider } from './Contexts/MusicContext';
-import { AuthProvider } from './Contexts/AuthContext'; // Import AuthProvider
+import { AuthProvider } from './Contexts/AuthContext';
 import HomePage from './Pages/HomePage';
 import AlbumPage from './Pages/AlbumPage';
 import CategoryPage from './Pages/CategoryPage';
 import SearchPage from './Pages/SearchPage';
-import LoginPage from './Pages/LoginPage';   // Import trang Login
-import SignupPage from './Pages/SignupPage'; // Import trang Signup
+import LoginPage from './Pages/LoginPage';
+import SignupPage from './Pages/SignupPage';
+import ProfilePage from './Pages/ProfilePage';
 
 function App() {
   return (
-    <AuthProvider> {/* Bọc AuthProvider ở ngoài cùng hoặc bao quanh Routes */}
+    <AuthProvider>
       <MusicProvider>
         <BrowserRouter>
           <Routes>
@@ -18,10 +19,9 @@ function App() {
             <Route path="/album/:id" element={<AlbumPage />} />
             <Route path="/category/:catId" element={<CategoryPage />} />
             <Route path="/search" element={<SearchPage />} />
-            
-            {/* Thêm Route cho Auth */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </BrowserRouter>
       </MusicProvider>

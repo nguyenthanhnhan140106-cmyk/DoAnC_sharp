@@ -1,0 +1,48 @@
+.auth-banner {
+  grid-area: player;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg, #004d40, #1db954);
+  padding: 11px 24px;
+  cursor: pointer;
+  z-index: 100;
+}
+
+.auth-banner-text {
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
+.auth-banner-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+  margin-bottom: 4px;
+}
+
+.auth-banner-subtitle {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.auth-banner-btn {
+  background-color: white;
+  color: black;
+  border: none;
+  border-radius: 500px;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.auth-banner-btn:hover {
+  transform: scale(1.04);
+}

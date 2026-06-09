@@ -12,6 +12,14 @@ DROP TABLE IF EXISTS artists;
 -- ─────────────────────────────────────────────────────────
 -- 1. BẢNG NGHỆ SĨ
 -- ─────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS users (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 CREATE TABLE artists (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL UNIQUE,
@@ -51,6 +59,7 @@ CREATE TABLE songs (
     Category VARCHAR(100) NULL,
     ArtistBanner VARCHAR(500) NULL,
     ArtistId INT NULL,
+    Lyrics TEXT NULL,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ArtistId) REFERENCES artists(Id) ON DELETE SET NULL
 );
@@ -421,6 +430,13 @@ INSERT INTO album_songs (AlbumId, SongId, OrderNumber) VALUES
 (3, 30, 7),
 (3, 31, 8),
 (3, 32, 9);
-
+UPDATE songs 
+SET Lyrics = '[
+  {"time": 2.0, "text": "Em đi lướt qua nhanh"},
+  {"time": 4.5, "text": "Hương thơm vương lại khiến anh đảo điên"},
+  {"time": 7.5, "text": "Phải chăng em là chất gây hại?"},
+  {"time": 10.0, "text": "Nhìn nụ cười em anh say mất rồi..."}
+]'
+WHERE Id = 12;
 
 COMMIT;

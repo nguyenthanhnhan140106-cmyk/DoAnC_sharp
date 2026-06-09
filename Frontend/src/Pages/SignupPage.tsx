@@ -1,55 +1,60 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import '../Components/Styles/Auth.css';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import API from '../Services/api'; // Sử dụng API service đã cấu hình interceptor
 
 export default function SignupPage() {
-  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Giả lập gọi API thành công -> chuyển trạng thái
-    setIsOtpSent(true); 
+    setError('');
+
+    try {
+      // Gửi request tới backend đã bảo mật
+      await API.post('/auth/register', {
+        username,
+        email,
+        password
+      });
+
+      alert("Đăng ký thành công! Hãy đăng nhập.");
+      navigate('/login');
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Đăng ký thất bại, thử lại nhé!");
+    }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-box">
-        <h1 className="auth-title">
-          {isOtpSent ? "Xác thực tài khoản" : "Đăng ký TuneVault"}
-        </h1>
-        
-        {!isOtpSent ? (
-          <form onSubmit={handleRegister} className="auth-form">
-            <input type="email" placeholder="Email của bạn" className="auth-input" required />
-            <input type="password" placeholder="Mật khẩu" className="auth-input" required />
-            <button type="submit" className="auth-submit-btn">Tiếp tục</button>
-            <p className="auth-link">
-              Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
-            </p>
-          </form>
-        ) : (
-          <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
-            <p style={{ color: '#b3b3b3', fontSize: '14px', marginBottom: '16px' }}>
-              Chúng mình đã gửi mã xác thực vào email của bạn.
-            </p>
-            <input 
-              type="text" 
-              placeholder="Nhập 6 chữ số OTP" 
-              className="auth-input" 
-              maxLength={6} 
-              style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '20px' }}
-            />
-            <button className="auth-submit-btn">Xác nhận đăng ký</button>
-            <button 
-              type="button" 
-              className="auth-link" 
-              style={{ background: 'none', border: 'none', cursor: 'pointer', marginTop: '10px' }}
-              onClick={() => setIsOtpSent(false)}
-            >
-              Gửi lại mã?
-            </button>
-          </form>
-        )}
+    <div className="auth-page">
+      {/* ... giữ nguyên phần header ... */}
+      
+      <div className="auth-container">
+        <h1>Sign up to start listening</h1>
+        <form onSubmit={handleSignup} className="auth-form">
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          
+          <div className="form-group">
+            <label>Email address</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+
+          <div className="form-group">
+            <label>Username</label>
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+          </div>
+
+          <div className="form-group">
+            <label>Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+
+          <button type="submit" className="auth-submit-btn">Sign Up</button>
+        </form>
+        {/* ... giữ nguyên phần footer ... */}
       </div>
     </div>
   );
