@@ -16,7 +16,7 @@ namespace Application.DTOs
 
         // 🟢 BỔ SUNG CÁC TRƯỜNG THÔNG TIN NGHỆ SĨ THẬT ĐỂ TRẢ VỀ FRONTEND DIALOG
         public int? ArtistId { get; set; }
-        public string VideoUrl { get; set; }
+        public string VideoUrl { get; set; } = string.Empty;
         public int WorldRank { get; set; }
         public int Followers { get; set; }
         public int MonthlyListeners { get; set; }
