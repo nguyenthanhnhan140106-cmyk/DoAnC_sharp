@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
+using Application.DTOs;
 
 namespace API.Controllers
 {
@@ -21,19 +22,18 @@ namespace API.Controllers
             return Ok(playlists);
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPlaylistById(int id)
+        {
+            var playlist = await _playlistService.GetPlaylistByIdAsync(id);
+            return playlist == null ? NotFound() : Ok(playlist);
+        }
+
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserPlaylists(int userId)
         {
             var playlists = await _playlistService.GetPlaylistsByUserIdAsync(userId);
             return Ok(playlists);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetPlaylistById(int id)
-        {
-            var playlist = await _playlistService.GetPlaylistByIdAsync(id);
-            if (playlist == null) return NotFound("Không tìm thấy Playlist");
-            return Ok(playlist);
         }
 
         [HttpPost("user/{userId}")]
