@@ -1,0 +1,148 @@
+.playlist-page-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 380px;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  pointer-events: none;
+  transition: background-image 0.8s ease-in-out;
+}
+
+.playlist-page-bg-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 380px;
+  background: linear-gradient(to bottom, rgba(18, 18, 18, 0) 0%, rgba(18, 18, 18, 0.5) 65%, #121212 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.playlist-content-top {
+  position: relative;
+  z-index: 2;
+}
+
+.playlist-header-container {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+}
+
+.playlist-cover-liked {
+  width: 232px;
+  height: 232px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #450af5, #8e8ee5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+}
+
+.playlist-cover-img {
+  width: 232px;
+  height: 232px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+}
+
+.playlist-type-label {
+  color: #fff;
+  font-size: 14px;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.playlist-title-text {
+  margin: 0 0 16px;
+  font-size: 48px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.playlist-meta-info {
+  color: #b3b3b3;
+  margin: 0;
+  font-size: 14px;
+}
+
+.playlist-creator-link {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.playlist-creator-link:hover {
+  text-decoration: underline;
+}
+
+.playlist-description {
+  color: #b3b3b3;
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+
+.playlist-action-bar {
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.playlist-play-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #1ed760;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 8px rgba(0, 0, 0, .3);
+  transition: transform 0.1s, background-color 0.2s;
+}
+
+.playlist-play-btn:hover {
+  background-color: #1fdf64;
+  transform: scale(1.05);
+}
+
+.playlist-icon-btn {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  display: flex;
+  transition: color 0.2s;
+}
+
+.playlist-icon-btn:hover {
+  color: #fff;
+}
+
+.playlist-collaborator-btn {
+  background: none;
+  border: 1px solid #b3b3b3;
+  color: #b3b3b3;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.playlist-collaborator-btn:hover {
+  color: #fff;
+  border-color: #fff;
+}

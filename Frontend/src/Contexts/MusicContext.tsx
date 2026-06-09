@@ -24,6 +24,14 @@ interface MusicContextType {
   isLyricsViewOpen: boolean;
   toggleLyricsView: () => void;
   recentlyPlayed: Song[];
+  likedSongs: Song[];
+  toggleLikeSong: (song: Song) => void;
+  isSongLiked: (songId: number) => boolean;
+  isAddToPlaylistModalOpen: boolean;
+  openAddToPlaylistModal: (song: Song, e?: React.MouseEvent) => void;
+  closeAddToPlaylistModal: () => void;
+  selectedSongForModal: Song | null;
+  modalPosition: {x: number, y: number} | null;
 }
 
 const MusicContext = createContext<MusicContextType | null>(null);
@@ -32,6 +40,37 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
   const audioState = useAudioPlayer();
   const [isQueueViewOpen, setIsQueueViewOpen] = useState(false);
   const [isLyricsViewOpen, setIsLyricsViewOpen] = useState(false);
+  const [likedSongs, setLikedSongs] = useState<Song[]>([]);
+  const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
+  const [selectedSongForModal, setSelectedSongForModal] = useState<Song | null>(null);
+
+  const toggleLikeSong = (song: Song) => {
+    setLikedSongs(prev => {
+      if (prev.find(s => s.id === song.id)) {
+        return prev.filter(s => s.id !== song.id);
+      }
+      return [song, ...prev];
+    });
+  };
+
+  const isSongLiked = (songId: number) => likedSongs.some(s => s.id === songId);
+
+  const [modalPosition, setModalPosition] = useState<{x: number, y: number} | null>(null);
+
+  const openAddToPlaylistModal = (song: Song, e?: React.MouseEvent) => {
+    setSelectedSongForModal(song);
+    if (e) {
+      setModalPosition({ x: e.clientX, y: e.clientY });
+    } else {
+      setModalPosition(null);
+    }
+    setIsAddToPlaylistModalOpen(true);
+  };
+
+  const closeAddToPlaylistModal = () => {
+    setIsAddToPlaylistModalOpen(false);
+    setSelectedSongForModal(null);
+  };
 
   const toggleQueueView = () => {
     setIsQueueViewOpen(prev => !prev);
@@ -47,6 +86,11 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
       ...audioState,
       isQueueViewOpen, toggleQueueView,
       isLyricsViewOpen, toggleLyricsView,
+      isAddToPlaylistModalOpen, openAddToPlaylistModal, closeAddToPlaylistModal, selectedSongForModal, modalPosition,
+      recentlyPlayed: [],
+      likedSongs,
+      toggleLikeSong,
+      isSongLiked,
     }}>
       {children}
     </MusicContext.Provider>

@@ -1,8 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import '../Components/Styles/AuthModal.css';
 
+interface User {
+  id: number;
+  username: string;
+}
+
 interface AuthContextType {
   isLoggedIn: boolean;
+  user: User | null;
   login: () => void;
   logout: () => void;
   openAuthModal: (data?: { title: string, coverUrl: string }) => void;
@@ -13,19 +19,26 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    // Tạm thời lưu trạng thái bằng localStorage để không bị mất khi F5
     return localStorage.getItem('isLoggedIn') === 'true';
   });
+  
+  const [user, setUser] = useState<User | null>(() => {
+    // Tạm thời mock user mặc định nếu đã login
+    return localStorage.getItem('isLoggedIn') === 'true' ? { id: 1, username: 'testuser' } : null;
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState<{ title: string, coverUrl: string } | null>(null);
 
   const login = () => {
     setIsLoggedIn(true);
+    setUser({ id: 1, username: 'testuser' });
     localStorage.setItem('isLoggedIn', 'true');
   };
 
   const logout = () => {
     setIsLoggedIn(false);
+    setUser(null);
     localStorage.removeItem('isLoggedIn');
   };
 
@@ -39,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, openAuthModal, closeAuthModal }}>
+    <AuthContext.Provider value={{ isLoggedIn, user, login, logout, openAuthModal, closeAuthModal }}>
       {children}
       {modalOpen && (
         <AuthModal 

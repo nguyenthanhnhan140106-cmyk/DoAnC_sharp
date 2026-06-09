@@ -3,6 +3,8 @@
 -- =========================================================
 SET NAMES utf8mb4;
 
+DROP TABLE IF EXISTS playlist_songs;
+DROP TABLE IF EXISTS playlists;
 DROP TABLE IF EXISTS album_songs;
 DROP TABLE IF EXISTS media_tags;
 DROP TABLE IF EXISTS albums;
@@ -20,6 +22,9 @@ CREATE TABLE IF NOT EXISTS users (
     PasswordHash VARCHAR(255) NOT NULL,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO users (Id, Username, Email, PasswordHash) VALUES 
+(1, 'testuser', 'test@example.com', 'hashed');
 CREATE TABLE artists (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL UNIQUE,
@@ -438,5 +443,27 @@ SET Lyrics = '[
   {"time": 10.0, "text": "Nhìn nụ cười em anh say mất rồi..."}
 ]'
 WHERE Id = 12;
+
+-- ─────────────────────────────────────────────────────────
+-- 5. BẢNG PLAYLISTS VÀ PLAYLIST_SONGS
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE playlists (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    UserId INT NOT NULL,
+    Description TEXT,
+    CoverUrl VARCHAR(500) NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
+);
+
+CREATE TABLE playlist_songs (
+    PlaylistId INT NOT NULL,
+    SongId INT NOT NULL,
+    AddedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (PlaylistId, SongId),
+    FOREIGN KEY (PlaylistId) REFERENCES playlists(Id) ON DELETE CASCADE,
+    FOREIGN KEY (SongId) REFERENCES songs(Id) ON DELETE CASCADE
+);
 
 COMMIT;

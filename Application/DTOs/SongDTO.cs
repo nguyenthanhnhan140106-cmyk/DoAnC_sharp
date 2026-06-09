@@ -13,6 +13,7 @@ namespace Application.DTOs
         public string? Category { get; set; }
         public string? Lyrics { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? AddedAt { get; set; }
 
         // 🟢 BỔ SUNG CÁC TRƯỜNG THÔNG TIN NGHỆ SĨ THẬT ĐỂ TRẢ VỀ FRONTEND DIALOG
         public int? ArtistId { get; set; }
