@@ -101,7 +101,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  z-index: 100;
+  z-index: 1000;
 }
 
 /* ── Nút Trang Chủ trên Header ── */
@@ -1119,7 +1119,7 @@
   align-items: center;
   margin-bottom: 16px;
   width: 100%;
-  /* ← thêm dòng này */
+  padding-left: 4px;
 }
 
 .show-all-btn {
@@ -1147,7 +1147,6 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-/* ── Card nằm ngang đúng chuẩn ── */
 .songs-grid {
   display: flex;
   flex-direction: row;
@@ -1155,6 +1154,7 @@
   flex-wrap: nowrap;
   overflow-x: auto;
   gap: 16px;
+  padding-left: 4px;
   padding-bottom: 12px;
   -ms-overflow-style: none;
   /* IE/Edge */
@@ -1844,6 +1844,7 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px 24px;
   margin-bottom: 40px;
+  padding-left: 4px;
 }
 
 .recent-card {

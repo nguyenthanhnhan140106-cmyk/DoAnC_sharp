@@ -42,7 +42,7 @@ namespace Application.Services
                 LEFT JOIN artists art ON a.ArtistId = art.Id
                 WHERE a.Id = @Id;
 
-                SELECT s.Id, s.Title, s.Artist, s.CoverUrl, s.AudioUrl, s.Category
+                SELECT s.Id, s.Title, s.Artist, s.CoverUrl, s.AudioUrl, s.Category, s.VideoUrl, s.ArtistBanner, s.ArtistId
                 FROM songs s
                 JOIN album_songs als ON s.Id = als.SongId
                 WHERE als.AlbumId = @Id

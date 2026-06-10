@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import searchIcon from '../assets/search.svg';
 import { songService } from '../Services/songService';
 import { useAuth } from '../Contexts/AuthContext';
+import { useMusic } from '../Contexts/MusicContext';
 import type { Song } from '../hooks/useAudioPlayer';
 import './Styles/ShareNotification.css';
 import NotificationPanel from './NotificationPanel';
 
 export default function Header() {
   const { isLoggedIn, logout } = useAuth();
+  const music = useMusic() as any;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
   // Giáº£ sá»­ báº¡n cÃ³ cÃ¡c state nÃ y cho logic search
@@ -66,6 +68,18 @@ export default function Header() {
     if (suggestions.length > 0) {
       setShowDropdown(true);
     }
+  };
+
+  const handleLogout = () => {
+    setIsMenuOpen(false);
+    if (music && music.isPlaying && music.togglePlay) {
+      music.togglePlay();
+    }
+    navigate('/');
+    window.dispatchEvent(new CustomEvent('RESET_HOME_TAB'));
+    setTimeout(() => {
+      logout();
+    }, 50);
   };
 
   return (
@@ -166,7 +180,7 @@ export default function Header() {
                     <li onClick={() => { setIsMenuOpen(false); navigate('/profile'); }}>Profile</li>
                     <li>Settings</li>
                     <hr className="dropdown-divider" />
-                    <li className="logout-text" onClick={logout}>Logout</li>
+                    <li className="logout-text" onClick={handleLogout}>Logout</li>
                   </ul>
                 </div>
               )}
