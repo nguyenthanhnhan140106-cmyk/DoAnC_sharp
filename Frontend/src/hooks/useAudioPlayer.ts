@@ -59,6 +59,10 @@ export function useAudioPlayer() {
         audio.pause();
       }
       setIsPlaying(false);
+      setCurrentSong(null);
+      setQueueState([]);
+      currentIndexRef.current = -1;
+      localStorage.removeItem('lastPlayedSong');
     }
   }, [isLoggedIn]);
 
