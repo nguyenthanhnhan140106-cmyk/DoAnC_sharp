@@ -1,18 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import searchIcon from '../assets/search.svg';
+import { songService } from '../Services/songService';
 import { useAuth } from '../Contexts/AuthContext';
-import API from '../Services/api';
+import { useMusic } from '../Contexts/MusicContext';
+import type { Song } from '../hooks/useAudioPlayer';
 
 export default function Header() {
   const { isLoggedIn, logout } = useAuth();
+  const music = useMusic() as any;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
   // Giả sử bạn có các state này cho logic search
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  
+
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -31,14 +36,14 @@ export default function Header() {
       return;
     }
     const timer = setTimeout(() => {
-      const q = encodeURIComponent(query.trim());
-      API.get(`/songs/search?q=${q}`)
-        .then((res: any) => {
-          const filtered = Array.isArray(res.data) ? res.data.slice(0, 6) : [];
+      const q = query.trim();
+      songService.searchSongs(q)
+        .then((list: any) => {
+          const filtered: Song[] = Array.isArray(list) ? list.slice(0, 6) : [];
           setSuggestions(filtered);
           setShowDropdown(filtered.length > 0);
         })
-        .catch(() => {});
+        .catch(() => { });
     }, 300);
     return () => clearTimeout(timer);
   }, [query]);
@@ -46,6 +51,32 @@ export default function Header() {
   const handleHomeClick = () => {
     navigate('/');
     window.dispatchEvent(new CustomEvent('RESET_HOME_TAB'));
+  };
+
+  const handleSearch = (searchQuery?: string) => {
+    const q = searchQuery !== undefined ? searchQuery : query;
+    if (q.trim()) {
+      navigate(`/search?q=${encodeURIComponent(q.trim())}`);
+      setShowDropdown(false);
+    }
+  };
+
+  const handleFocus = () => {
+    if (suggestions.length > 0) {
+      setShowDropdown(true);
+    }
+  };
+
+  const handleLogout = () => {
+    setIsMenuOpen(false);
+    if (music && music.isPlaying && music.togglePlay) {
+      music.togglePlay();
+    }
+    navigate('/');
+    window.dispatchEvent(new CustomEvent('RESET_HOME_TAB'));
+    setTimeout(() => {
+      logout();
+    }, 50);
   };
 
   return (
@@ -62,23 +93,83 @@ export default function Header() {
             <path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33zm-2-1.732a3 3 0 0 1 3 0l7.5 4.33a2 2 0 0 1 1 1.732V21a1 1 0 0 1-1 1h-6.5a1 1 0 0 1-1-1v-6h-3v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.577a2 2 0 0 1 1-1.732l7.5-4.33z"></path>
           </svg>
         </button>
-        {/* Thêm input search của bạn ở đây */}
+
+        {/* Search */}
+        <div className="search-wrapper" ref={searchRef} style={{ position: 'relative' }}>
+          <span className="search-icon">
+            <img src={searchIcon} alt="Search" style={{ width: '18px', height: '18px' }} />
+          </span>
+          <input
+            type="text"
+            placeholder="Bạn muốn phát gì?"
+            className="search-input"
+            value={query}
+            onChange={e => { setQuery(e.target.value); }}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+            onFocus={handleFocus}
+          />
+          {/* Nút tìm kiếm nâng cao */}
+          <button className="search-advanced-btn" onClick={() => handleSearch()} title="Tìm kiếm">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <path d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5zM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5z" />
+            </svg>
+          </button>
+
+          {/* Dropdown: Lịch sử khi rỗng, Gợi ý khi gõ */}
+          {showDropdown && query.trim() && (
+            <div className="search-dropdown">
+              {/* — Hiện gợi ý khi gõ — */}
+              <>
+                {suggestions.map(song => (
+                  <div
+                    key={song.id}
+                    className="search-suggestion-item"
+                    onClick={() => {
+                      handleSearch(song.title);
+                    }}
+                  >
+                    <img
+                      src={song.coverUrl || `https://loremflickr.com/40/40/music?lock=${song.id}`}
+                      alt={song.title}
+                      className="suggestion-cover"
+                    />
+                    <div className="suggestion-info">
+                      <span className="suggestion-title">{song.title}</span>
+                      <span className="suggestion-artist">{song.artist}</span>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="#b3b3b3">
+                      <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607z" />
+                    </svg>
+                  </div>
+                ))}
+                <div className="search-suggestion-footer" onClick={() => handleSearch()}>
+                  Tìm tất cả kết quả cho "<strong>{query}</strong>"
+                </div>
+              </>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* 3. Profile hoặc Auth Buttons */}
+      {/* Phần profile hoặc Auth buttons */}
       <div className="header-profile-container">
         {isLoggedIn ? (
           <>
-            <button className="notification-btn">...</button>
+            <button className="notification-btn" title="Thông báo">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </button>
             <div className="profile-dropdown-wrapper" ref={dropdownRef}>
-              <div className="user-avatar" onClick={() => setIsMenuOpen(!isMenuOpen)}>N</div>
+              <div className="user-avatar" onClick={() => setIsMenuOpen(!isMenuOpen)} title="My Account">N</div>
               {isMenuOpen && (
                 <div className="dropdown-menu">
                   <ul className="dropdown-list">
-                    <li onClick={() => setIsMenuOpen(false)}>Profile</li>
-                    <li onClick={() => setIsMenuOpen(false)}>Settings</li>
+                    <li onClick={() => { setIsMenuOpen(false); navigate('/profile'); }}>Profile</li>
+                    <li>Settings</li>
                     <hr className="dropdown-divider" />
-                    <li onClick={logout}>Logout</li>
+                    <li className="logout-text" onClick={handleLogout}>Logout</li>
                   </ul>
                 </div>
               )}
@@ -86,8 +177,8 @@ export default function Header() {
           </>
         ) : (
           <div className="auth-buttons">
-            <Link to="/login" className="login-link">Đăng nhập</Link>
-            <Link to="/signup" className="signup-link">Đăng ký</Link>
+            <button className="signup-btn" onClick={() => navigate('/signup')}>Sign up</button>
+            <button className="login-btn" onClick={() => navigate('/login')}>Log in</button>
           </div>
         )}
       </div>

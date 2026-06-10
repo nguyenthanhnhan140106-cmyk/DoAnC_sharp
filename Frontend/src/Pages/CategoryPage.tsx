@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import API from '../Services/api';
 import Sidebar from '../Components/Sidebar';
 import Header from '../Components/header';
 import PlayerBar from '../Components/PlayerBar';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
 import { useMusic } from '../Contexts/MusicContext';
+import { useAuth } from '../Contexts/AuthContext';
+import { songService } from '../Services/songService';
+import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
 
 interface Song {
@@ -26,26 +28,27 @@ const CategoryPage = () => {
   const navigate = useNavigate();
   const [songs, setSongs] = useState<Song[]>([]);
   const { playSong, currentSong, isPlaying } = useMusic();
+  const { isLoggedIn } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
   useEffect(() => {
-    API.get('/songs')
-      .then((res: any) => {
-        let list: Song[] = res.data || [];
-        if (!Array.isArray(list)) return;
+    songService.getAllSongs()
+      .then((list: any) => {
+        let songList: Song[] = list || [];
+        if (!Array.isArray(songList)) return;
 
         // Lọc danh sách theo catId
         if (catId === 'friday') {
-          list = list.filter(s => s.category?.toLowerCase() === 'friday');
+          songList = songList.filter(s => s.category?.toLowerCase() === 'friday');
         } else if (catId === 'vsound') {
-          list = list.filter(s => s.category?.toLowerCase() === 'vsound');
+          songList = songList.filter(s => s.category?.toLowerCase() === 'vsound');
         } else if (catId === 'rap') {
-          list = list.filter(s => s.category?.toLowerCase() === 'rap');
+          songList = songList.filter(s => s.category?.toLowerCase() === 'rap');
         }
         // Nếu catId là 'all' thì hiển thị toàn bộ
 
-        setSongs(list);
+        setSongs(songList);
       })
       .catch((err) => console.error('❌ Lỗi:', err));
   }, [catId]);
@@ -72,7 +75,7 @@ const CategoryPage = () => {
   };
 
   return (
-    <div className={`spotify-layout ${isSidebarCollapsed ? 'sidebar-hidden' : ''} ${isRightCollapsed ? 'right-hidden' : ''}`}>
+    <div className={`spotify-layout ${isSidebarCollapsed ? 'sidebar-hidden' : ''} ${isRightCollapsed || !isLoggedIn ? 'right-hidden' : ''}`}>
       <Header />
       <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
 
@@ -86,13 +89,24 @@ const CategoryPage = () => {
           <h1 style={{ color: '#fff', fontSize: '32px', fontWeight: 'bold', marginBottom: '24px' }}>{title}</h1>
 
           <div className="songs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '24px' }}>
-            {/* Mẹo nhân bản danh sách để Demo đủ 20 bài */}
-            {[...songs, ...songs, ...songs].slice(0, 20).map((song, index) => {
+            {songs.map((song, index) => {
               const isActive = currentSong?.id === song.id;
               return (
-                <div key={`${song.id}-${index}`} className="song-card-item" onClick={(e) => handleForcePlay(e, song)} style={{ cursor: "pointer" }}>
+                <div 
+                  key={`${song.id}-${index}`} 
+                  className="song-card-item" 
+                  onClick={(e) => handleForcePlay(e, song)} 
+                  style={{ cursor: "pointer", minWidth: 'auto', maxWidth: 'none' }}
+                >
                   <div className="song-card-img-wrapper">
-                    <img src={getCover(song)} alt={song.title} className="song-card-img" />
+                    <img 
+                      src={getCover(song)} 
+                      alt={song.title} 
+                      className="song-card-img" 
+                      onError={(e) => {
+                        e.currentTarget.src = `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop`;
+                      }}
+                    />
                     <button
                       className={`card-play-btn ${isActive && isPlaying ? "playing" : ""}`}
                       aria-label={`Phát ${song.title}`}
@@ -109,8 +123,8 @@ const CategoryPage = () => {
         </div>
       </div>
 
-      <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />
-      <PlayerBar />
+      {isLoggedIn && <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />}
+      {isLoggedIn ? <PlayerBar /> : <AuthBanner />}
     </div>
   );
 };

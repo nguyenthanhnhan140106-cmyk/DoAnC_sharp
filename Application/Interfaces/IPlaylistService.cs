@@ -5,6 +5,12 @@ namespace Application.Interfaces
     public interface IPlaylistService
     {
         Task<IEnumerable<PlaylistDTO>> GetAllPlaylistsAsync();
-        Task<IEnumerable<PlaylistDTO>> GetPlaylistsByUserIdAsync(int userId); // Lấy playlist của riêng user đó
+        Task<IEnumerable<PlaylistDTO>> GetPlaylistsByUserIdAsync(int userId);
+        Task<PlaylistDTO> CreatePlaylistAsync(int userId, CreatePlaylistDTO dto);
+        Task<PlaylistDTO?> GetPlaylistByIdAsync(int id);
+        Task<bool> AddSongToPlaylistAsync(int playlistId, int songId);
+        Task<bool> RemoveSongFromPlaylistAsync(int playlistId, int songId);
+        Task<bool> DeletePlaylistAsync(int id);
+        Task<IEnumerable<int>> GetPlaylistsContainingSongAsync(int userId, int songId);
     }
 }

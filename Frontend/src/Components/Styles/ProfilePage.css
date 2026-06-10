@@ -1,0 +1,244 @@
+/* ProfilePage.css */
+
+.profile-header-container {
+  position: relative;
+  height: 340px;
+  background: linear-gradient(transparent 0, rgba(0, 0, 0, 0.5) 100%), #535353;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.profile-header-content {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.profile-avatar {
+  width: 232px;
+  height: 232px;
+  border-radius: 50%;
+  background-color: #282828;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
+  color: #7f7f7f;
+}
+
+.profile-avatar svg {
+  width: 96px;
+  height: 96px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.profile-badge {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.profile-name {
+  font-size: 96px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  color: #fff;
+}
+
+.profile-edit-btn-wrapper {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2;
+}
+
+.profile-edit-btn {
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 500px;
+  padding: 7px 15px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+
+.profile-edit-btn:hover {
+  border-color: #fff;
+  transform: scale(1.04);
+}
+
+.profile-body {
+  background: linear-gradient(rgba(0, 0, 0, 0.6) 0, #121212 100%);
+  background-color: #121212;
+  padding: 24px;
+  min-height: 50vh;
+}
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.profile-action-btn {
+  background: transparent;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.1s ease, transform 0.1s ease;
+}
+
+.profile-action-btn:hover {
+  color: #fff;
+  transform: scale(1.04);
+}
+
+.profile-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.profile-section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.profile-section-subtitle {
+  font-size: 14px;
+  color: #b3b3b3;
+  margin: 4px 0 0 0;
+}
+
+.profile-show-all {
+  background: transparent;
+  border: none;
+  color: #b3b3b3;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.profile-show-all:hover {
+  text-decoration: underline;
+  color: #fff;
+}
+
+/* Track list */
+.profile-tracks-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-track-item {
+  display: grid;
+  grid-template-columns: 16px minmax(120px, 4fr) 2fr minmax(120px, 1fr);
+  gap: 16px;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.profile-track-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.track-col {
+  display: flex;
+  align-items: center;
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.track-index {
+  justify-content: center;
+  position: relative;
+  width: 16px;
+}
+
+.track-number {
+  font-size: 16px;
+}
+
+.track-play-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 0;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.profile-track-item:hover .track-number {
+  display: none;
+}
+
+.profile-track-item:hover .track-play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.track-info {
+  gap: 12px;
+}
+
+.track-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.track-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.track-title {
+  font-size: 16px;
+  font-weight: 400;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.track-artist {
+  font-size: 14px;
+}
+
+.track-album:hover {
+  text-decoration: underline;
+  color: #fff;
+}
+
+.track-duration {
+  justify-content: flex-end;
+}

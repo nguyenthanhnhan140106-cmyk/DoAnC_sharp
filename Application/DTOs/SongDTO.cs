@@ -11,11 +11,13 @@ namespace Application.DTOs
         public string? CoverUrl { get; set; }
         public string? AudioUrl { get; set; }
         public string? Category { get; set; }
+        public string? Lyrics { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? AddedAt { get; set; }
 
         // 🟢 BỔ SUNG CÁC TRƯỜNG THÔNG TIN NGHỆ SĨ THẬT ĐỂ TRẢ VỀ FRONTEND DIALOG
         public int? ArtistId { get; set; }
-        public string VideoUrl { get; set; }
+        public string VideoUrl { get; set; } = string.Empty;
         public int WorldRank { get; set; }
         public int Followers { get; set; }
         public int MonthlyListeners { get; set; }
@@ -32,6 +34,7 @@ namespace Application.DTOs
         public string? AudioUrl { get; set; }
         public string VideoUrl { get; set; }
         public string? Category { get; set; }
+        public string? Lyrics { get; set; }
         public int? ArtistId { get; set; } // Thêm nếu sau này làm giao diện Admin tạo bài hát gắn với Ca sĩ
     }
 
@@ -43,6 +46,7 @@ namespace Application.DTOs
         public string? AudioUrl { get; set; }
         public string VideoUrl { get; set; }
         public string? Category { get; set; }
+        public string? Lyrics { get; set; }
         public int? ArtistId { get; set; }
     }
 }

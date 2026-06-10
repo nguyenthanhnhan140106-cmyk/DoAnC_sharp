@@ -91,8 +91,8 @@ namespace Infrastructure.Repositories
         public async Task<int> CreateAsync(Song song)
         {
                         const string query = @"
-                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, ArtistBanner, ArtistId, CreatedAt) 
-                VALUES (@Title, @Artist, @CoverUrl, @AudioUrl, @VideoUrl, @Category, @ArtistBanner, @ArtistId, @CreatedAt);
+                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, Lyrics, ArtistBanner, ArtistId, CreatedAt) 
+                VALUES (@Title, @Artist, @CoverUrl, @AudioUrl, @VideoUrl, @Category, @Lyrics, @ArtistBanner, @ArtistId, @CreatedAt);
                 SELECT LAST_INSERT_ID();";
 
 
@@ -111,6 +111,7 @@ namespace Infrastructure.Repositories
                     AudioUrl = @AudioUrl, 
                     VideoUrl = @VideoUrl,
                     Category = @Category,
+                    Lyrics = @Lyrics,
                     ArtistBanner = @ArtistBanner,
                     ArtistId = @ArtistId
                 WHERE Id = @Id";

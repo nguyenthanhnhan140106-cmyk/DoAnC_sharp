@@ -3,6 +3,8 @@
 -- =========================================================
 SET NAMES utf8mb4;
 
+DROP TABLE IF EXISTS playlist_songs;
+DROP TABLE IF EXISTS playlists;
 DROP TABLE IF EXISTS album_songs;
 DROP TABLE IF EXISTS media_tags;
 DROP TABLE IF EXISTS albums;
@@ -12,6 +14,17 @@ DROP TABLE IF EXISTS artists;
 -- ─────────────────────────────────────────────────────────
 -- 1. BẢNG NGHỆ SĨ
 -- ─────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS users (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO users (Id, Username, Email, PasswordHash) VALUES 
+(1, 'testuser', 'test@example.com', 'hashed');
 CREATE TABLE artists (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL UNIQUE,
@@ -51,60 +64,71 @@ CREATE TABLE songs (
     Category VARCHAR(100) NULL,
     ArtistBanner VARCHAR(500) NULL,
     ArtistId INT NULL,
+    Lyrics TEXT NULL,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ArtistId) REFERENCES artists(Id) ON DELETE SET NULL
 );
 
 INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, ArtistBanner, ArtistId, CreatedAt) VALUES 
-(1,  'Buông đôi tay nhau ra', 'Sơn Tùng M-TP',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845052/Screenshot_2026-06-07_220253_croprc.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780844831/Bu%C3%B4ng_%C4%90%C3%B4i_Tay_Nhau_Ra_su2pyw.mp3',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727889/thanhtan_hhmggj.mp4', 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
+(1,  'Thanh Tân',           'VƯƠNG BÌNH',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/thanhtan_olnawd.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657507/thanhtan_tnaf1e.mp3',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727889/thanhtan_hhmggj.mp4',
+     'friday', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop', 9, NOW()),
 
-(2,  'Hãy trao cho anh', 'Sơn Tùng M-TP',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845051/Screenshot_2026-06-07_215651_pndsey.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780844833/H%C3%A3y_Trao_Cho_Anh_e0rctx.mp3',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727870/vebenanh_vipbk1.mp4', 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
+(2,  'Về bên anh',          'Jack-J97',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/vebenanh_rrpaon.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657507/vebenanh_kf3kmi.mp3',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727870/vebenanh_vipbk1.mp4',
+     'vsound', 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=240&fit=crop', 2, NOW()),
 
-(3,  'Đừng làm trái tim anh đau', 'Sơn Tùng M-TP',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845051/Screenshot_2026-06-07_220203_bd5fr5.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780844831/%C4%90%E1%BB%ABng_L%C3%A0m_Tr%C3%A1i_Tim_Anh_%C4%90au_Remix_kblgj7.mp3',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780751992/songgio_dhzhih.mp4', 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
+(3,  'Sóng gió',            'Jack-J97,K-ICM,ICM',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/songgio_kb1ndq.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657506/songgio_zreqh8.mp3',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780751992/songgio_dhzhih.mp4',
+     'vsound', 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=240&fit=crop', 3, NOW()),
 
-(4,  'Come my way', 'Sơn Tùng M-TP',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845352/Screenshot_2026-06-07_221540_me0aff.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780844831/Come_My_Way_vyyka9.mp3',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727867/nhunaycoanh_ckr2mj.mp4', 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
+(4,  'Nơi này có anh',      'Sơn Tùng M-TP',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/noinaycoanh_t4adrb.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657502/noinaycoanh_eo4kxd.mp3',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727867/nhunaycoanh_ckr2mj.mp4',
+     'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
 
-(5,  'Chạy ngay đi', 'Sơn Tùng M-TP',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845051/Screenshot_2026-06-07_220222_slzpej.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780844831/CH%E1%BA%A0Y_NGAY_%C4%90I_c2tgve.mp3',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727865/ngayroichuyenbay_kdzzl4.mp4', 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
+(5,  'Ngày rời chuyến bay', 'Minh Huy, Pinny',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/ngayroichuyenbay_ytirxp.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657503/ngayroichuyenbay_xovjt2.mp3',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727865/ngayroichuyenbay_kdzzl4.mp4',
+     'friday', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=240&fit=crop', 10, NOW()),
 
-(6,  'Âm thầm bên em', 'Sơn Tùng M-TP',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845053/Screenshot_2026-06-07_220950_mhejjf.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780844831/%C3%82m_Th%E1%BA%A7m_B%C3%AAn_Em_lfchah.mp3',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727856/matketnoi_ueyvel.mp4', 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
+(6,  'Mất kết nối',         'Dương Domic',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/matketnoi_xr8gpa.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657504/matketnoi_otbz56.mp3',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727856/matketnoi_ueyvel.mp4',
+     'vsound', 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500&h=240&fit=crop', 6, NOW()),
 
-(7,  'Chúng ta không thuộc về nhau', 'Sơn Tùng M-TP',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845051/Screenshot_2026-06-07_220047_g5o1l7.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780844832/Ch%C3%BAng_Ta_Kh%C3%B4ng_Thu%E1%BB%99c_V%E1%BB%81_Nhau_ixtzto.mp3',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727853/hongnhan_ncrnah.mp4', 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
+(7,  'Hồng nhan',           'Jack-J97, K-ICM, ICM',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/hongnhan_isqcez.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657499/hongnhan_f6rlrh.mp3',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727853/hongnhan_ncrnah.mp4',
+     'vsound', 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=240&fit=crop', 3, NOW()),
 
-(8,  'Making My way', 'Sơn Tùng M-TP',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845592/Screenshot_2026-06-07_221936_li17xi.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780844833/MAKING_MY_WAY_wakhqb.mp3',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727873/emthuacota_k7qleq.mp4', 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
+(8,  'Em thua cô ta',       'Thiên Đình',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/emthuacota_uugowq.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657501/emthuacota_nbuyyp.mp3',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727873/emthuacota_k7qleq.mp4',
+     'friday', 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=240&fit=crop', 11, NOW()),
 
-(9,  'There is no one at all', 'Sơn Tùng M-TP',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845052/Screenshot_2026-06-07_220316_h4vhrr.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780844833/THERE_S_NO_ONE_AT_ALL_xuuli6.mp3',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727868/em_xsew9b.mp4', 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
+(9,  'Em',                  'Binz, SOONBIN',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/em_d1ahp5.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657502/em_brfzsn.mp3',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727868/em_xsew9b.mp4',
+     'vsound', 'https://images.unsplash.com/photo-1516280440614-37939bbacd6a?w=500&h=240&fit=crop', 7, NOW()),
 
-(10, 'Nơi này có anh', 'Sơn Tùng M-TP',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845051/Screenshot_2026-06-07_215430_vvlkgq.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780844833/N%C6%A1i_N%C3%A0y_C%C3%B3_Anh_lns6x6.mp3',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727863/dondauvocung_zlsm0e.mp4', 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 1, NOW()),
+(10, 'Đớn đau vô cùng',     'DatKaa',
+     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/dondauvocung_qyamxw.jpg',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657507/dondauvocung_htprq8.mp3',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727863/dondauvocung_zlsm0e.mp4',
+     'friday', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop', 4, NOW()),
 
 (11, 'Chờ anh về',          'ANH TRAI SAY HI',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/choanhve_xa6mtg.jpg',
@@ -421,6 +445,35 @@ INSERT INTO album_songs (AlbumId, SongId, OrderNumber) VALUES
 (3, 30, 7),
 (3, 31, 8),
 (3, 32, 9);
+UPDATE songs 
+SET Lyrics = '[
+  {"time": 2.0, "text": "Em đi lướt qua nhanh"},
+  {"time": 4.5, "text": "Hương thơm vương lại khiến anh đảo điên"},
+  {"time": 7.5, "text": "Phải chăng em là chất gây hại?"},
+  {"time": 10.0, "text": "Nhìn nụ cười em anh say mất rồi..."}
+]'
+WHERE Id = 12;
 
+-- ─────────────────────────────────────────────────────────
+-- 5. BẢNG PLAYLISTS VÀ PLAYLIST_SONGS
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE playlists (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    UserId INT NOT NULL,
+    Description TEXT,
+    CoverUrl VARCHAR(500) NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
+);
+
+CREATE TABLE playlist_songs (
+    PlaylistId INT NOT NULL,
+    SongId INT NOT NULL,
+    AddedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (PlaylistId, SongId),
+    FOREIGN KEY (PlaylistId) REFERENCES playlists(Id) ON DELETE CASCADE,
+    FOREIGN KEY (SongId) REFERENCES songs(Id) ON DELETE CASCADE
+);
 
 COMMIT;
