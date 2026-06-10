@@ -11,6 +11,7 @@ import ProfilePage from './Pages/ProfilePage';
 import PlaylistPage from './Pages/PlaylistPage';
 
 import AddToPlaylistModal from './Components/AddToPlaylistModal';
+import Toast from './Components/Toast';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
           </Routes>
           <AddToPlaylistModal />
+          <Toast />
         </BrowserRouter>
       </MusicProvider>
     </AuthProvider>
