@@ -1,48 +1,122 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
 import API from '../Services/api';
-import { useAuth } from '../Contexts/AuthContext';
-import Header from '../Components/header';
-import Sidebar from '../Components/Sidebar';
-import RightSidebar from '../Components/RightSidebar';
-import PlayerBar from '../Components/PlayerBar';
-import TuneBot from '../Components/TuneBot';
-import '../Components/Styles/HomePage.css';
 import '../Components/Styles/ShareNotification.css';
 
 interface NotificationItem {
   id: number;
   userId: number;
   type: string;
-  title: string;
-  message: string;
   payload?: string;
+  title?: string;
+  description?: string;
   isRead: boolean;
   createdAt: string;
+  coverUrl?: string;
 }
 
 interface SharedItem {
   id: number;
-  senderUserId: number;
-  senderUsername: string;
-  receiverUserId: number;
-  receiverUsername: string;
-  songId?: number;
-  playlistId?: number;
-  mediaType: string;
-  mediaTitle: string;
+  senderUserId?: number;
+  senderId?: number;
+  senderName?: string;
+  receiverUserId?: number;
+  receiverId?: number;
+  songId?: number | null;
+  playlistId?: number | null;
+  title?: string;
   artist?: string;
   coverUrl?: string;
   message?: string;
   sharedAt: string;
 }
 
+function getCurrentUserId(): number | null {
+  const userRaw = localStorage.getItem('user');
+
+  if (userRaw) {
+    try {
+      const user = JSON.parse(userRaw);
+      const id = Number(user.id || user.userId || user.Id || user.UserId);
+
+      if (Number.isFinite(id) && id > 0) {
+        return id;
+      }
+    } catch {
+      // Ignore invalid user json
+    }
+  }
+
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+
+      const id = Number(
+        payload.id ||
+          payload.userId ||
+          payload.nameid ||
+          payload.sub ||
+          payload[
+            'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
+          ]
+      );
+
+      if (Number.isFinite(id) && id > 0) {
+        return id;
+      }
+    } catch {
+      // Ignore invalid token
+    }
+  }
+
+  return null;
+}
+
+function parseNotification(item: NotificationItem) {
+  if (item.title || item.description) {
+    return {
+      title: item.title || 'Thông báo',
+      description: item.description || '',
+      coverUrl: item.coverUrl,
+    };
+  }
+
+  if (!item.payload) {
+    return {
+      title: 'Thông báo',
+      description: '',
+      coverUrl: undefined,
+    };
+  }
+
+  try {
+    const data = JSON.parse(item.payload);
+
+    return {
+      title: data.title || data.Title || 'Thông báo',
+      description:
+        data.description ||
+        data.Description ||
+        data.message ||
+        data.Message ||
+        '',
+      coverUrl: data.coverUrl || data.CoverUrl,
+    };
+  } catch {
+    return {
+      title: 'Thông báo',
+      description: item.payload,
+      coverUrl: undefined,
+    };
+  }
+}
+
 export default function NotificationPage() {
-  const { isLoggedIn } = useAuth();
-  const navigate = useNavigate();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isRightCollapsed, setIsRightCollapsed] = useState(false);
-  const [tab, setTab] = useState<'notifications' | 'shared'>('notifications');
+  const userId = useMemo(() => getCurrentUserId(), []);
+  const [activeTab, setActiveTab] = useState<'notifications' | 'shared'>(
+    'notifications'
+  );
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [sharedItems, setSharedItems] = useState<SharedItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,128 +125,157 @@ export default function NotificationPage() {
   const unreadCount = notifications.filter((item) => !item.isRead).length;
 
   const loadData = async () => {
-    if (!isLoggedIn) return;
+    if (!userId) {
+      setError('Bạn cần đăng nhập để xem thông báo.');
+      return;
+    }
 
     setLoading(true);
     setError('');
 
     try {
-      const [notificationsRes, sharedRes] = await Promise.all([
-        API.get('/notifications'),
-        API.get('/media-shares/received'),
+      const [notiRes, sharedRes] = await Promise.all([
+        API.get(`/notifications/user/${userId}`),
+        API.get(`/media-shares/received/${userId}`),
       ]);
 
-      setNotifications(Array.isArray(notificationsRes.data) ? notificationsRes.data : []);
+      setNotifications(Array.isArray(notiRes.data) ? notiRes.data : []);
       setSharedItems(Array.isArray(sharedRes.data) ? sharedRes.data : []);
     } catch (err: any) {
-      console.error('Không tải được trang thông báo:', err);
-      setError(err.response?.data?.message || 'Không tải được thông báo. Hãy kiểm tra backend và đăng nhập lại.');
+      console.error('Không tải được thông báo/chia sẻ:', err);
+      setError(err?.response?.data?.message || 'Không tải được thông báo.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/login');
-      return;
-    }
-
     loadData();
-
-    const refresh = () => loadData();
-    window.addEventListener('tunevault:notification-refresh', refresh);
-
-    return () => window.removeEventListener('tunevault:notification-refresh', refresh);
-  }, [isLoggedIn]);
+  }, [userId]);
 
   const markAsRead = async (id: number) => {
-    await API.put(`/notifications/${id}/read`);
-    await loadData();
+    try {
+      await API.put(`/notifications/${id}/read`);
+      await loadData();
+    } catch (err) {
+      console.error('Không thể đánh dấu đã đọc:', err);
+    }
   };
 
   const markAllAsRead = async () => {
-    await API.put('/notifications/read-all');
-    await loadData();
+    if (!userId) return;
+
+    try {
+      await API.put(`/notifications/user/${userId}/read-all`);
+      await loadData();
+    } catch (err) {
+      console.error('Không thể đánh dấu đọc hết:', err);
+    }
   };
 
   return (
-    <div className={`spotify-layout ${isSidebarCollapsed ? 'sidebar-hidden' : ''} ${isRightCollapsed ? 'right-hidden' : ''}`}>
-      <Header />
-      <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
-
-      <div className="main-view">
-        <div className="content-wrapper tv-main-notification-page">
-          <div className="tv-page-head">
-            <div>
-              <p>TuneVault</p>
-              <h1>Thông báo</h1>
-              <span>{unreadCount} thông báo chưa đọc</span>
-            </div>
-            <button type="button" onClick={markAllAsRead} disabled={unreadCount === 0}>
-              Đánh dấu đã đọc hết
-            </button>
+    <main className="tv-notification-page">
+      <section className="tv-notification-card">
+        <div className="tv-notification-page-head">
+          <div>
+            <p>Trung tâm thông báo</p>
+            <h1>Thông báo</h1>
+            <span>{unreadCount} chưa đọc</span>
           </div>
 
-          <div className="tv-page-tabs">
-            <button className={tab === 'notifications' ? 'active' : ''} onClick={() => setTab('notifications')}>
-              Thông báo
-            </button>
-            <button className={tab === 'shared' ? 'active' : ''} onClick={() => setTab('shared')}>
-              Đã chia sẻ với tôi
-            </button>
-          </div>
+          <button type="button" onClick={markAllAsRead} disabled={unreadCount === 0}>
+            Đọc hết
+          </button>
+        </div>
 
-          {loading && <div className="tv-page-empty">Đang tải...</div>}
-          {error && <div className="tv-page-error">{error}</div>}
+        <div className="tv-panel-tabs">
+          <button
+            type="button"
+            className={activeTab === 'notifications' ? 'active' : ''}
+            onClick={() => setActiveTab('notifications')}
+          >
+            Thông báo
+          </button>
 
-          {!loading && !error && tab === 'notifications' && (
-            <div className="tv-page-list">
-              {notifications.length === 0 && <div className="tv-page-empty">Chưa có thông báo nào.</div>}
+          <button
+            type="button"
+            className={activeTab === 'shared' ? 'active' : ''}
+            onClick={() => setActiveTab('shared')}
+          >
+            Đã chia sẻ với tôi
+          </button>
+        </div>
 
-              {notifications.map((item) => (
+        {error && <div className="tv-status error">{error}</div>}
+
+        <div className="tv-notification-list page-list">
+          {loading && <div className="tv-empty">Đang tải...</div>}
+
+          {!loading && activeTab === 'notifications' && notifications.length === 0 && (
+            <div className="tv-empty">Chưa có thông báo nào.</div>
+          )}
+
+          {!loading &&
+            activeTab === 'notifications' &&
+            notifications.map((item) => {
+              const data = parseNotification(item);
+
+              return (
                 <button
                   key={item.id}
                   type="button"
-                  className={`tv-page-notification ${item.isRead ? '' : 'unread'}`}
+                  className={`tv-notification-item ${item.isRead ? '' : 'unread'}`}
                   onClick={() => markAsRead(item.id)}
                 >
-                  <div className="tv-noti-dot" />
-                  <div>
-                    <b>{item.title}</b>
-                    <span>{item.message}</span>
+                  <img
+                    src={
+                      data.coverUrl ||
+                      `https://picsum.photos/seed/noti-${item.id}/80/80`
+                    }
+                    alt=""
+                  />
+
+                  <span>
+                    <b>{data.title}</b>
+                    <small>{data.description}</small>
                     <time>{new Date(item.createdAt).toLocaleString('vi-VN')}</time>
-                  </div>
+                  </span>
                 </button>
-              ))}
-            </div>
+              );
+            })}
+
+          {!loading && activeTab === 'shared' && sharedItems.length === 0 && (
+            <div className="tv-empty">Chưa có media nào được chia sẻ với bạn.</div>
           )}
 
-          {!loading && !error && tab === 'shared' && (
-            <div className="tv-shared-grid">
-              {sharedItems.length === 0 && <div className="tv-page-empty">Chưa có media nào được chia sẻ với bạn.</div>}
+          {!loading &&
+            activeTab === 'shared' &&
+            sharedItems.map((item) => (
+              <div key={item.id} className="tv-notification-item shared-card">
+                <img
+                  src={
+                    item.coverUrl ||
+                    `https://picsum.photos/seed/share-${item.id}/80/80`
+                  }
+                  alt=""
+                />
 
-              {sharedItems.map((item) => (
-                <div key={item.id} className="tv-shared-card">
-                  <img src={item.coverUrl || `https://picsum.photos/seed/shared-${item.id}/220/220`} alt={item.mediaTitle} />
-                  <div>
-                    <small>{item.mediaType === 'playlist' ? 'Playlist' : 'Bài hát / Video'}</small>
-                    <h3>{item.mediaTitle}</h3>
-                    {item.artist && <p>{item.artist}</p>}
-                    <span>Người gửi: {item.senderUsername}</span>
-                    {item.message && <em>“{item.message}”</em>}
-                    <time>{new Date(item.sharedAt).toLocaleString('vi-VN')}</time>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                <span>
+                  <b>{item.title || 'Media được chia sẻ'}</b>
+
+                  <small>
+                    {item.artist || 'TuneVault'} •{' '}
+                    {item.senderName || 'Người dùng'} đã chia sẻ
+                  </small>
+
+                  {item.message && <small>Lời nhắn: {item.message}</small>}
+
+                  <time>{new Date(item.sharedAt).toLocaleString('vi-VN')}</time>
+                </span>
+              </div>
+            ))}
         </div>
-      </div>
-
-      <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />
-      <TuneBot />
-      <PlayerBar />
-    </div>
+      </section>
+    </main>
   );
 }

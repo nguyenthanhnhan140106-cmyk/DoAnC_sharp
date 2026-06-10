@@ -31,9 +31,8 @@ builder.Services.AddScoped<AlbumService>(_ => new AlbumService(connectionString)
 builder.Services.AddScoped<IAuthService>(provider => new AuthService(connectionString, builder.Configuration));
 builder.Services.AddScoped<IHistoryRepository>(_ => new HistoryRepository(connectionString));
 builder.Services.AddScoped<IHistoryService, HistoryService>();
-builder.Services.AddScoped(_ => new ShareMediaService(connectionString));
 builder.Services.AddScoped(_ => new NotificationService(connectionString));
-
+builder.Services.AddScoped(provider => new ShareMediaService(connectionString, provider.GetRequiredService<NotificationService>()));
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {

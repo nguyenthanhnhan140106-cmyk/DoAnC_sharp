@@ -1,63 +1,106 @@
+using System.Text.Json;
 using Application.DTOs;
 using Dapper;
 using MySqlConnector;
 
-namespace Application.Services
+namespace Application.Services;
+
+public class NotificationService
 {
-    public class NotificationService
+    private readonly string _connectionString;
+
+    public NotificationService(string connectionString)
     {
-        private readonly string _connectionString;
+        _connectionString = connectionString;
+    }
 
-        public NotificationService(string connectionString)
+    public async Task<int> CreateAsync(int userId, string type, object payload)
+    {
+        using var conn = new MySqlConnection(_connectionString);
+        var json = JsonSerializer.Serialize(payload);
+
+        const string sql = @"
+            INSERT INTO notifications (UserId, Type, Payload, IsRead, CreatedAt)
+            VALUES (@UserId, @Type, @Payload, 0, NOW());
+            SELECT LAST_INSERT_ID();";
+
+        return await conn.ExecuteScalarAsync<int>(sql, new
         {
-            _connectionString = connectionString;
-        }
+            UserId = userId,
+            Type = type,
+            Payload = json
+        });
+    }
 
-        public async Task<IEnumerable<NotificationDTO>> GetByUserAsync(int userId)
+    public async Task<IEnumerable<NotificationDTO>> GetByUserAsync(int userId)
+    {
+        using var conn = new MySqlConnection(_connectionString);
+
+        const string sql = @"
+            SELECT Id, UserId, Type, Payload, IsRead, CreatedAt
+            FROM notifications
+            WHERE UserId = @UserId
+            ORDER BY CreatedAt DESC;";
+
+        var rows = await conn.QueryAsync(sql, new { UserId = userId });
+
+        return rows.Select(row =>
         {
-            using var conn = new MySqlConnection(_connectionString);
+            string title = "Thông báo";
+            string description = "Bạn có thông báo mới.";
+            string? coverUrl = null;
 
-            return await conn.QueryAsync<NotificationDTO>(@"
-                SELECT Id, UserId, Type, Title, Message, Payload, IsRead, CreatedAt
-                FROM notifications
-                WHERE UserId = @UserId
-                ORDER BY CreatedAt DESC, Id DESC;",
-                new { UserId = userId });
-        }
+            try
+            {
+                using var doc = JsonDocument.Parse((string)row.Payload);
+                var root = doc.RootElement;
 
-        public async Task<int> CountUnreadAsync(int userId)
-        {
-            using var conn = new MySqlConnection(_connectionString);
+                if (root.TryGetProperty("title", out var titleProp))
+                    title = titleProp.GetString() ?? title;
 
-            return await conn.ExecuteScalarAsync<int>(@"
-                SELECT COUNT(*)
-                FROM notifications
-                WHERE UserId = @UserId AND IsRead = 0;",
-                new { UserId = userId });
-        }
+                if (root.TryGetProperty("description", out var descProp))
+                    description = descProp.GetString() ?? description;
 
-        public async Task<bool> MarkAsReadAsync(int userId, int notificationId)
-        {
-            using var conn = new MySqlConnection(_connectionString);
+                if (root.TryGetProperty("coverUrl", out var coverProp))
+                    coverUrl = coverProp.GetString();
+            }
+            catch
+            {
+                description = Convert.ToString(row.Payload) ?? description;
+            }
 
-            var affected = await conn.ExecuteAsync(@"
-                UPDATE notifications
-                SET IsRead = 1
-                WHERE Id = @NotificationId AND UserId = @UserId;",
-                new { NotificationId = notificationId, UserId = userId });
+            return new NotificationDTO
+            {
+                Id = row.Id,
+                UserId = row.UserId,
+                Type = row.Type,
+                Title = title,
+                Description = description,
+                CoverUrl = coverUrl,
+                IsRead = row.IsRead,
+                CreatedAt = row.CreatedAt
+            };
+        });
+    }
 
-            return affected > 0;
-        }
+    public async Task<int> CountUnreadAsync(int userId)
+    {
+        using var conn = new MySqlConnection(_connectionString);
+        const string sql = "SELECT COUNT(*) FROM notifications WHERE UserId = @UserId AND IsRead = 0;";
+        return await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId });
+    }
 
-        public async Task<int> MarkAllAsReadAsync(int userId)
-        {
-            using var conn = new MySqlConnection(_connectionString);
+    public async Task<bool> MarkAsReadAsync(int id)
+    {
+        using var conn = new MySqlConnection(_connectionString);
+        const string sql = "UPDATE notifications SET IsRead = 1 WHERE Id = @Id;";
+        return await conn.ExecuteAsync(sql, new { Id = id }) > 0;
+    }
 
-            return await conn.ExecuteAsync(@"
-                UPDATE notifications
-                SET IsRead = 1
-                WHERE UserId = @UserId AND IsRead = 0;",
-                new { UserId = userId });
-        }
+    public async Task<int> MarkAllAsReadAsync(int userId)
+    {
+        using var conn = new MySqlConnection(_connectionString);
+        const string sql = "UPDATE notifications SET IsRead = 1 WHERE UserId = @UserId AND IsRead = 0;";
+        return await conn.ExecuteAsync(sql, new { UserId = userId });
     }
 }

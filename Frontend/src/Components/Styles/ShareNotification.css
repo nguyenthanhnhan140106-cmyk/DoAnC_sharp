@@ -1,30 +1,41 @@
+/* Share dialog + Notification page styles for TuneVault */
+
+/* =========================
+   SHARE MEDIA DIALOG
+   ========================= */
 .tv-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.72);
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100000;
-  padding: 24px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-sizing: border-box;
 }
 
 .tv-share-dialog {
-  width: min(440px, 96vw);
+  width: min(440px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
   background: #181818;
-  color: #fff;
-  border: 1px solid #2a2a2a;
-  border-radius: 18px;
+  color: #ffffff;
   padding: 20px;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  box-sizing: border-box;
 }
 
 .tv-dialog-head {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
   gap: 16px;
-  margin-bottom: 18px;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
 .tv-dialog-head p {
@@ -33,25 +44,30 @@
   font-size: 13px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .tv-dialog-head h3 {
   margin: 0;
+  color: #ffffff;
   font-size: 22px;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .tv-dialog-head button {
   width: 34px;
   height: 34px;
-  border-radius: 50%;
+  flex: 0 0 34px;
   border: 0;
-  color: #fff;
-  background: #282828;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
   cursor: pointer;
   font-size: 24px;
   line-height: 1;
+}
+
+.tv-dialog-head button:hover {
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .tv-share-song {
@@ -59,276 +75,373 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #101010;
   border-radius: 14px;
-  margin-bottom: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 16px;
 }
 
 .tv-share-song img {
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
   border-radius: 10px;
   object-fit: cover;
+  flex: 0 0 auto;
 }
 
-.tv-share-song b,
+.tv-share-song b {
+  display: block;
+  color: #ffffff;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
 .tv-share-song span {
   display: block;
-}
-
-.tv-share-song span {
-  margin-top: 4px;
   color: #b3b3b3;
   font-size: 13px;
+  margin-top: 4px;
 }
 
 .tv-field {
   display: block;
-  margin-top: 12px;
-  color: #b3b3b3;
+  color: #d7d7d7;
   font-size: 13px;
   font-weight: 700;
+  margin: 12px 0;
 }
 
-.tv-field input,
 .tv-field select,
-.tv-field textarea {
+.tv-field textarea,
+.tv-field input {
   width: 100%;
-  margin-top: 7px;
-  background: #242424;
-  color: #fff;
-  border: 1px solid #3a3a3a;
-  border-radius: 10px;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: #101010;
+  color: #ffffff;
   padding: 11px 12px;
   outline: none;
   box-sizing: border-box;
 }
 
+.tv-field select:focus,
+.tv-field textarea:focus,
+.tv-field input:focus {
+  border-color: rgba(29, 185, 84, 0.75);
+}
+
 .tv-field textarea {
-  min-height: 86px;
+  min-height: 88px;
   resize: vertical;
-  font-family: inherit;
 }
 
 .tv-status {
-  margin-top: 12px;
-  padding: 10px 12px;
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 12px;
   background: rgba(29, 185, 84, 0.12);
-  color: #d8f8e3;
-  border: 1px solid rgba(29, 185, 84, 0.28);
-  border-radius: 10px;
+  border: 1px solid rgba(29, 185, 84, 0.35);
+  color: #d6ffe4;
   font-size: 13px;
+  line-height: 1.4;
+}
+
+.tv-status.error,
+.tv-error-state {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 75, 75, 0.1);
+  border: 1px solid rgba(255, 75, 75, 0.35);
+  color: #ffd6d6;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .tv-submit {
   width: 100%;
-  margin-top: 14px;
   border: 0;
   border-radius: 999px;
-  padding: 12px 18px;
   background: #1db954;
-  color: #000;
-  font-weight: 900;
+  color: #000000;
+  font-weight: 800;
   cursor: pointer;
+  padding: 13px 16px;
+  margin-top: 8px;
+}
+
+.tv-submit:hover {
+  background: #1ed760;
 }
 
 .tv-submit:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.notification-btn {
-  position: relative;
-}
-
-.tv-notification-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 17px;
-  height: 17px;
-  padding: 0 4px;
-  border-radius: 999px;
-  background: #1db954;
-  color: #000;
-  font-size: 10px;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tv-main-notification-page {
+/* =========================
+   NOTIFICATION PAGE /notifications
+   ========================= */
+.tv-notification-page {
+  width: 100%;
+  min-height: calc(100vh - 120px);
   padding: 32px;
-  min-height: calc(100vh - 110px);
-  color: #fff;
+  color: #ffffff;
+  background: linear-gradient(180deg, #24104f 0%, #121212 280px, #121212 100%);
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
+.tv-notification-card {
+  width: min(960px, 100%);
+  margin: 0 auto;
+  background: rgba(18, 18, 18, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 24px;
+  box-sizing: border-box;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+}
+
+.tv-notification-page-head,
 .tv-page-head {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
+.tv-notification-page-head p,
 .tv-page-head p {
-  color: #1db954;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 12px;
-  font-weight: 900;
   margin: 0 0 6px;
+  color: #1db954;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
+.tv-notification-page-head h1,
 .tv-page-head h1 {
   margin: 0;
-  font-size: clamp(34px, 5vw, 58px);
-  font-weight: 950;
+  color: #ffffff;
+  font-size: 32px;
+  line-height: 1.2;
 }
 
+.tv-notification-page-head span,
 .tv-page-head span {
   display: block;
-  margin-top: 8px;
+  margin-top: 6px;
   color: #b3b3b3;
+  font-size: 14px;
 }
 
-.tv-page-head button,
+.tv-notification-page-head button,
+.tv-page-head button {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 18px;
+  background: #1db954;
+  color: #000000;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tv-notification-page-head button:hover,
+.tv-page-head button:hover {
+  background: #1ed760;
+}
+
+.tv-notification-page-head button:disabled,
+.tv-page-head button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tv-panel-tabs,
+.tv-page-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0 20px;
+}
+
+.tv-panel-tabs button,
 .tv-page-tabs button {
   border: 0;
   border-radius: 999px;
   padding: 10px 16px;
-  background: #2a2a2a;
-  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-weight: 700;
   cursor: pointer;
-  font-weight: 800;
 }
 
-.tv-page-head button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+.tv-panel-tabs button:hover,
+.tv-page-tabs button:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
-.tv-page-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 22px;
-}
-
+.tv-panel-tabs button.active,
 .tv-page-tabs button.active {
-  background: #1db954;
-  color: #000;
+  background: #ffffff;
+  color: #000000;
 }
 
+.tv-notification-list,
 .tv-page-list {
-  display: grid;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.tv-page-notification {
+.tv-notification-list.page-list {
+  max-height: none;
+  overflow: visible;
+}
+
+.tv-notification-item,
+.tv-notification-row,
+.tv-share-row {
   width: 100%;
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 15px;
-  background: #181818;
-  border: 1px solid #282828;
-  border-radius: 14px;
-  color: #fff;
+  align-items: center;
+  gap: 14px;
   text-align: left;
+  border: 0;
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.055);
+  color: #ffffff;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
-.tv-page-notification.unread {
-  background: rgba(29, 185, 84, 0.1);
-  border-color: rgba(29, 185, 84, 0.28);
+.tv-notification-item:hover,
+.tv-notification-row:hover,
+.tv-share-row:hover {
+  background: rgba(255, 255, 255, 0.09);
 }
 
-.tv-noti-dot {
-  width: 10px;
-  height: 10px;
-  margin-top: 6px;
-  border-radius: 50%;
-  background: #1db954;
-  flex: 0 0 auto;
+.tv-notification-item.unread,
+.tv-notification-row.unread {
+  box-shadow: inset 4px 0 0 #1db954;
+  background: rgba(29, 185, 84, 0.14);
 }
 
-.tv-page-notification:not(.unread) .tv-noti-dot {
-  background: #555;
+.tv-notification-item.shared-card,
+.tv-share-row {
+  cursor: default;
 }
 
-.tv-page-notification b,
-.tv-page-notification span,
-.tv-page-notification time {
-  display: block;
+.tv-notification-item img,
+.tv-notification-row img,
+.tv-share-row img {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
-.tv-page-notification span {
-  color: #d8d8d8;
-  margin-top: 4px;
+.tv-notification-item span,
+.tv-notification-row span,
+.tv-share-row div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.tv-page-notification time {
-  color: #8a8a8a;
-  margin-top: 8px;
+.tv-notification-item b,
+.tv-notification-row b,
+.tv-share-row b {
+  color: #ffffff;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.tv-notification-item small,
+.tv-notification-row small,
+.tv-share-row small,
+.tv-share-row p {
+  color: #b3b3b3;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.tv-notification-item time,
+.tv-notification-row time,
+.tv-share-row time {
+  color: #7a7a7a;
   font-size: 12px;
 }
 
-.tv-shared-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.tv-shared-card {
-  background: #181818;
-  border: 1px solid #282828;
-  border-radius: 16px;
-  padding: 14px;
-}
-
-.tv-shared-card img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 12px;
-}
-
-.tv-shared-card small {
-  color: #1db954;
-  font-weight: 900;
-}
-
-.tv-shared-card h3 {
-  margin: 6px 0;
-  font-size: 18px;
-}
-
-.tv-shared-card p,
-.tv-shared-card span,
-.tv-shared-card em,
-.tv-shared-card time {
-  display: block;
+.tv-empty,
+.tv-empty-state {
+  padding: 28px;
+  text-align: center;
   color: #b3b3b3;
-  margin-top: 6px;
-  font-size: 13px;
-}
-
-.tv-shared-card em {
-  color: #fff;
-}
-
-.tv-page-empty,
-.tv-page-error {
-  padding: 22px;
+  background: rgba(255, 255, 255, 0.045);
   border-radius: 16px;
-  background: #181818;
-  border: 1px solid #282828;
-  color: #b3b3b3;
 }
 
-.tv-page-error {
-  color: #ff9b9b;
-  border-color: rgba(255, 80, 80, 0.25);
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width: 768px) {
+  .tv-notification-page {
+    padding: 20px;
+  }
+
+  .tv-notification-card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .tv-notification-page-head,
+  .tv-page-head {
+    flex-direction: column;
+  }
+
+  .tv-notification-page-head h1,
+  .tv-page-head h1 {
+    font-size: 26px;
+  }
+
+  .tv-notification-page-head button,
+  .tv-page-head button {
+    width: 100%;
+  }
+
+  .tv-panel-tabs button,
+  .tv-page-tabs button {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .tv-notification-page {
+    padding: 14px;
+  }
+
+  .tv-share-dialog {
+    padding: 16px;
+  }
+
+  .tv-notification-item,
+  .tv-notification-row,
+  .tv-share-row {
+    align-items: flex-start;
+  }
+
+  .tv-notification-item img,
+  .tv-notification-row img,
+  .tv-share-row img {
+    width: 48px;
+    height: 48px;
+  }
 }

@@ -1,68 +1,44 @@
 using Application.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
-namespace API.Controllers
+namespace API.Controllers;
+
+[ApiController]
+[Route("api/notifications")]
+public class NotificationsController : ControllerBase
 {
-    [ApiController]
-    [Authorize]
-    [Route("api/notifications")]
-    public class NotificationsController : ControllerBase
+    private readonly NotificationService _notificationService;
+
+    public NotificationsController(NotificationService notificationService)
     {
-        private readonly NotificationService _notificationService;
+        _notificationService = notificationService;
+    }
 
-        public NotificationsController(NotificationService notificationService)
-        {
-            _notificationService = notificationService;
-        }
+    [HttpGet("user/{userId:int}")]
+    public async Task<IActionResult> GetByUser(int userId)
+    {
+        var data = await _notificationService.GetByUserAsync(userId);
+        return Ok(data);
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> GetMine()
-        {
-            var userId = GetCurrentUserId();
-            if (userId <= 0) return Unauthorized(new { message = "Bạn cần đăng nhập." });
+    [HttpGet("user/{userId:int}/unread-count")]
+    public async Task<IActionResult> CountUnread(int userId)
+    {
+        var count = await _notificationService.CountUnreadAsync(userId);
+        return Ok(new { count });
+    }
 
-            var data = await _notificationService.GetByUserAsync(userId);
-            return Ok(data);
-        }
+    [HttpPut("{id:int}/read")]
+    public async Task<IActionResult> MarkAsRead(int id)
+    {
+        var ok = await _notificationService.MarkAsReadAsync(id);
+        return ok ? NoContent() : NotFound(new { message = "Không tìm thấy thông báo." });
+    }
 
-        [HttpGet("unread-count")]
-        public async Task<IActionResult> CountUnread()
-        {
-            var userId = GetCurrentUserId();
-            if (userId <= 0) return Unauthorized(new { message = "Bạn cần đăng nhập." });
-
-            var count = await _notificationService.CountUnreadAsync(userId);
-            return Ok(new { count });
-        }
-
-        [HttpPut("{id:int}/read")]
-        public async Task<IActionResult> MarkAsRead(int id)
-        {
-            var userId = GetCurrentUserId();
-            if (userId <= 0) return Unauthorized(new { message = "Bạn cần đăng nhập." });
-
-            var ok = await _notificationService.MarkAsReadAsync(userId, id);
-            return ok ? NoContent() : NotFound(new { message = "Không tìm thấy thông báo." });
-        }
-
-        [HttpPut("read-all")]
-        public async Task<IActionResult> MarkAllAsRead()
-        {
-            var userId = GetCurrentUserId();
-            if (userId <= 0) return Unauthorized(new { message = "Bạn cần đăng nhập." });
-
-            var affected = await _notificationService.MarkAllAsReadAsync(userId);
-            return Ok(new { affected });
-        }
-
-        private int GetCurrentUserId()
-        {
-            var rawId = User.FindFirst("id")?.Value
-                ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            return int.TryParse(rawId, out var id) ? id : 0;
-        }
+    [HttpPut("user/{userId:int}/read-all")]
+    public async Task<IActionResult> MarkAllAsRead(int userId)
+    {
+        var affected = await _notificationService.MarkAllAsReadAsync(userId);
+        return Ok(new { affected });
     }
 }
