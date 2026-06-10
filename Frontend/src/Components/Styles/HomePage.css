@@ -101,7 +101,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  z-index: 100;
+  z-index: 1000;
 }
 
 /* ── Nút Trang Chủ trên Header ── */
