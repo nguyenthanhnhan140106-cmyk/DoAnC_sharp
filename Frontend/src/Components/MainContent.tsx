@@ -175,7 +175,9 @@ export default function MainContent({ songs }: Props) {
   const { currentSong, recentlyPlayed } = useMusic();
   const { isLoggedIn } = useAuth();
   const songData = currentSong as any;
-  const [activeTab, setActiveTab] = useState<"all" | "album" | "video">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "album" | "video">(() => {
+    return (localStorage.getItem("homeActiveTab") as "all" | "album" | "video") || "all";
+  });
   const [hoveredCover, setHoveredCover] = useState<string | null>(null);
   const [albums, setAlbums] = useState<Album[]>([]);
   const navigate = useNavigate();
@@ -189,7 +191,14 @@ export default function MainContent({ songs }: Props) {
   }, []);
 
   useEffect(() => {
-    const handleResetTab = () => setActiveTab("all");
+    localStorage.setItem("homeActiveTab", activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    const handleResetTab = () => {
+      setActiveTab("all");
+      localStorage.setItem("homeActiveTab", "all");
+    };
     window.addEventListener("RESET_HOME_TAB", handleResetTab);
     return () => window.removeEventListener("RESET_HOME_TAB", handleResetTab);
   }, []);

@@ -52,6 +52,16 @@ export function useAudioPlayer() {
     }
   }, [currentSong]);
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+      }
+      setIsPlaying(false);
+    }
+  }, [isLoggedIn]);
+
   const internalPlay = useCallback((song: Song, index: number) => {
     currentIndexRef.current = index;
     const audio = audioRef.current;
