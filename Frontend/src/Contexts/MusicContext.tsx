@@ -73,8 +73,10 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleQueueView = () => {
-    setIsQueueViewOpen(prev => !prev);
-    if (!isQueueViewOpen) setIsLyricsViewOpen(false);
+    setIsQueueViewOpen(prev => {
+      if (!prev) setIsLyricsViewOpen(false);
+      return !prev;
+    });
   };
 
   const toggleLyricsView = () => {
@@ -87,7 +89,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
       isQueueViewOpen, toggleQueueView,
       isLyricsViewOpen, toggleLyricsView,
       isAddToPlaylistModalOpen, openAddToPlaylistModal, closeAddToPlaylistModal, selectedSongForModal, modalPosition,
-      recentlyPlayed: [],
+      recentlyPlayed: audioState.recentlyPlayed,
       likedSongs,
       toggleLikeSong,
       isSongLiked,

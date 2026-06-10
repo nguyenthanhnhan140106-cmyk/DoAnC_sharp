@@ -9,5 +9,10 @@ export const songService = {
   searchSongs: async (query: string) => {
     const response = await API.get(`/songs/search?q=${encodeURIComponent(query)}`);
     return response.data;
+  },
+
+  savePlayHistory: async (songId: number) => {
+    const response = await API.post(`/history/played/${songId}`);
+    return response.data;
   }
 };

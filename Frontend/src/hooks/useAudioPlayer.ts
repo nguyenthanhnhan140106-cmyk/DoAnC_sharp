@@ -67,6 +67,11 @@ export function useAudioPlayer() {
       return updated;
     });
 
+    // Save play history to server
+    songService.savePlayHistory(song.id).catch(err => {
+      console.error("Failed to save play history to server:", err);
+    });
+
     audio.play();
     setIsPlaying(true);
 

@@ -27,6 +27,8 @@ builder.Services.AddScoped<IArtistService>(_ => new ArtistService(connectionStri
 builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connectionString));
 builder.Services.AddScoped<AlbumService>(_ => new AlbumService(connectionString));
 builder.Services.AddScoped<IAuthService>(provider => new AuthService(connectionString, builder.Configuration));
+builder.Services.AddScoped<IHistoryRepository>(_ => new HistoryRepository(connectionString));
+builder.Services.AddScoped<IHistoryService, HistoryService>();
 
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -87,6 +89,21 @@ for (int retry = 1; retry <= maxRetries; retry++)
                     Email VARCHAR(100) NOT NULL UNIQUE,
                     PasswordHash VARCHAR(255) NOT NULL,
                     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+                );";
+            cmd.ExecuteNonQuery();
+        }
+
+        // 3. Tạo bảng user_history
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS user_history (
+                    Id INT AUTO_INCREMENT PRIMARY KEY,
+                    UserId INT NOT NULL,
+                    SongId INT NOT NULL,
+                    PlayedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (UserId) REFERENCES users(Id),
+                    FOREIGN KEY (SongId) REFERENCES songs(Id)
                 );";
             cmd.ExecuteNonQuery();
         }
