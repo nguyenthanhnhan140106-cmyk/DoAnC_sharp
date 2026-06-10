@@ -3,6 +3,8 @@ import { useMusic } from '../Contexts/MusicContext';
 import LyricsView from './LyricsView';
 import type { Song } from '../hooks/useAudioPlayer';
 import './Styles/HomePage.css';
+import ShareMediaDialog from './ShareMediaDialog';
+import './Styles/ShareNotification.css';
 
 interface RightSidebarProps {
   isCollapsed: boolean;
@@ -25,6 +27,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isRecentViewOpen, setIsRecentViewOpen] = useState(false);
   const [recentSongs, setRecentSongs] = useState<any[]>([]);
   const [isLoadingRecent, setIsLoadingRecent] = useState(false);
@@ -445,9 +448,17 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
                   <svg className="submenu-arrow" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M5.5 13.5l5.5-5.5-5.5-5.5v11z" /></svg>
                 </li>
                 <li className="album-dropdown-divider"></li>
-                <li>
-                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M12.5 2.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-3.5 2a3.5 3.5 0 1 1 6.5 1.77L9.57 10.3A3.492 3.492 0 0 1 10.5 12a3.5 3.5 0 1 1-6.196-2.247l2.844-3.555A3.493 3.493 0 0 1 6.5 4.5a3.5 3.5 0 0 1 2.5-1.02v1.02a2 2 0 1 0-1.748 3.01l3.056 3.82a2 2 0 1 0 1.636-2.73l-2.944-3.68v.58z" /></svg>
-                  <span>Share</span>
+                <li
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMoreMenuOpen(false);
+                      setIsShareDialogOpen(true);
+                   }}
+                 >
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                  <path d="M13 1a2 2 0 1 1-1.995 2.15L5.72 5.792a2 2 0 0 1 0 4.416l5.285 2.643A2 2 0 1 1 10.5 14a2.02 2.02 0 0 1 .05-.44L5.265 10.917a2 2 0 1 1 0-5.834L10.55 2.44A2.02 2.02 0 0 1 10.5 2 2 2 0 0 1 13 1Z" />
+                 </svg>
+                     <span>Share</span>
                 </li>
               </ul>
             )}
