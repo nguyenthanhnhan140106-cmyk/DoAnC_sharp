@@ -89,13 +89,24 @@ const CategoryPage = () => {
           <h1 style={{ color: '#fff', fontSize: '32px', fontWeight: 'bold', marginBottom: '24px' }}>{title}</h1>
 
           <div className="songs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '24px' }}>
-            {/* Mẹo nhân bản danh sách để Demo đủ 20 bài */}
-            {[...songs, ...songs, ...songs].slice(0, 20).map((song, index) => {
+            {songs.map((song, index) => {
               const isActive = currentSong?.id === song.id;
               return (
-                <div key={`${song.id}-${index}`} className="song-card-item" onClick={(e) => handleForcePlay(e, song)} style={{ cursor: "pointer" }}>
+                <div 
+                  key={`${song.id}-${index}`} 
+                  className="song-card-item" 
+                  onClick={(e) => handleForcePlay(e, song)} 
+                  style={{ cursor: "pointer", minWidth: 'auto', maxWidth: 'none' }}
+                >
                   <div className="song-card-img-wrapper">
-                    <img src={getCover(song)} alt={song.title} className="song-card-img" />
+                    <img 
+                      src={getCover(song)} 
+                      alt={song.title} 
+                      className="song-card-img" 
+                      onError={(e) => {
+                        e.currentTarget.src = `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop`;
+                      }}
+                    />
                     <button
                       className={`card-play-btn ${isActive && isPlaying ? "playing" : ""}`}
                       aria-label={`Phát ${song.title}`}
