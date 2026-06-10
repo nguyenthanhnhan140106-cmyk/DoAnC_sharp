@@ -62,20 +62,19 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   useEffect(() => {
     if (!isRecentViewOpen) return;
 
+    // 🔥 NGAY LẬP TỨC: Show local recentlyPlayed từ context (real-time, không chờ backend)
+    const localRecent = musicContext?.recentlyPlayed || [];
+    setRecentSongs(localRecent);
+    setRecentError(null);
+
     const controller = new AbortController();
 
     const fetchRecent = async () => {
-      setIsLoadingRecent(true);
-      setRecentError(null);
-
       try {
         const token = localStorage.getItem("token");
 
         if (!token) {
-          const localRecent = musicContext?.recentlyPlayed || [];
-          setRecentSongs(localRecent);
-          setIsLoadingRecent(false);
-          return;
+          return; // Dùng local data là đủ nếu không có token
         }
 
         const url = 'http://localhost:5000/api/history/recent?limit=10';
@@ -91,17 +90,13 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
 
         if (response.status === 401) {
           localStorage.removeItem("token");
-          const localRecent = musicContext?.recentlyPlayed || [];
-          setRecentSongs(localRecent);
-          setRecentError(null);
-          setIsLoadingRecent(false);
-          return;
+          return; // Dùng local data
         }
 
         if (!response.ok) {
           const bodyText = await response.text().catch(() => '');
           console.error('Recent API error:', response.status, bodyText);
-          throw new Error(`${response.status} ${response.statusText}`);
+          return; // Dùng local data nếu backend fail
         }
 
         const data = await response.json();
@@ -124,20 +119,16 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           console.error('Failed to load recent songs:', err);
-          setRecentError('Không thể tải được danh sách vừa nghe');
-          setRecentSongs([]);
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoadingRecent(false);
+          // Giữ local data, không cần show error
         }
       }
     };
 
+    // Fetch backend để sync (không blocking, optional)
     fetchRecent();
 
     return () => controller.abort();
-  }, [isRecentViewOpen]);
+  }, [isRecentViewOpen, currentSong?.id, musicContext?.recentlyPlayed]);
 
   useEffect(() => {
     if (!isRecentViewOpen) return;
