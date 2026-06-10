@@ -561,7 +561,16 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
         <div className="spotify-right-sidebar-box" style={{ backgroundColor: '#242424', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#fff' }}>Next in queue</h4>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#b3b3b3', cursor: 'pointer' }}>Open queue</span>
+            <span 
+              onClick={() => {
+                if (!isQueueViewOpen && toggleQueueView) {
+                  toggleQueueView();
+                }
+              }}
+              style={{ fontSize: '13px', fontWeight: 700, color: '#b3b3b3', cursor: 'pointer' }}
+            >
+              Open queue
+            </span>
           </div>
 
           {(() => {
