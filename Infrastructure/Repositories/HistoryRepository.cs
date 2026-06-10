@@ -36,7 +36,7 @@ namespace Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error adding to history: {ex.Message}");
+                Console.WriteLine($"Error adding to history: {ex}");
                 throw;
             }
         }
@@ -53,7 +53,7 @@ namespace Infrastructure.Repositories
                     using (var cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"
-                            SELECT DISTINCT s.Id, s.Title, s.Artist, s.CoverUrl, s.AudioUrl
+                            SELECT DISTINCT s.Id, s.Title, s.Artist, s.CoverUrl, s.AudioUrl, s.Category, uh.PlayedAt
                             FROM user_history uh
                             INNER JOIN songs s ON uh.SongId = s.Id
                             WHERE uh.UserId = @userId
@@ -69,6 +69,8 @@ namespace Infrastructure.Repositories
                             var artistOrd = reader.GetOrdinal("Artist");
                             var coverOrd = reader.GetOrdinal("CoverUrl");
                             var audioOrd = reader.GetOrdinal("AudioUrl");
+                            var categoryOrd = reader.GetOrdinal("Category");
+                            var playedAtOrd = reader.GetOrdinal("PlayedAt");
 
                             while (await reader.ReadAsync())
                             {
@@ -78,7 +80,9 @@ namespace Infrastructure.Repositories
                                     Title = reader.IsDBNull(titleOrd) ? string.Empty : reader.GetString(titleOrd),
                                     Artist = reader.IsDBNull(artistOrd) ? string.Empty : reader.GetString(artistOrd),
                                     CoverUrl = reader.IsDBNull(coverOrd) ? string.Empty : reader.GetString(coverOrd),
-                                    AudioUrl = reader.IsDBNull(audioOrd) ? string.Empty : reader.GetString(audioOrd)
+                                    AudioUrl = reader.IsDBNull(audioOrd) ? string.Empty : reader.GetString(audioOrd),
+                                    Category = reader.IsDBNull(categoryOrd) ? string.Empty : reader.GetString(categoryOrd),
+                                    PlayedAt = reader.IsDBNull(playedAtOrd) ? (DateTime?)null : reader.GetDateTime(playedAtOrd)
                                 });
                             }
                         }
@@ -87,7 +91,7 @@ namespace Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting recent songs: {ex.Message}");
+                Console.WriteLine($"Error getting recent songs: {ex}");
                 throw;
             }
 

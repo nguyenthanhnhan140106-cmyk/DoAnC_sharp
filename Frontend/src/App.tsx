@@ -9,6 +9,7 @@ import LoginPage from './Pages/LoginPage';
 import SignupPage from './Pages/SignupPage';
 import ProfilePage from './Pages/ProfilePage';
 import PlaylistPage from './Pages/PlaylistPage';
+import ListeningHistoryPage from './Pages/ListeningHistoryPage';
 
 import AddToPlaylistModal from './Components/AddToPlaylistModal';
 
@@ -26,6 +27,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/history" element={<ListeningHistoryPage />} />
           </Routes>
           <AddToPlaylistModal />
         </BrowserRouter>

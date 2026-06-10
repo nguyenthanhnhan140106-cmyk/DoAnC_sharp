@@ -208,6 +208,18 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           )}
         </div>
 
+        <div className="playlist-item" title="Listening history" onClick={() => navigate('/history')}>
+          <div className="playlist-cover default-cover" style={{ background: 'linear-gradient(135deg, #1db954, #1ed760)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff"><path d="M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 1zm1.5 12.25h-4a.5.5 0 0 1 0-1h3.5V6.5a.5.5 0 0 1 1 0v6.75z"/></svg>
+          </div>
+          {!isCollapsed && (
+            <div className="playlist-info">
+              <p className="playlist-title">History</p>
+              <p className="playlist-subtitle">Recently played</p>
+            </div>
+          )}
+        </div>
+
         {playlists.map((pl) => (
           <div 
             key={pl.id} 
