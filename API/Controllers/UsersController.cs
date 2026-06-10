@@ -1,34 +1,46 @@
+using Application.DTOs;
+using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Application.Interfaces;
+using MySqlConnector;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Authorize]
+    [Route("api/users")]
     public class UsersController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly string _connectionString;
 
-        // Inject IUserService vào để xử lý logic tài khoản hằng ngày
-        public UsersController(IUserService userService)
+        public UsersController(IConfiguration configuration)
         {
-            _userService = userService;
+            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
         }
 
-        // API: GET http://localhost:5104/api/Users
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            try
-            {
-                // Giả định trong IUserService của nhóm đã có hàm GetAllUsersAsync
-                var users = await _userService.GetAllUsersAsync();
-                return Ok(users); // Trả về danh sách tài khoản dạng JSON
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, $"Lỗi hệ thống Backend: {ex.Message}");
-            }
+            var currentUserId = GetCurrentUserId();
+            using var conn = new MySqlConnection(_connectionString);
+
+            var users = await conn.QueryAsync<ShareUserDTO>(@"
+                SELECT Id, Username, Email
+                FROM users
+                WHERE Id <> @CurrentUserId
+                ORDER BY Username;",
+                new { CurrentUserId = currentUserId });
+
+            return Ok(users);
+        }
+
+        private int GetCurrentUserId()
+        {
+            var rawId = User.FindFirst("id")?.Value
+                ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return int.TryParse(rawId, out var id) ? id : 0;
         }
     }
 }

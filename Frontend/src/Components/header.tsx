@@ -3,29 +3,34 @@ import { useNavigate } from 'react-router-dom';
 import searchIcon from '../assets/search.svg';
 import { songService } from '../Services/songService';
 import { useAuth } from '../Contexts/AuthContext';
-import { useMusic } from '../Contexts/MusicContext';
 import type { Song } from '../hooks/useAudioPlayer';
-import './Styles/ShareNotification.css';
 import NotificationPanel from './NotificationPanel';
+import './Styles/ShareNotification.css';
 
 export default function Header() {
   const { isLoggedIn, logout } = useAuth();
-  const music = useMusic() as any;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [query, setQuery] = useState('');
-  // Giáº£ sá»­ báº¡n cÃ³ cÃ¡c state nÃ y cho logic search
+  // Giả sử bạn có các state này cho logic search
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
+      }
+      if (
+         notificationRef.current &&
+         !notificationRef.current.contains(event.target as Node)
+      ) {
+         setIsNotificationOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -70,18 +75,6 @@ export default function Header() {
     }
   };
 
-  const handleLogout = () => {
-    setIsMenuOpen(false);
-    if (music && music.isPlaying && music.togglePlay) {
-      music.togglePlay();
-    }
-    navigate('/');
-    window.dispatchEvent(new CustomEvent('RESET_HOME_TAB'));
-    setTimeout(() => {
-      logout();
-    }, 50);
-  };
-
   return (
     <header className="spotify-header">
       {/* 1. Logo */}
@@ -91,7 +84,7 @@ export default function Header() {
 
       {/* 2. Search & Home */}
       <div className="header-search-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <button className="home-button" title="Trang chá»§" onClick={handleHomeClick}>
+        <button className="home-button" title="Trang chủ" onClick={handleHomeClick}>
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
             <path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33zm-2-1.732a3 3 0 0 1 3 0l7.5 4.33a2 2 0 0 1 1 1.732V21a1 1 0 0 1-1 1h-6.5a1 1 0 0 1-1-1v-6h-3v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.577a2 2 0 0 1 1-1.732l7.5-4.33z"></path>
           </svg>
@@ -104,24 +97,24 @@ export default function Header() {
           </span>
           <input
             type="text"
-            placeholder="Báº¡n muá»‘n phÃ¡t gÃ¬?"
+            placeholder="Bạn muốn phát gì?"
             className="search-input"
             value={query}
             onChange={e => { setQuery(e.target.value); }}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
             onFocus={handleFocus}
           />
-          {/* NÃºt tÃ¬m kiáº¿m nÃ¢ng cao */}
-          <button className="search-advanced-btn" onClick={() => handleSearch()} title="TÃ¬m kiáº¿m">
+          {/* Nút tìm kiếm nâng cao */}
+          <button className="search-advanced-btn" onClick={() => handleSearch()} title="Tìm kiếm">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
               <path d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5zM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5z" />
             </svg>
           </button>
 
-          {/* Dropdown: Lá»‹ch sá»­ khi rá»—ng, Gá»£i Ã½ khi gÃµ */}
+          {/* Dropdown: Lịch sử khi rỗng, Gợi ý khi gõ */}
           {showDropdown && query.trim() && (
             <div className="search-dropdown">
-              {/* â€” Hiá»‡n gá»£i Ã½ khi gÃµ â€” */}
+              {/* — Hiện gợi ý khi gõ — */}
               <>
                 {suggestions.map(song => (
                   <div
@@ -146,7 +139,7 @@ export default function Header() {
                   </div>
                 ))}
                 <div className="search-suggestion-footer" onClick={() => handleSearch()}>
-                  TÃ¬m táº¥t cáº£ káº¿t quáº£ cho "<strong>{query}</strong>"
+                  Tìm tất cả kết quả cho "<strong>{query}</strong>"
                 </div>
               </>
             </div>
@@ -154,24 +147,21 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Pháº§n profile hoáº·c Auth buttons */}
+      {/* Phần profile hoặc Auth buttons */}
       <div className="header-profile-container">
         {isLoggedIn ? (
           <>
-            <div className="tv-notification-wrapper" ref={notificationRef}>
-  <button
-    className="notification-btn"
-    title="ThÃ´ng bÃ¡o"
-    onClick={() => setIsNotificationOpen((value) => !value)}
-  >
-    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-    </svg>
-  </button>
-
-  <NotificationPanel open={isNotificationOpen} />
-</div>
+          <div className="tv-notification-wrapper" ref={notificationRef}>
+            <button 
+                className="notification-btn" 
+                title="Thông báo"
+                onClick={() => setIsNotificationOpen((value) => !value)}>
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </button>
+            <NotificationPanel open={isNotificationOpen} /></div>
             <div className="profile-dropdown-wrapper" ref={dropdownRef}>
               <div className="user-avatar" onClick={() => setIsMenuOpen(!isMenuOpen)} title="My Account">N</div>
               {isMenuOpen && (
@@ -180,7 +170,7 @@ export default function Header() {
                     <li onClick={() => { setIsMenuOpen(false); navigate('/profile'); }}>Profile</li>
                     <li>Settings</li>
                     <hr className="dropdown-divider" />
-                    <li className="logout-text" onClick={handleLogout}>Logout</li>
+                    <li className="logout-text" onClick={logout}>Logout</li>
                   </ul>
                 </div>
               )}
@@ -196,4 +186,3 @@ export default function Header() {
     </header>
   );
 }
-

@@ -14,201 +14,223 @@ namespace Application.Services
             _connectionString = connectionString;
         }
 
-        public async Task EnsureTablesAsync()
+        public async Task<(MediaShareResponseDTO Share, NotificationDTO Notification)> ShareAsync(int senderUserId, ShareMediaRequestDTO dto)
         {
-            using var conn = new MySqlConnection(_connectionString);
-
-            await conn.ExecuteAsync(@"
-                CREATE TABLE IF NOT EXISTS media_shares (
-                    Id INT AUTO_INCREMENT PRIMARY KEY,
-                    SenderId INT NOT NULL,
-                    ReceiverId INT NOT NULL,
-                    SongId INT NULL,
-                    AlbumId INT NULL,
-                    Message VARCHAR(500) NULL,
-                    SharedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    INDEX idx_media_shares_receiver (ReceiverId),
-                    INDEX idx_media_shares_sender (SenderId),
-                    INDEX idx_media_shares_song (SongId),
-                    INDEX idx_media_shares_album (AlbumId)
-                );");
-
-            await conn.ExecuteAsync(@"
-                CREATE TABLE IF NOT EXISTS notifications (
-                    Id INT AUTO_INCREMENT PRIMARY KEY,
-                    UserId INT NOT NULL,
-                    Type VARCHAR(50) NOT NULL,
-                    Payload TEXT NOT NULL,
-                    IsRead BOOLEAN NOT NULL DEFAULT FALSE,
-                    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    INDEX idx_notifications_user_read (UserId, IsRead),
-                    INDEX idx_notifications_created (CreatedAt)
-                );");
-        }
-
-        public async Task<MediaShareDTO> ShareAsync(ShareMediaRequestDTO dto)
-        {
-            if (dto.SenderId <= 0)
-                throw new ArgumentException("SenderId không hợp lệ.");
-
-            if (dto.ReceiverId <= 0)
-                throw new ArgumentException("ReceiverId không hợp lệ.");
-
-            if (dto.SenderId == dto.ReceiverId)
-                throw new ArgumentException("Không thể chia sẻ cho chính mình.");
-
-            var hasSong = dto.SongId.HasValue;
-            var hasAlbum = dto.AlbumId.HasValue;
-
-            if (hasSong == hasAlbum)
-                throw new ArgumentException("Chỉ được chia sẻ 1 bài hát hoặc 1 album.");
-
-            await EnsureTablesAsync();
+            ValidateRequest(senderUserId, dto);
 
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
             using var tx = await conn.BeginTransactionAsync();
 
-            try
+            var sender = await conn.QuerySingleOrDefaultAsync<ShareUserDTO>(
+                "SELECT Id, Username, Email FROM users WHERE Id = @Id;",
+                new { Id = senderUserId }, tx);
+
+            if (sender == null)
+                throw new ArgumentException("Không tìm thấy tài khoản người gửi. Bạn hãy đăng nhập lại.");
+
+            var receiver = await conn.QuerySingleOrDefaultAsync<ShareUserDTO>(
+                "SELECT Id, Username, Email FROM users WHERE Id = @Id;",
+                new { Id = dto.ReceiverUserId }, tx);
+
+            if (receiver == null)
+                throw new ArgumentException("Người nhận không tồn tại trong hệ thống.");
+
+            string mediaType;
+            string mediaTitle;
+            string? artist = null;
+            string? coverUrl = null;
+
+            if (dto.SongId.HasValue)
             {
-                var media = hasSong
-                    ? await conn.QueryFirstOrDefaultAsync<MediaInfo>(@"
-                        SELECT Id, Title, Artist, CoverUrl, 'song' AS MediaType
-                        FROM songs
-                        WHERE Id = @Id;",
-                        new { Id = dto.SongId }, tx)
-                    : await conn.QueryFirstOrDefaultAsync<MediaInfo>(@"
-                        SELECT a.Id,
-                               a.Title,
-                               COALESCE(ar.Name, 'Various Artists') AS Artist,
-                               a.CoverUrl,
-                               'album' AS MediaType
-                        FROM albums a
-                        LEFT JOIN artists ar ON a.ArtistId = ar.Id
-                        WHERE a.Id = @Id;",
-                        new { Id = dto.AlbumId }, tx);
+                var song = await conn.QuerySingleOrDefaultAsync<dynamic>(@"
+                    SELECT Id, Title, Artist, CoverUrl
+                    FROM songs
+                    WHERE Id = @SongId;",
+                    new { dto.SongId }, tx);
 
-                if (media == null)
-                    throw new ArgumentException("Không tìm thấy bài hát/album để chia sẻ.");
+                if (song == null)
+                    throw new ArgumentException("Bài hát/video không tồn tại.");
 
-                var shareId = await conn.ExecuteScalarAsync<int>(@"
-                    INSERT INTO media_shares (SenderId, ReceiverId, SongId, AlbumId, Message, SharedAt)
-                    VALUES (@SenderId, @ReceiverId, @SongId, @AlbumId, @Message, NOW());
-                    SELECT LAST_INSERT_ID();",
-                    new
-                    {
-                        dto.SenderId,
-                        dto.ReceiverId,
-                        dto.SongId,
-                        dto.AlbumId,
-                        Message = string.IsNullOrWhiteSpace(dto.Message) ? null : dto.Message.Trim()
-                    }, tx);
-
-                var payload = JsonSerializer.Serialize(new
-                {
-                    shareId,
-                    senderId = dto.SenderId,
-                    senderName = $"User {dto.SenderId}",
-                    receiverId = dto.ReceiverId,
-                    songId = dto.SongId,
-                    albumId = dto.AlbumId,
-                    mediaType = media.MediaType,
-                    title = media.Title,
-                    artist = media.Artist,
-                    coverUrl = media.CoverUrl,
-                    message = string.IsNullOrWhiteSpace(dto.Message) ? null : dto.Message.Trim()
-                });
-
-                await conn.ExecuteAsync(@"
-                    INSERT INTO notifications (UserId, Type, Payload, IsRead, CreatedAt)
-                    VALUES (@UserId, 'media_share', @Payload, FALSE, NOW());",
-                    new { UserId = dto.ReceiverId, Payload = payload }, tx);
-
-                await tx.CommitAsync();
-
-                return new MediaShareDTO
-                {
-                    Id = shareId,
-                    SenderId = dto.SenderId,
-                    SenderName = $"User {dto.SenderId}",
-                    ReceiverId = dto.ReceiverId,
-                    SongId = dto.SongId,
-                    AlbumId = dto.AlbumId,
-                    MediaType = media.MediaType,
-                    Title = media.Title,
-                    Artist = media.Artist,
-                    CoverUrl = media.CoverUrl,
-                    Message = string.IsNullOrWhiteSpace(dto.Message) ? null : dto.Message.Trim(),
-                    SharedAt = DateTime.Now
-                };
+                mediaType = "song";
+                mediaTitle = song.Title;
+                artist = song.Artist;
+                coverUrl = song.CoverUrl;
             }
-            catch
+            else
             {
-                await tx.RollbackAsync();
-                throw;
+                var playlist = await conn.QuerySingleOrDefaultAsync<dynamic>(@"
+                    SELECT Id, Name
+                    FROM playlists
+                    WHERE Id = @PlaylistId;",
+                    new { dto.PlaylistId }, tx);
+
+                if (playlist == null)
+                    throw new ArgumentException("Playlist không tồn tại.");
+
+                mediaType = "playlist";
+                mediaTitle = playlist.Name;
             }
+
+            var shareId = await conn.ExecuteScalarAsync<int>(@"
+                INSERT INTO media_shares
+                    (SenderUserId, ReceiverUserId, SongId, PlaylistId, Message, SharedAt)
+                VALUES
+                    (@SenderUserId, @ReceiverUserId, @SongId, @PlaylistId, @Message, NOW());
+                SELECT LAST_INSERT_ID();",
+                new
+                {
+                    SenderUserId = senderUserId,
+                    dto.ReceiverUserId,
+                    dto.SongId,
+                    dto.PlaylistId,
+                    Message = string.IsNullOrWhiteSpace(dto.Message) ? null : dto.Message.Trim()
+                }, tx);
+
+            var payload = JsonSerializer.Serialize(new
+            {
+                shareId,
+                senderUserId,
+                senderUsername = sender.Username,
+                receiverUserId = receiver.Id,
+                mediaType,
+                songId = dto.SongId,
+                playlistId = dto.PlaylistId,
+                mediaTitle,
+                artist,
+                coverUrl,
+                message = dto.Message
+            });
+
+            var notificationTitle = "Bạn có chia sẻ mới";
+            var notificationMessage = $"{sender.Username} đã chia sẻ {mediaTitle} cho bạn.";
+
+            var notificationId = await conn.ExecuteScalarAsync<int>(@"
+                INSERT INTO notifications
+                    (UserId, Type, Title, Message, Payload, IsRead, CreatedAt)
+                VALUES
+                    (@UserId, @Type, @Title, @Message, @Payload, 0, NOW());
+                SELECT LAST_INSERT_ID();",
+                new
+                {
+                    UserId = dto.ReceiverUserId,
+                    Type = "media_share",
+                    Title = notificationTitle,
+                    Message = notificationMessage,
+                    Payload = payload
+                }, tx);
+
+            await tx.CommitAsync();
+
+            var share = new MediaShareResponseDTO
+            {
+                Id = shareId,
+                SenderUserId = senderUserId,
+                SenderUsername = sender.Username,
+                ReceiverUserId = receiver.Id,
+                ReceiverUsername = receiver.Username,
+                SongId = dto.SongId,
+                PlaylistId = dto.PlaylistId,
+                MediaType = mediaType,
+                MediaTitle = mediaTitle,
+                Artist = artist,
+                CoverUrl = coverUrl,
+                Message = string.IsNullOrWhiteSpace(dto.Message) ? null : dto.Message.Trim(),
+                SharedAt = DateTime.Now
+            };
+
+            var notification = new NotificationDTO
+            {
+                Id = notificationId,
+                UserId = dto.ReceiverUserId,
+                Type = "media_share",
+                Title = notificationTitle,
+                Message = notificationMessage,
+                Payload = payload,
+                IsRead = false,
+                CreatedAt = DateTime.Now
+            };
+
+            return (share, notification);
         }
 
-        public async Task<IEnumerable<MediaShareDTO>> GetReceivedAsync(int userId)
+        public async Task<IEnumerable<MediaShareResponseDTO>> GetReceivedAsync(int userId)
         {
-            await EnsureTablesAsync();
-
             using var conn = new MySqlConnection(_connectionString);
-            return await conn.QueryAsync<MediaShareDTO>(@"
-                SELECT ms.Id,
-                       ms.SenderId,
-                       CONCAT('User ', ms.SenderId) AS SenderName,
-                       ms.ReceiverId,
-                       ms.SongId,
-                       ms.AlbumId,
-                       CASE WHEN ms.SongId IS NOT NULL THEN 'song' ELSE 'album' END AS MediaType,
-                       COALESCE(s.Title, a.Title, 'Unknown media') AS Title,
-                       COALESCE(s.Artist, ar.Name, 'Unknown Artist') AS Artist,
-                       COALESCE(s.CoverUrl, a.CoverUrl) AS CoverUrl,
-                       ms.Message,
-                       ms.SharedAt
+
+            return await conn.QueryAsync<MediaShareResponseDTO>(@"
+                SELECT
+                    ms.Id,
+                    ms.SenderUserId,
+                    sender.Username AS SenderUsername,
+                    ms.ReceiverUserId,
+                    receiver.Username AS ReceiverUsername,
+                    ms.SongId,
+                    ms.PlaylistId,
+                    CASE WHEN ms.SongId IS NOT NULL THEN 'song' ELSE 'playlist' END AS MediaType,
+                    COALESCE(s.Title, p.Name, 'Không rõ') AS MediaTitle,
+                    s.Artist,
+                    s.CoverUrl,
+                    ms.Message,
+                    ms.SharedAt
                 FROM media_shares ms
-                LEFT JOIN songs s ON ms.SongId = s.Id
-                LEFT JOIN albums a ON ms.AlbumId = a.Id
-                LEFT JOIN artists ar ON a.ArtistId = ar.Id
-                WHERE ms.ReceiverId = @UserId
+                INNER JOIN users sender ON sender.Id = ms.SenderUserId
+                INNER JOIN users receiver ON receiver.Id = ms.ReceiverUserId
+                LEFT JOIN songs s ON s.Id = ms.SongId
+                LEFT JOIN playlists p ON p.Id = ms.PlaylistId
+                WHERE ms.ReceiverUserId = @UserId
                 ORDER BY ms.SharedAt DESC, ms.Id DESC;",
                 new { UserId = userId });
         }
 
-        public async Task<MediaShareDTO?> GetByIdAsync(int id)
+        public async Task<IEnumerable<MediaShareResponseDTO>> GetSentAsync(int userId)
         {
-            await EnsureTablesAsync();
-
             using var conn = new MySqlConnection(_connectionString);
-            return await conn.QueryFirstOrDefaultAsync<MediaShareDTO>(@"
-                SELECT ms.Id,
-                       ms.SenderId,
-                       CONCAT('User ', ms.SenderId) AS SenderName,
-                       ms.ReceiverId,
-                       ms.SongId,
-                       ms.AlbumId,
-                       CASE WHEN ms.SongId IS NOT NULL THEN 'song' ELSE 'album' END AS MediaType,
-                       COALESCE(s.Title, a.Title, 'Unknown media') AS Title,
-                       COALESCE(s.Artist, ar.Name, 'Unknown Artist') AS Artist,
-                       COALESCE(s.CoverUrl, a.CoverUrl) AS CoverUrl,
-                       ms.Message,
-                       ms.SharedAt
+
+            return await conn.QueryAsync<MediaShareResponseDTO>(@"
+                SELECT
+                    ms.Id,
+                    ms.SenderUserId,
+                    sender.Username AS SenderUsername,
+                    ms.ReceiverUserId,
+                    receiver.Username AS ReceiverUsername,
+                    ms.SongId,
+                    ms.PlaylistId,
+                    CASE WHEN ms.SongId IS NOT NULL THEN 'song' ELSE 'playlist' END AS MediaType,
+                    COALESCE(s.Title, p.Name, 'Không rõ') AS MediaTitle,
+                    s.Artist,
+                    s.CoverUrl,
+                    ms.Message,
+                    ms.SharedAt
                 FROM media_shares ms
-                LEFT JOIN songs s ON ms.SongId = s.Id
-                LEFT JOIN albums a ON ms.AlbumId = a.Id
-                LEFT JOIN artists ar ON a.ArtistId = ar.Id
-                WHERE ms.Id = @Id;",
-                new { Id = id });
+                INNER JOIN users sender ON sender.Id = ms.SenderUserId
+                INNER JOIN users receiver ON receiver.Id = ms.ReceiverUserId
+                LEFT JOIN songs s ON s.Id = ms.SongId
+                LEFT JOIN playlists p ON p.Id = ms.PlaylistId
+                WHERE ms.SenderUserId = @UserId
+                ORDER BY ms.SharedAt DESC, ms.Id DESC;",
+                new { UserId = userId });
         }
 
-        private class MediaInfo
+        private static void ValidateRequest(int senderUserId, ShareMediaRequestDTO dto)
         {
-            public int Id { get; set; }
-            public string Title { get; set; } = string.Empty;
-            public string Artist { get; set; } = string.Empty;
-            public string? CoverUrl { get; set; }
-            public string MediaType { get; set; } = string.Empty;
+            if (dto == null)
+                throw new ArgumentException("Dữ liệu chia sẻ không hợp lệ.");
+
+            if (senderUserId <= 0)
+                throw new ArgumentException("Bạn cần đăng nhập trước khi chia sẻ.");
+
+            if (dto.ReceiverUserId <= 0)
+                throw new ArgumentException("Bạn cần chọn người nhận.");
+
+            if (senderUserId == dto.ReceiverUserId)
+                throw new ArgumentException("Không thể chia sẻ cho chính mình.");
+
+            var hasSong = dto.SongId.HasValue && dto.SongId.Value > 0;
+            var hasPlaylist = dto.PlaylistId.HasValue && dto.PlaylistId.Value > 0;
+
+            if (hasSong == hasPlaylist)
+                throw new ArgumentException("Chỉ được chọn một loại media: bài hát/video hoặc playlist.");
         }
     }
 }

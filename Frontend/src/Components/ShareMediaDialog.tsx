@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react';
 import API from '../Services/api';
+import { useAuth } from '../Contexts/AuthContext';
 import './Styles/ShareNotification.css';
 
 interface SongLike {
   id: number;
   title: string;
-  artist: string;
+  artist?: string;
   coverUrl?: string;
+}
+
+interface ShareUser {
+  id: number;
+  username: string;
+  email?: string;
 }
 
 interface Props {
@@ -15,61 +22,60 @@ interface Props {
   onClose: () => void;
 }
 
-const users = [
-  { id: 1, name: 'User 1 - Tôi' },
-  { id: 2, name: 'User 2 - Bạn nghe nhạc' },
-  { id: 3, name: 'User 3 - Thành viên nhóm' },
-  { id: 4, name: 'User 4 - Khách mời' },
-];
-
-const getCurrentUserId = () => {
-  const stored = Number(localStorage.getItem('tunevaultCurrentUserId') || '1');
-  return Number.isFinite(stored) && stored > 0 ? stored : 1;
-};
-
 export default function ShareMediaDialog({ song, open, onClose }: Props) {
-  const [senderId, setSenderId] = useState<number>(getCurrentUserId());
-  const [receiverId, setReceiverId] = useState<number | ''>('');
+  const { user, isLoggedIn } = useAuth();
+  const [users, setUsers] = useState<ShareUser[]>([]);
+  const [receiverUserId, setReceiverUserId] = useState<number | ''>('');
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState('');
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      const currentId = getCurrentUserId();
-      setSenderId(currentId);
-      setReceiverId('');
-      setMessage('');
-      setStatus('');
-      setSending(false);
+    if (!open) return;
+
+    setReceiverUserId('');
+    setMessage('');
+    setStatus('');
+    setUsers([]);
+
+    if (!isLoggedIn) {
+      setStatus('Bạn cần đăng nhập trước khi chia sẻ.');
+      return;
     }
-  }, [open, song]);
+
+    const loadUsers = async () => {
+      setLoadingUsers(true);
+      try {
+        const res = await API.get('/users');
+        const data = Array.isArray(res.data) ? res.data : [];
+        setUsers(data.filter((item: ShareUser) => item.id !== user?.id));
+      } catch (error: any) {
+        console.error('Không tải được danh sách tài khoản:', error);
+        setStatus(error.response?.data?.message || 'Không tải được danh sách tài khoản.');
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+
+    loadUsers();
+  }, [open, isLoggedIn, user?.id]);
 
   if (!open || !song) return null;
 
-  const receivers = users.filter((user) => user.id !== senderId);
-
   const handleClose = () => {
     if (sending) return;
-    setReceiverId('');
-    setMessage('');
-    setStatus('');
     onClose();
   };
 
   const submit = async () => {
-    if (!song?.id) {
-      setStatus('Không tìm thấy bài hát để chia sẻ.');
+    if (!isLoggedIn) {
+      setStatus('Bạn cần đăng nhập trước khi chia sẻ.');
       return;
     }
 
-    if (!receiverId) {
-      setStatus('Bạn hãy chọn người nhận.');
-      return;
-    }
-
-    if (senderId === receiverId) {
-      setStatus('Không thể chia sẻ cho chính mình.');
+    if (!receiverUserId) {
+      setStatus('Bạn hãy chọn tài khoản nhận.');
       return;
     }
 
@@ -78,39 +84,21 @@ export default function ShareMediaDialog({ song, open, onClose }: Props) {
 
     try {
       await API.post('/media-shares', {
-        senderId,
-        receiverId,
+        receiverUserId,
         songId: song.id,
-        albumId: null,
+        playlistId: null,
         message: message.trim() || null,
       });
 
       window.dispatchEvent(new CustomEvent('tunevault:notification-refresh'));
-      setStatus('Đã gửi chia sẻ thành công.');
+      setStatus('Đã chia sẻ thành công.');
 
       setTimeout(() => {
-        setReceiverId('');
-        setMessage('');
-        setStatus('');
         onClose();
-      }, 700);
+      }, 650);
     } catch (error: any) {
-      console.error('Lỗi gửi chia sẻ:', error);
-      console.error('Status code:', error?.response?.status);
-      console.error('Response backend:', error?.response?.data);
-
-      const statusCode = error?.response?.status;
-      const backendMessage = error?.response?.data?.message;
-
-      if (statusCode === 404) {
-        setStatus('Lỗi 404: Backend chưa có API /api/media-shares hoặc backend chưa chạy lại.');
-      } else if (statusCode === 500) {
-        setStatus(backendMessage || 'Lỗi 500: Backend nhận được request nhưng lỗi service/database.');
-      } else if (statusCode === 400) {
-        setStatus(backendMessage || 'Dữ liệu chia sẻ không hợp lệ.');
-      } else {
-        setStatus(backendMessage || error?.message || 'Gửi chia sẻ thất bại. Kiểm tra backend/API.');
-      }
+      console.error('Lỗi chia sẻ media:', error);
+      setStatus(error.response?.data?.message || error.message || 'Gửi chia sẻ thất bại.');
     } finally {
       setSending(false);
     }
@@ -121,52 +109,37 @@ export default function ShareMediaDialog({ song, open, onClose }: Props) {
       <div className="tv-share-dialog" onMouseDown={(e) => e.stopPropagation()}>
         <div className="tv-dialog-head">
           <div>
-            <p>Chia sẻ bài hát</p>
+            <p>Chia sẻ media</p>
             <h3>{song.title}</h3>
           </div>
 
-          <button type="button" onClick={handleClose} disabled={sending}>
-            ×
-          </button>
+          <button type="button" onClick={handleClose} disabled={sending}>×</button>
         </div>
 
         <div className="tv-share-song">
-          <img src={song.coverUrl || `https://picsum.photos/seed/${song.id}/96/96`} alt={song.title} />
-
+          <img src={song.coverUrl || `https://picsum.photos/seed/share-${song.id}/96/96`} alt={song.title} />
           <div>
             <b>{song.title}</b>
-            <span>{song.artist}</span>
+            <span>{song.artist || 'Unknown artist'}</span>
           </div>
         </div>
 
         <label className="tv-field">
           Người gửi
-          <select
-            value={senderId}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              setSenderId(value);
-              localStorage.setItem('tunevaultCurrentUserId', String(value));
-              setReceiverId('');
-            }}
-            disabled={sending}
-          >
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
-              </option>
-            ))}
-          </select>
+          <input value={user ? `${user.username} (#${user.id})` : 'Chưa đăng nhập'} readOnly />
         </label>
 
         <label className="tv-field">
           Người nhận
-          <select value={receiverId} onChange={(e) => setReceiverId(Number(e.target.value))} disabled={sending}>
-            <option value="">Chọn người nhận</option>
-
-            {receivers.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
+          <select
+            value={receiverUserId}
+            onChange={(e) => setReceiverUserId(Number(e.target.value))}
+            disabled={loadingUsers || sending || !isLoggedIn}
+          >
+            <option value="">{loadingUsers ? 'Đang tải tài khoản...' : 'Chọn tài khoản nhận'}</option>
+            {users.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.username}{item.email ? ` - ${item.email}` : ''}
               </option>
             ))}
           </select>
@@ -185,7 +158,7 @@ export default function ShareMediaDialog({ song, open, onClose }: Props) {
 
         {status && <div className="tv-status">{status}</div>}
 
-        <button className="tv-submit" type="button" onClick={submit} disabled={sending}>
+        <button className="tv-submit" type="button" onClick={submit} disabled={sending || loadingUsers || !isLoggedIn}>
           {sending ? 'Đang gửi...' : 'Gửi chia sẻ'}
         </button>
       </div>
