@@ -1,4 +1,6 @@
 import { useMusic } from '../Contexts/MusicContext';
+// 1. Đảm bảo đã import component hiển thị lời bài hát vào đây
+import { FullScreenLyrics } from "./FullScreenLyrics"; 
 
 export default function PlayerBar() {
   const {
@@ -8,7 +10,7 @@ export default function PlayerBar() {
     repeatMode, cycleRepeat,
     playNext, playPrev,
     isQueueViewOpen, toggleQueueView,
-    isLyricsViewOpen, toggleLyricsView,
+    isLyricsViewOpen, toggleLyricsView, // Biến check trạng thái đóng/mở lời bài hát từ Context
     isSongLiked, toggleLikeSong,
     openAddToPlaylistModal
   } = useMusic() as any;
@@ -31,13 +33,19 @@ export default function PlayerBar() {
     <footer className="spotify-player">
 
       {/* GÓC TRÁI: Thông tin bài hát */}
-      <div className="player-left" style={{ gap: '12px', display: 'flex', alignItems: 'center' }}>
+      {/* 🟢 Gom toàn bộ khối thông tin vào 1 div chung và gắn sự kiện onClick */}
+      <div 
+        className="player-left" 
+        style={{ gap: '12px', display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
+        onClick={() => { if (toggleLyricsView) toggleLyricsView(); }}
+        title="Click để xem lời bài hát"
+      >
         {currentSong && (
           <>
             <img
               src={currentSong.coverUrl || `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50&h=50&fit=crop`}
               alt={currentSong.title}
-              style={{ width: 48, height: 48, borderRadius: 4, objectFit: 'cover' }}
+              style={{ width: 48, height: 48, borderRadius: 4, objectFit: 'cover' }} 
             />
             <div>
               <p style={{ margin: 0, fontSize: 14, color: '#fff', fontWeight: 500 }}>
@@ -47,11 +55,14 @@ export default function PlayerBar() {
                 {currentSong.artist}
               </p>
             </div>
+            {/* Nút Like được đặt ra ngoài khối onClick chung để không bị kích hoạt mở lời khi bấm Like */}
             <button 
-              className="control-btn" 
+              className="control-btn heart-btn" 
               title={isSongLiked(currentSong.id) ? "Đã lưu vào Liked Songs" : "Thêm vào danh sách phát"} 
-              style={{ marginLeft: '16px', color: isSongLiked(currentSong.id) ? '#1db954' : '' }}
+              style={{ marginLeft: '16px', color: isSongLiked(currentSong.id) ? '#1db954' : '', cursor: 'pointer' }}
               onClick={(e) => {
+                // Ngăn sự kiện click lan truyền lên div cha .player-left
+                e.stopPropagation(); 
                 if (isSongLiked(currentSong.id)) {
                   openAddToPlaylistModal(currentSong, e);
                 } else {
@@ -90,7 +101,6 @@ export default function PlayerBar() {
               <path d="M13.151.922a.75.75 0 1 0-1.06 1.06L13.109 3H11.16a3.75 3.75 0 0 0-2.873 1.34l-6.173 7.356A2.25 2.25 0 0 1 .39 12.5H0V14h.391a3.75 3.75 0 0 0 2.873-1.34l6.173-7.356a2.25 2.25 0 0 1 1.724-.804h1.947l-1.017 1.018a.75.75 0 0 0 1.06 1.06L15.98 4.75 13.15.922zM.391 3.5H0V2h.391c1.109 0 2.16.49 2.873 1.34L4.89 5.277l-.979 1.167-1.796-2.14A2.25 2.25 0 0 0 .39 3.5z" />
               <path d="m7.5 10.723.98-1.167 1.737 2.071A2.25 2.25 0 0 0 11.936 12.5H13.11l-1.018-1.018a.75.75 0 0 0 1.06-1.06l2.829 2.828-2.829 2.828a.75.75 0 1 0 1.06 1.06L15.98 14.308 13.15 11.48a.75.75 0 0 0-1.06 1.06l1.018 1.018H11.16a3.75 3.75 0 0 1-2.873-1.34l-1.767-2.106z" />
             </svg>
-            {/* Chấm xanh bên dưới khi shuffle bật */}
             {isShuffle && (
               <span style={{
                 position: 'absolute', bottom: -4, left: '50%',
@@ -130,12 +140,10 @@ export default function PlayerBar() {
             style={{ color: repeatMode !== 'none' ? activeColor : inactiveColor, position: 'relative' }}
           >
             {repeatMode === 'one' ? (
-              // Icon lặp 1 bài: có chữ "1" nhỏ
               <div style={{ position: 'relative', display: 'inline-flex' }}>
                 <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
                   <path d="M0 4.75A3.75 3.75 0 0 1 3.75 1h8.5A3.75 3.75 0 0 1 16 4.75v5a3.75 3.75 0 0 1-3.75 3.75H9.81l1.018 1.018a.75.75 0 1 1-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 1 1 1.06 1.06L9.811 12h2.439a2.25 2.25 0 0 0 2.25-2.25v-5a2.25 2.25 0 0 0-2.25-2.25h-8.5A2.25 2.25 0 0 0 1.5 4.75v5A2.25 2.25 0 0 0 3.75 12H5v1.5H3.75A3.75 3.75 0 0 1 0 9.75v-5z" />
                 </svg>
-                {/* Số "1" nhỏ ở trên */}
                 <span style={{
                   position: 'absolute', top: -4, right: -5,
                   fontSize: 8, fontWeight: 700, color: activeColor,
@@ -147,7 +155,6 @@ export default function PlayerBar() {
                 <path d="M0 4.75A3.75 3.75 0 0 1 3.75 1h8.5A3.75 3.75 0 0 1 16 4.75v5a3.75 3.75 0 0 1-3.75 3.75H9.81l1.018 1.018a.75.75 0 1 1-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 1 1 1.06 1.06L9.811 12h2.439a2.25 2.25 0 0 0 2.25-2.25v-5a2.25 2.25 0 0 0-2.25-2.25h-8.5A2.25 2.25 0 0 0 1.5 4.75v5A2.25 2.25 0 0 0 3.75 12H5v1.5H3.75A3.75 3.75 0 0 1 0 9.75v-5z" />
               </svg>
             )}
-            {/* Chấm xanh bên dưới khi lặp đang bật */}
             {repeatMode !== 'none' && (
               <span style={{
                 position: 'absolute', bottom: -4, left: '50%',
@@ -186,10 +193,10 @@ export default function PlayerBar() {
         </div>
       </div>
 
-      {/* GÓC PHẢI: Volume */}
+      {/* GÓC PHẢI: Các tiện ích & Volume */}
       <div className="player-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         
-        {/* Lời bài hát (Lyrics) */}
+        {/* Nút bật/tắt Lời bài hát */}
         <button 
           className="control-btn" 
           title="Lời bài hát"
@@ -199,12 +206,13 @@ export default function PlayerBar() {
           style={{ position: 'relative', color: isLyricsViewOpen ? '#1db954' : 'currentColor' }}
         >
           <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M11.666 4.707a2.535 2.535 0 0 0-3.585 0l-.634.633-1.042-1.041 1.258-1.259a4.035 4.035 0 0 1 5.707 0l1.258 1.259-1.041 1.042-1.259-1.258a1.035 1.035 0 0 0-1.464 0l-1.259 1.259 1.042 1.041.633-.634a2.535 2.535 0 0 0 0-3.585zm-4.707 5.251a2.535 2.535 0 0 0 3.585 0l.633-.634 1.042 1.042-1.259 1.258a4.035 4.035 0 0 1-5.707 0L4.015 9.385l1.042-1.042 1.258 1.259a1.035 1.035 0 0 0 1.464 0l1.259-1.259-1.041-1.042-.634.633a2.535 2.535 0 0 0 0 3.585zM4.015 2.815a1.035 1.035 0 0 0-1.464 0l-1.258 1.259 1.041 1.041 1.259-1.258a2.535 2.535 0 0 1 3.585 0l.634.633-1.042 1.042-1.258-1.259a4.035 4.035 0 0 0-5.707 0L.563 5.49l1.042 1.042 1.259-1.259a1.035 1.035 0 0 1 1.464 0l1.258 1.259-1.041 1.041-.634-.633a2.535 2.535 0 0 1 0-3.585z"/>
+            <path d="M11 5.5a2.5 2.5 0 0 0-5 0v4a2.5 2.5 0 0 0 5 0v-4zM8 2a3.5 3.5 0 0 1 3.5 3.5v4a3.5 3.5 0 0 1-7 0v-4A3.5 3.5 0 0 1 8 2z"/>
+            <path d="M14 7.5a.5.5 0 0 0-1 0 5 5 0 0 1-9.5 2.215v-1.43a.5.5 0 0 0-1 0v1.43a6 6 0 0 0 5 5.918V17a.5.5 0 0 0 1 0v-1.367a6 6 0 0 0 5-5.918v-1.43a.5.5 0 0 0-1 0v1.43A5 5 0 0 1 14 7.5z"/>
           </svg>
           {isLyricsViewOpen && <div className="active-dot" style={{ position: 'absolute', bottom: '-4px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', backgroundColor: '#1db954', borderRadius: '50%' }}></div>}
         </button>
 
-        {/* Danh sách chờ (Queue) */}
+        {/* Nút bật/tắt Danh sách chờ */}
         <button 
           className="control-btn" 
           title="Danh sách chờ" 
@@ -238,6 +246,15 @@ export default function PlayerBar() {
           }}
         />
       </div>
+
+      {/* 2. Đặt Component hiển thị lời bài hát full-screen tại đây */}
+      <FullScreenLyrics 
+        currentSong={currentSong} 
+        currentTime={currentTime} 
+        isOpen={isLyricsViewOpen} 
+        onClose={() => { if (toggleLyricsView) toggleLyricsView(); }} 
+        seek={seek} 
+      />
 
     </footer>
   );
