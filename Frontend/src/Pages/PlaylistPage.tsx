@@ -18,6 +18,9 @@ interface Song {
   coverUrl?: string;
   audioUrl?: string;
   addedAt?: string;
+  videoUrl?: string;
+  artistBanner?: string;
+  artistId?: number;
 }
 
 interface Playlist {
