@@ -1,0 +1,73 @@
+.notifications-wrapper {
+  padding: 40px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.notifications-header {
+  margin-bottom: 48px;
+}
+
+.notifications-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.notifications-header p {
+  color: #b3b3b3;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+.notifications-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.notifications-filters .filter-chip {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 500px;
+  padding: 8px 16px;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.notifications-filters .filter-chip:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.notifications-filters .filter-chip.active {
+  background: #fff;
+  color: #000;
+}
+
+.notifications-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: 60px;
+  max-width: 600px;
+  align-self: center;
+}
+
+.notifications-empty-state h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.notifications-empty-state p {
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.5;
+}

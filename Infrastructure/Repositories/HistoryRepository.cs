@@ -27,7 +27,7 @@ namespace Infrastructure.Repositories
                 using var connection = CreateConnection();
                 const string query = @"
                     INSERT INTO user_history (UserId, SongId, PlayedAt)
-                    VALUES (@UserId, @SongId, NOW())";
+                    VALUES (@UserId, @SongId, UTC_TIMESTAMP())";
                 await connection.ExecuteAsync(query, new { UserId = userId, SongId = songId });
             }
             catch (Exception ex)

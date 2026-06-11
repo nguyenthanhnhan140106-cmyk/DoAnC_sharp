@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMusic } from '../Contexts/MusicContext';
 import Header from '../Components/header';
 import Sidebar from '../Components/Sidebar';
@@ -15,24 +16,31 @@ interface ListeningHistorySong {
   title: string;
   artist: string;
   album?: string;
+  albumId?: string | number;
+  playlistId?: string | number;
+  playlistName?: string;
   playedAt?: string;
   coverUrl?: string;
   audioUrl?: string;
+  videoUrl?: string;
 }
 
 type SortField = 'title' | 'playedAt' | 'album';
 type SortDirection = 'asc' | 'desc';
+type TabType = 'Songs' | 'Playlists' | 'Albums' | 'Artists' | 'Videos';
 
 export default function ListeningHistoryPage() {
+  const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
   const musicContext = useMusic() as any;
-  const { playSong, currentSong, togglePlay } = musicContext;
+  const { playSong, currentSong, togglePlay, setQueue } = musicContext;
   const [songs, setSongs] = useState<ListeningHistorySong[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterTerm, setFilterTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('playedAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [activeTab, setActiveTab] = useState<TabType>('Songs');
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
@@ -66,18 +74,22 @@ export default function ListeningHistoryPage() {
         const payload = Array.isArray(response.data)
           ? response.data
           : Array.isArray(response.data?.songs)
-          ? response.data.songs
-          : [];
+            ? response.data.songs
+            : [];
 
         const parsed = payload.map((item: any) => ({
           id: Number(item?.id) || 0,
           title: item?.title ?? item?.name ?? 'Unknown title',
           artist: item?.artist ?? item?.artistName ?? 'Unknown artist',
-          album: item?.category ?? item?.album ?? 'Không xác định',
+          album: item?.albumName ?? item?.category ?? item?.album ?? 'Không xác định',
+          albumId: item?.albumId, // Don't fallback to string category for ID
+          playlistId: item?.playlistId ?? undefined,
+          playlistName: item?.playlistName ?? 'Playlist',
           duration: item?.duration ?? item?.length ?? '--',
           playedAt: item?.playedAt ?? item?.playedAtUtc ?? '',
           coverUrl: item?.coverUrl ?? item?.imageUrl ?? undefined,
           audioUrl: item?.audioUrl ?? undefined,
+          videoUrl: item?.videoUrl ?? undefined,
         }));
 
         setSongs(parsed);
@@ -100,7 +112,13 @@ export default function ListeningHistoryPage() {
 
   const visibleSongs = useMemo(() => {
     const normalizedTerm = filterTerm.trim().toLowerCase();
-    const filtered = songs.filter((song) => {
+    let filtered = songs;
+
+    if (activeTab === 'Videos') {
+      filtered = filtered.filter(s => s.videoUrl);
+    }
+
+    filtered = filtered.filter((song) => {
       if (!normalizedTerm) return true;
       return [song.title, song.artist, song.album]
         .filter(Boolean)
@@ -126,7 +144,38 @@ export default function ListeningHistoryPage() {
         ? String(first).localeCompare(String(second))
         : String(second).localeCompare(String(first));
     });
-  }, [songs, filterTerm, sortDirection, sortField]);
+  }, [songs, filterTerm, sortDirection, sortField, activeTab]);
+
+  const uniqueAlbums = useMemo(() => {
+    const albumsMap = new Map<string, ListeningHistorySong>();
+    songs.forEach(s => {
+      // Chỉ nhóm các bài hát có albumId thực sự
+      if (s.album && s.album !== 'Không xác định' && !albumsMap.has(s.album)) {
+        albumsMap.set(s.album, s);
+      }
+    });
+    return Array.from(albumsMap.values());
+  }, [songs]);
+
+  const uniquePlaylists = useMemo(() => {
+    const playlistsMap = new Map<string, ListeningHistorySong>();
+    songs.forEach(s => {
+      if (s.playlistId && !playlistsMap.has(String(s.playlistId))) {
+        playlistsMap.set(String(s.playlistId), s);
+      }
+    });
+    return Array.from(playlistsMap.values());
+  }, [songs]);
+
+  const uniqueArtists = useMemo(() => {
+    const artistsMap = new Map<string, ListeningHistorySong>();
+    songs.forEach(s => {
+      if (s.artist && s.artist !== 'Unknown artist' && !artistsMap.has(s.artist)) {
+        artistsMap.set(s.artist, s);
+      }
+    });
+    return Array.from(artistsMap.values());
+  }, [songs]);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -139,7 +188,8 @@ export default function ListeningHistoryPage() {
 
   const formatPlayedAt = (value?: string) => {
     if (!value) return '--';
-    const parsed = new Date(value);
+    const dateStr = value.endsWith('Z') ? value : value + 'Z';
+    const parsed = new Date(dateStr);
     if (Number.isNaN(parsed.getTime())) return value;
     return parsed.toLocaleString('vi-VN', {
       hour: '2-digit',
@@ -163,94 +213,155 @@ export default function ListeningHistoryPage() {
       <div className="main-view">
         <div className="content-wrapper history-page-wrapper">
           <div className="history-header-row">
-            <div>
-              <div className="history-tab-row">
-                <button className="history-tab history-tab-active">Recently played</button>
+            <div className="history-header-content">
+              <h1 className="history-title">Recently played</h1>
+              <div className="history-tabs">
+                <button className={`history-tab-item ${activeTab === 'Songs' ? 'active' : ''}`} onClick={() => setActiveTab('Songs')}>Songs</button>
+                <button className={`history-tab-item ${activeTab === 'Playlists' ? 'active' : ''}`} onClick={() => setActiveTab('Playlists')}>Playlists</button>
+                <button className={`history-tab-item ${activeTab === 'Albums' ? 'active' : ''}`} onClick={() => setActiveTab('Albums')}>Albums</button>
+                <button className={`history-tab-item ${activeTab === 'Artists' ? 'active' : ''}`} onClick={() => setActiveTab('Artists')}>Artists</button>
+                <button className={`history-tab-item ${activeTab === 'Videos' ? 'active' : ''}`} onClick={() => setActiveTab('Videos')}>Videos</button>
               </div>
-              <h1 className="history-title">Lịch sử nghe</h1>
-              <p className="history-subtitle">Danh sách các bài hát bạn vừa nghe gần đây, lấy trực tiếp từ API.</p>
-            </div>
-
-            <div className="history-controls">
-              <label className="history-search">
-                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" className="history-search-icon">
-                  <path d="M7 1.75a5.25 5.25 0 1 0 0 10.5 5.25 5.25 0 0 0 0-10.5zM.25 7a6.75 6.75 0 1 1 12.096 4.12l3.184 3.185a.75.75 0 1 1-1.06 1.06L11.304 12.2A6.75 6.75 0 0 1 .25 7z" />
-                </svg>
-                <input
-                  type="search"
-                  placeholder="Tìm bài hát, nghệ sĩ, album..."
-                  value={filterTerm}
-                  onChange={(event) => setFilterTerm(event.target.value)}
-                />
-              </label>
-
-              <div className="history-sort-group">
-                <button type="button" className="history-sort-btn" onClick={() => handleSort('title')}>
-                  Tên bài hát {getSortLabel('title')}
+              <div className="history-played-songs">
+                <button className="history-play-btn" onClick={() => {
+                  if (visibleSongs.length > 0 && (activeTab === 'Songs' || activeTab === 'Videos')) {
+                    setQueue?.(visibleSongs);
+                    playSong?.(visibleSongs[0]);
+                  }
+                }}>
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
                 </button>
-                <button type="button" className="history-sort-btn" onClick={() => handleSort('playedAt')}>
-                  Ngày giờ {getSortLabel('playedAt')}
-                </button>
+                <h2>Played {activeTab === 'Songs' ? 'songs' : activeTab === 'Videos' ? 'videos' : activeTab.toLowerCase()} <span>({activeTab === 'Songs' || activeTab === 'Videos' ? visibleSongs.length : activeTab === 'Albums' ? uniqueAlbums.length : activeTab === 'Artists' ? uniqueArtists.length : 0})</span></h2>
               </div>
             </div>
           </div>
 
           <div className="history-card">
             <div className="history-card-meta">
-              <span className="history-row-count">{loading ? 'Đang tải...' : `${visibleSongs.length} bài hát`}</span>
+              <span className="history-row-count">
+                {loading ? 'Đang tải...' :
+                  activeTab === 'Songs' || activeTab === 'Videos' ? `${visibleSongs.length} bài hát` :
+                    activeTab === 'Albums' ? `${uniqueAlbums.length} album` :
+                      activeTab === 'Artists' ? `${uniqueArtists.length} nghệ sĩ` :
+                        '0 playlist'
+                }
+              </span>
               {!loading && error && <span className="history-error-message">{error}</span>}
             </div>
 
-            <div className="history-table-container">
-              <div className="history-table-head">
-                <span>Title</span>
-                <span>Album/Podcast</span>
-                <span>Ngày giờ nghe</span>
-              </div>
-
-              {loading ? (
-                <div className="history-card-empty">Đang tải lịch sử nghe...</div>
-              ) : error ? (
-                <div className="history-card-empty">{error}</div>
-              ) : visibleSongs.length === 0 ? (
-                <div className="history-card-empty">Chưa có bài nghe gần đây</div>
-              ) : (
-                <div className="history-table-body">
-                  {visibleSongs.map((song, index) => {
-                    const isActive = currentSong?.id === song.id;
-                    const isHovered = hoveredId === song.id;
-                    return (
-                      <button
-                        type="button"
-                        key={`${song.id}-${index}`}
-                        className={`history-row ${isActive ? 'history-row-active' : ''} ${isHovered ? 'history-row-hover' : ''}`}
-                        onClick={() => {
-                          if (isActive) togglePlay?.();
-                          else playSong?.(song);
-                        }}
-                        onMouseEnter={() => setHoveredId(song.id)}
-                        onMouseLeave={() => setHoveredId(null)}
-                      >
-                        <div className="history-cell history-track-cell">
-                          <div className="history-track-index">{index + 1}</div>
-                          <img
-                            className="history-cover"
-                            src={song.coverUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=80&h=80&fit=crop'}
-                            alt={song.title}
-                          />
-                          <div className="history-track-info">
-                            <span className="history-track-title">{song.title}</span>
-                            <span className="history-track-subtitle">{song.artist}</span>
-                          </div>
-                        </div>
-                        <div className="history-cell history-album-cell">{song.album || 'Không xác định'}</div>
-                        <div className="history-cell history-playedat-cell">{formatPlayedAt(song.playedAt)}</div>
-                      </button>
-                    );
-                  })}
+            {(activeTab === 'Songs' || activeTab === 'Videos') && (
+              <div className="history-table-container">
+                <div className="history-table-head">
+                  <span>Title</span>
+                  <span>Album/Podcast</span>
+                  <span>Ngày giờ nghe</span>
                 </div>
-              )}
-            </div>
+
+                {loading ? (
+                  <div className="history-card-empty">Đang tải lịch sử nghe...</div>
+                ) : error ? (
+                  <div className="history-card-empty">{error}</div>
+                ) : visibleSongs.length === 0 ? (
+                  <div className="history-card-empty">Chưa có bài nghe gần đây</div>
+                ) : (
+                  <div className="history-table-body">
+                    {visibleSongs.map((song, index) => {
+                      const isActive = currentSong?.id === song.id;
+                      const isHovered = hoveredId === song.id;
+                      return (
+                        <button
+                          type="button"
+                          key={`${song.id}-${index}`}
+                          className={`history-row ${isActive ? 'history-row-active' : ''} ${isHovered ? 'history-row-hover' : ''}`}
+                          onClick={() => {
+                            if (isActive) {
+                              togglePlay?.();
+                            } else {
+                              setQueue?.(visibleSongs);
+                              playSong?.(song);
+                            }
+                          }}
+                          onMouseEnter={() => setHoveredId(song.id)}
+                          onMouseLeave={() => setHoveredId(null)}
+                        >
+                          <div className="history-cell history-track-cell">
+                            <div className="history-track-index">{index + 1}</div>
+                            <img
+                              className="history-cover"
+                              src={song.coverUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=80&h=80&fit=crop'}
+                              alt={song.title}
+                            />
+                            <div className="history-track-info">
+                              <span className="history-track-title">{song.title}</span>
+                              <span className="history-track-subtitle">{song.artist}</span>
+                            </div>
+                          </div>
+                          <div className="history-cell history-album-cell">{song.album || 'Không xác định'}</div>
+                          <div className="history-cell history-playedat-cell">{formatPlayedAt(song.playedAt)}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'Albums' && (
+              <div className="history-grid-container">
+                {uniqueAlbums.length === 0 ? (
+                  <div className="history-card-empty">Không có album nào trong lịch sử</div>
+                ) : (
+                  <div className="history-grid">
+                    {uniqueAlbums.map((song, index) => (
+                      <div key={index} className="history-grid-item" onClick={() => navigate(`/album/${song.albumId || song.album}`)} style={{ cursor: 'pointer' }}>
+                        <img src={song.coverUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=80&h=80&fit=crop'} alt={song.album} />
+                        <span className="history-grid-title">{song.album}</span>
+                        <span className="history-grid-subtitle">{song.artist}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'Artists' && (
+              <div className="history-grid-container">
+                {uniqueArtists.length === 0 ? (
+                  <div className="history-card-empty">Không có nghệ sĩ nào trong lịch sử</div>
+                ) : (
+                  <div className="history-grid">
+                    {uniqueArtists.map((song, index) => (
+                      <div key={index} className="history-grid-item artist-item">
+                        <img src={song.coverUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=80&h=80&fit=crop'} alt={song.artist} style={{ borderRadius: '50%' }} />
+                        <span className="history-grid-title">{song.artist}</span>
+                        <span className="history-grid-subtitle">Artist</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'Playlists' && (
+              <div className="history-grid-container">
+                {uniquePlaylists.length === 0 ? (
+                  <div className="history-card-empty">Chưa có playlist nào được nghe gần đây.</div>
+                ) : (
+                  <div className="history-grid">
+                    {uniquePlaylists.map((song, index) => (
+                      <div key={index} className="history-grid-item" onClick={() => navigate(`/playlist/${song.playlistId}`)} style={{ cursor: 'pointer' }}>
+                        <img src={song.coverUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=80&h=80&fit=crop'} alt={song.playlistName} />
+                        <span className="history-grid-title">{song.playlistName}</span>
+                        <span className="history-grid-subtitle">Playlist</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         </div>
       </div>

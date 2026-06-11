@@ -19,7 +19,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Đăng ký các Service
+// 🟢 Đăng ký các Service & Repository
 builder.Services.AddScoped<ISongRepository, SongRepository>();
 builder.Services.AddScoped<ISongService, SongService>();
 builder.Services.AddScoped<IUserService>(_ => new UserService(connectionString));
@@ -29,6 +29,12 @@ builder.Services.AddScoped<AlbumService>(_ => new AlbumService(connectionString)
 builder.Services.AddScoped<IAuthService>(provider => new AuthService(connectionString, builder.Configuration));
 builder.Services.AddScoped<IHistoryRepository>(_ => new HistoryRepository(connectionString));
 builder.Services.AddScoped<IHistoryService, HistoryService>();
+
+// 🟢 BỔ SUNG: Đăng ký Notification Repository và Service
+builder.Services.AddScoped<Application.Interfaces.INotificationRepository, Infrastructure.Repositories.NotificationRepository>(provider => 
+    new Infrastructure.Repositories.NotificationRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
+
+builder.Services.AddScoped<Application.Services.NotificationService>();
 
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -49,7 +55,6 @@ if (app.Environment.IsDevelopment())
 }
 
 // --- AUTO SEED DATABASE (Đặt ở đây là chuẩn nhất) ---
-// --- AUTO SEED DATABASE ---
 var logger = app.Logger;
 int maxRetries = 5;
 
@@ -161,6 +166,22 @@ for (int retry = 1; retry <= maxRetries; retry++)
             cmd.ExecuteNonQuery();
         }
 
+        // 🟢 6. BỔ SUNG: Tạo bảng Notification để lưu trữ thông báo và chuỗi JSON chia sẻ nhạc
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS notifications (
+                    Id INT AUTO_INCREMENT PRIMARY KEY,
+                    UserId INT NOT NULL,
+                    Type VARCHAR(50) NOT NULL,
+                    Payload TEXT NOT NULL,
+                    IsRead BOOLEAN DEFAULT FALSE,
+                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
+                );";
+            cmd.ExecuteNonQuery();
+        }
+
         logger.LogInformation("[TuneVault DB] 🟢 Kết nối và khởi tạo bảng thành công!");
         break;
     }
@@ -170,6 +191,7 @@ for (int retry = 1; retry <= maxRetries; retry++)
         Thread.Sleep(3000);
     }
 }
+
 // --- Middleware & App Run ---
 app.UseSwagger();
 app.UseSwaggerUI();
