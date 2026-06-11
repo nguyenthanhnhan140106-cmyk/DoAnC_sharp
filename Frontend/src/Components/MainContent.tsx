@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useMusic } from "../Contexts/MusicContext";
 import { useAuth } from "../Contexts/AuthContext";
 import { albumService } from "../Services/albumService";
+import ChartsSection from './ChartsSection';
 import "./Styles/HomePage.css";
 
 interface Song {
@@ -80,15 +81,11 @@ const VideoCard = ({ song, onHover }: { song: Song; onHover?: (url: string | nul
 
   const handleForcePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // Nếu bài hát không phải bài hiện tại, chọn nó nhưng đừng play ngay lập tức (nếu audio chậm)
-    // Việc gọi playSong sẽ đổi currentSong nhưng có thể sẽ có chút độ trễ
+
     if (currentSong?.id !== song.id) {
-       playSong(song);
+      playSong(song);
     }
-    
-    // Dispatch event ngay lập tức, RightSidebar sẽ gọi pauseSong()
-    // Thời gian trễ nhẹ để đảm bảo state currentSong đã được update (nếu cần)
+
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('OPEN_VIDEO_MODAL'));
     }, 50);
@@ -204,7 +201,6 @@ export default function MainContent({ songs }: Props) {
     return () => window.removeEventListener("RESET_HOME_TAB", handleResetTab);
   }, []);
 
-  // Hàm xáo trộn mảng để nhạc không bị lặp thứ tự
   const shuffleArray = <T,>(array: T[]): T[] => {
     const newArr = [...array];
     for (let i = newArr.length - 1; i > 0; i--) {
@@ -222,6 +218,45 @@ export default function MainContent({ songs }: Props) {
   const vSoundSongs = shuffledSongs.filter((s) => s.category?.toLowerCase() === "vsound");
   const rapSongs = shuffledSongs.filter((s) => s.category?.toLowerCase() === "rap");
   const hasCategory = fridaySongs.length > 0 || vSoundSongs.length > 0 || rapSongs.length > 0;
+
+  // 🟢 Đã gọt xuống ĐÚNG 5 NGHỆ SĨ để vừa vặn 1 hàng ngang
+  const popularArtists = [
+    {
+      id: 1,
+      name: "Sơn Tùng M-TP",
+      followers: 134003,
+      coverImg: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop",
+      featuredSong: { title: "Come My Way", artist: "Sơn Tùng M-TP, Tyga", coverUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=40&h=40&fit=crop" }
+    },
+    {
+      id: 2,
+      name: "Binz",
+      followers: 20891,
+      coverImg: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=300&h=300&fit=crop",
+      featuredSong: { title: "Em (feat. SOOBIN)", artist: "Binz, SOOBIN", coverUrl: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=40&h=40&fit=crop" }
+    },
+    {
+      id: 3,
+      name: "VSTRA",
+      followers: 11550,
+      coverImg: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop",
+      featuredSong: { title: "Ai Ngoài Anh", artist: "VSTRA, Tyronee", coverUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=40&h=40&fit=crop" }
+    },
+    {
+      id: 4,
+      name: "Low G",
+      followers: 42797,
+      coverImg: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop",
+      featuredSong: { title: "In Love", artist: "Low G, JustaTee", coverUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=40&h=40&fit=crop" }
+    },
+    {
+      id: 5,
+      name: "SOOBIN",
+      followers: 27506,
+      coverImg: "https://images.unsplash.com/photo-1628157582853-a796fa650a6a?w=300&h=300&fit=crop",
+      featuredSong: { title: "Em (feat. SOOBIN)", artist: "Binz, SOOBIN", coverUrl: "https://images.unsplash.com/photo-1628157582853-a796fa650a6a?w=40&h=40&fit=crop" }
+    }
+  ];
 
   return (
     <div className="main-content-container">
@@ -245,7 +280,6 @@ export default function MainContent({ songs }: Props) {
 
         {activeTab === "all" && (
           <>
-            {/* ── KHỐI NGHE GẦN ĐÂY (RECENTLY PLAYED) ── */}
             {isLoggedIn && (recentlyPlayed.length > 0 || songs.length > 0 || albums.length > 0) && (
               <div className="recent-grid">
                 {recentlyPlayed.length > 0 ? (
@@ -257,19 +291,18 @@ export default function MainContent({ songs }: Props) {
                     const defaultAlbums = albums.slice(0, 2).map(a => ({ item: a, type: 'album' as const }));
                     const defaultSongs = songs.slice(0, 4 - defaultAlbums.length).map(s => ({ item: s, type: 'song' as const }));
                     const combined = [...defaultAlbums, ...defaultSongs];
-                    
-                    // Nếu vẫn thiếu (do ít bài hát), lấy bù thêm album
+
                     if (combined.length < 4) {
                       const moreAlbums = albums.slice(2, 2 + (4 - combined.length)).map(a => ({ item: a, type: 'album' as const }));
                       combined.push(...moreAlbums);
                     }
 
                     return combined.map((obj, idx) => (
-                      <RecentCard 
-                        key={`default-${obj.type}-${obj.item.id}-${idx}`} 
-                        item={obj.item} 
-                        type={obj.type} 
-                        onHover={setHoveredCover} 
+                      <RecentCard
+                        key={`default-${obj.type}-${obj.item.id}-${idx}`}
+                        item={obj.item}
+                        type={obj.type}
+                        onHover={setHoveredCover}
                       />
                     ));
                   })()
@@ -277,17 +310,7 @@ export default function MainContent({ songs }: Props) {
               </div>
             )}
 
-            {albums.length > 0 && (
-              <div className="playlist-section">
-                <div className="section-header">
-                  <h2 className="section-title">Album của bạn</h2>
-                  {/* Nếu muốn Show All Album, có thể bấm sang Tab Album kế bên nên tạm ẩn nút */}
-                </div>
-                <div className="songs-grid">
-                  {albums.slice(0, 10).map((album) => <AlbumCard key={album.id} album={album} onHover={setHoveredCover} />)}
-                </div>
-              </div>
-            )}
+            <ChartsSection songs={songs} />
 
             {!hasCategory && songs.length > 0 && (
               <div className="playlist-section">
@@ -344,9 +367,70 @@ export default function MainContent({ songs }: Props) {
                 </div>
               </div>
             )}
+
+            {/* 🟢 KHỐI NGHỆ SĨ THỊNH HÀNH - ĐÃ XÓA KHỐI SỐ 2 VÀ TĂNG paddingBottom */}
+            <div className="playlist-section" style={{ marginTop: "40px", paddingBottom: "60px" }}>
+              <div className="section-header" style={{ marginBottom: "20px" }}>
+                <h2 className="section-title">Trending Artists</h2>
+                <button className="show-all-btn">More</button>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "24px" }}>
+                {popularArtists.map((artist) => (
+                  <div key={artist.id} style={{ backgroundColor: "#181818", borderRadius: "8px", overflow: "hidden", cursor: "pointer", transition: "background-color 0.3s ease, transform 0.2s ease" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#282828"; e.currentTarget.style.transform = "translateY(-4px)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#181818"; e.currentTarget.style.transform = "translateY(0)"; }}
+                    onClick={() => navigate(`/search?q=${encodeURIComponent(artist.name)}`)}
+                  >
+                    <div style={{ position: "relative", width: "100%", paddingBottom: "100%" }}>
+                      <img src={artist.coverImg} alt={artist.name} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%)" }} />
+
+                      <div style={{ position: "absolute", bottom: "16px", left: "16px", right: "16px" }}>
+                        <h3 style={{ margin: "0 0 4px 0", color: "#fff", fontSize: "20px", fontWeight: 700 }}>{artist.name}</h3>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <p style={{ margin: 0, color: "#b3b3b3", fontSize: "12px", fontWeight: 500 }}>{artist.followers.toLocaleString()} followers</p>
+                          <button style={{ backgroundColor: "transparent", color: "#fff", border: "1px solid #727272", borderRadius: "500px", padding: "4px 16px", fontSize: "12px", fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}
+                            onClick={(e) => { e.stopPropagation(); }}
+                            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#fff"; e.currentTarget.style.transform = "scale(1.05)"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#727272"; e.currentTarget.style.transform = "scale(1)"; }}
+                          >
+                            Follow
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ padding: "16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <img src={artist.featuredSong.coverUrl} alt="Cover" style={{ width: "40px", height: "40px", borderRadius: "4px", objectFit: "cover", flexShrink: 0 }} />
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <p style={{ margin: 0, color: "#fff", fontSize: "14px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{artist.featuredSong.title}</p>
+                          <p style={{ margin: "2px 0 0 0", color: "#b3b3b3", fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{artist.featuredSong.artist}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </>
         )}
 
+        {albums.length > 0 && (
+          <div className="playlist-section">
+            <div className="section-header">
+              <h2 className="section-title">Album của bạn</h2>
+              {/* Nếu muốn Show All Album, có thể bấm sang Tab Album kế bên nên tạm ẩn nút */}
+            </div>
+            <div className="songs-grid">
+              {albums.slice(0, 10).map((album) => <AlbumCard key={album.id} album={album} onHover={setHoveredCover} />)}
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB DÀNH RIÊNG CHO TOÀN BỘ ALBUM ── */}
         {activeTab === "album" && (
           <div className="playlist-section">
             <div className="section-header">
@@ -365,6 +449,7 @@ export default function MainContent({ songs }: Props) {
           </div>
         )}
 
+        {/* ── TAB DÀNH RIÊNG CHO VIDEO ── */}
         {activeTab === "video" && (
           <div className="playlist-section">
             <div className="section-header">

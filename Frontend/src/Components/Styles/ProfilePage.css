@@ -92,24 +92,71 @@
 .profile-actions {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
   margin-bottom: 32px;
+  width: 100%;
 }
 
-.profile-action-btn {
-  background: transparent;
-  border: none;
-  color: #b3b3b3;
+.profile-action-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 12px 16px;
+  border-radius: 6px;
+  flex: 1;
+  min-width: 0;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.profile-action-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.1s ease, transform 0.1s ease;
+  color: #fff;
+  flex-shrink: 0;
 }
 
-.profile-action-btn:hover {
+.card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.liked-songs {
+  background: linear-gradient(135deg, #FF6B93 0%, #FF4A7A 100%);
+}
+
+.recently-played {
+  background: linear-gradient(135deg, #1E3B70 0%, #0F1E3A 100%);
+}
+
+.uploaded {
+  background: linear-gradient(135deg, #2D8B55 0%, #15452A 100%);
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-title {
   color: #fff;
-  transform: scale(1.04);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.card-subtitle {
+  color: #a7a7a7;
+  font-size: 14px;
 }
 
 .profile-section-header {

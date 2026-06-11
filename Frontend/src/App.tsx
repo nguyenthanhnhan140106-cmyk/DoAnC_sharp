@@ -10,6 +10,8 @@ import SignupPage from './Pages/SignupPage';
 import ProfilePage from './Pages/ProfilePage';
 import PlaylistPage from './Pages/PlaylistPage';
 import ListeningHistoryPage from './Pages/ListeningHistoryPage';
+import UploadPage from './Pages/UploadPage';
+import NotificationsPage from './Pages/NotificationsPage';
 
 import AddToPlaylistModal from './Components/AddToPlaylistModal';
 import Toast from './Components/Toast';
@@ -29,6 +31,8 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/history" element={<ListeningHistoryPage />} />
+            <Route path="/upload" element={<UploadPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
           </Routes>
           <AddToPlaylistModal />
           <Toast />
