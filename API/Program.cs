@@ -78,6 +78,7 @@ for (int retry = 1; retry <= maxRetries; retry++)
                     CoverUrl TEXT,
                     AudioUrl TEXT,
                     VideoUrl TEXT,
+                    LyricsUrl VARCHAR(500) NULL, 
                     ArtistId INT NULL,
                     WorldRank INT DEFAULT 0,
                     Followers INT DEFAULT 0,

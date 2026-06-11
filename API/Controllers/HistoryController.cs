@@ -20,7 +20,8 @@ namespace API.Controllers
         {
             get
             {
-                if (int.TryParse(User.FindFirst("sub")?.Value, out var userId))
+                var idClaim = User.FindFirst("id")?.Value ?? User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (int.TryParse(idClaim, out var userId))
                 {
                     return userId;
                 }

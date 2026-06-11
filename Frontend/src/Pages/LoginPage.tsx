@@ -1,18 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Contexts/AuthContext';
+import API from '../Services/api';
 import '../Components/Styles/AuthPage.css';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    login();
-    navigate('/');
+    setError('');
+    try {
+      const response = await API.post('/auth/login', {
+        username,
+        password
+      });
+      const token = response.data.token || response.data.Token;
+      if (!token) throw new Error("Không nhận được token từ hệ thống.");
+      login(token, username);
+      navigate('/');
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.response?.data?.Message || "Đăng nhập thất bại, kiểm tra lại nhé!");
+    }
   };
 
   return (
@@ -26,13 +39,15 @@ export default function LoginPage() {
       <div className="auth-container">
         <h1>Welcome back</h1>
         <form onSubmit={handleLogin} className="auth-form">
+          {error && <p style={{ color: 'red', fontSize: '14px', marginBottom: '15px' }}>{error}</p>}
+          
           <div className="form-group">
-            <label>Email</label>
+            <label>Username</label>
             <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
+              type="text" 
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
               required 
             />
           </div>

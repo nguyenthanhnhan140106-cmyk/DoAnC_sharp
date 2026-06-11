@@ -53,7 +53,7 @@ namespace Application.Services
                 AudioUrl  = dto.AudioUrl,
                 VideoUrl  = dto.VideoUrl,
                 Category  = dto.Category,
-                Lyrics    = dto.Lyrics,
+                LyricsUrl    = dto.LyricsUrl,
                 ArtistId  = dto.ArtistId,
                 CreatedAt = DateTime.UtcNow // 🟢 Gán thời gian tạo tại đây khi khởi tạo bài mới thông qua API
             };
@@ -77,7 +77,7 @@ namespace Application.Services
             if (dto.AudioUrl != null) song.AudioUrl = dto.AudioUrl;
             if (dto.VideoUrl != null) song.VideoUrl = dto.VideoUrl;
             if (dto.Category != null) song.Category = dto.Category;
-            if (dto.Lyrics   != null) song.Lyrics   = dto.Lyrics;
+            if (dto.LyricsUrl   != null) song.LyricsUrl   = dto.LyricsUrl;
             if (dto.ArtistId != null) song.ArtistId = dto.ArtistId; 
 
             // Thực thi lệnh UPDATE bằng Dapper SQL thuần
@@ -101,7 +101,7 @@ namespace Application.Services
             AudioUrl         = s.AudioUrl,
             VideoUrl         = s.VideoUrl, // <--- THÊM DÒNG NÀY ĐỂ FRONTEND NHẬN ĐƯỢC VIDEO
             Category         = s.Category,
-            Lyrics           = s.Lyrics,
+            LyricsUrl           = s.LyricsUrl,
             CreatedAt        = s.CreatedAt,
             
             ArtistId         = s.ArtistId,

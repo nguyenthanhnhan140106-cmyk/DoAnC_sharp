@@ -9,7 +9,7 @@ interface User {
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
-  login: () => void;
+  login: (token: string, username: string) => void;
   logout: () => void;
   openAuthModal: (data?: { title: string, coverUrl: string }) => void;
   closeAuthModal: () => void;
@@ -30,16 +30,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState<{ title: string, coverUrl: string } | null>(null);
 
-  const login = () => {
+  const login = (token: string, username: string) => {
     setIsLoggedIn(true);
-    setUser({ id: 1, username: 'testuser' });
+    setUser({ id: 1, username: username });
     localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('token', token);
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     setUser(null);
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('token');
   };
 
   const openAuthModal = (data?: { title: string, coverUrl: string }) => {

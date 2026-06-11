@@ -1,47 +1,128 @@
-.spotify-lyrics-view {
-  width: 100%;
-  height: 100%;
-  background-color: #032b43;
-  /* Màu xanh đen như hình */
-  border-radius: 8px;
-  overflow-y: auto;
-  padding: 40px 60px;
-  box-sizing: border-box;
-}
-
-.lyrics-content-wrapper {
+.lyric-fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+  background-color: #000;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 800px;
+  font-family: 'Montserrat', sans-serif;
 }
 
-.lyrics-spacer {
-  height: 30vh;
+.lyric-blur-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(60px) brightness(0.3); /* Loang mờ nghệ thuật */
+  transform: scale(1.2);
+  z-index: -1;
 }
 
-.lyric-line {
-  margin: 0;
-  font-size: 32px;
-  font-weight: 800;
-  line-height: 1.4;
-  color: #729ebc;
-  /* Màu xanh dương nhạt cho dòng chưa hát */
-  transition: color 0.3s ease, transform 0.3s ease;
-  letter-spacing: -0.5px;
+.lyric-close-icon {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 28px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.lyric-line:hover {
-  color: #a1c6de;
+.lyric-close-icon:hover {
+  color: #fff;
+  transform: scale(1.1);
 }
 
-.lyric-line.active {
-  color: #ffffff;
-  /* Dòng hiện tại sáng trắng */
+.lyric-main-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 10%;
+  gap: 80px;
+  max-height: calc(100vh - 100px);
 }
 
-/* Hiệu ứng gạch dưới cho đoạn nổi bật */
-.lyric-line.active:nth-child(5) {
-  text-decoration: underline;
+.lyric-left-block {
+  flex: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.lyric-disk-cover {
+  width: 320px;
+  height: 320px;
+  border-radius: 8px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  margin-bottom: 24px;
+  object-fit: cover;
+}
+
+.lyric-song-title {
+  color: #fff;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.lyric-artist-name {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 18px;
+  margin: 0;
+}
+
+.lyric-right-block {
+  flex: 6;
+  height: 80%;
+  overflow-y: auto;
+  padding-right: 20px;
+  mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 85%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 85%, transparent);
+}
+
+/* Thao tác ẩn thanh cuộn scrollbar nhìn cho thẩm mỹ */
+.lyric-right-block::-webkit-scrollbar {
+  width: 0px;
+}
+
+.lyric-text-row {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 28px;
+  font-weight: 700;
+  margin: 28px 0;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: left center;
+}
+
+/* 🌟 Khi câu hát đang được phát (Active) */
+.lyric-text-row.is-singing {
+  color: #ffffff !important;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+  transform: scale(1.05);
+}
+
+.text-center-status {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.lyric-fixed-playbar {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  padding: 16px 0;
 }
