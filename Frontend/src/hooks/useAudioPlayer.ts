@@ -52,6 +52,20 @@ export function useAudioPlayer() {
     }
   }, [currentSong]);
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+      }
+      setIsPlaying(false);
+      setCurrentSong(null);
+      setQueueState([]);
+      currentIndexRef.current = -1;
+      localStorage.removeItem('lastPlayedSong');
+    }
+  }, [isLoggedIn]);
+
   const internalPlay = useCallback((song: Song, index: number) => {
     currentIndexRef.current = index;
     const audio = audioRef.current;
@@ -143,10 +157,16 @@ export function useAudioPlayer() {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play();
+      audio.play().catch(e => console.log("Play failed:", e));
       setIsPlaying(true);
     }
   };
+
+  const pauseSong = useCallback(() => {
+    const audio = audioRef.current;
+    audio.pause();
+    setIsPlaying(false);
+  }, []);
 
   const seek = (time: number) => {
     audioRef.current.currentTime = time;
@@ -226,7 +246,7 @@ export function useAudioPlayer() {
   };
 
   return {
-    currentSong, isPlaying, playSong, togglePlay,
+    currentSong, isPlaying, playSong, togglePlay, pauseSong,
     currentTime, duration, seek, volume, setVolume,
     queue, setQueue,
     isShuffle, toggleShuffle,

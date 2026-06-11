@@ -6,6 +6,7 @@ interface MusicContextType {
   isPlaying: boolean;
   playSong: (song: Song) => void;
   togglePlay: () => void;
+  pauseSong: () => void;
   currentTime: number;
   duration: number;
   seek: (time: number) => void;
@@ -32,6 +33,8 @@ interface MusicContextType {
   closeAddToPlaylistModal: () => void;
   selectedSongForModal: Song | null;
   modalPosition: {x: number, y: number} | null;
+  toast: { message: string; coverUrl?: string; visible: boolean } | null;
+  showToast: (message: string, coverUrl?: string) => void;
 }
 
 const MusicContext = createContext<MusicContextType | null>(null);
@@ -43,6 +46,17 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
   const [likedSongs, setLikedSongs] = useState<Song[]>([]);
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [selectedSongForModal, setSelectedSongForModal] = useState<Song | null>(null);
+  const [toast, setToast] = useState<{ message: string; coverUrl?: string; visible: boolean } | null>(null);
+  const [toastTimeout, setToastTimeout] = useState<any>(null);
+
+  const showToast = (message: string, coverUrl?: string) => {
+    if (toastTimeout) clearTimeout(toastTimeout);
+    setToast({ message, coverUrl, visible: true });
+    const timeout = setTimeout(() => {
+      setToast(prev => prev ? { ...prev, visible: false } : null);
+    }, 3000);
+    setToastTimeout(timeout);
+  };
 
   const toggleLikeSong = (song: Song) => {
     setLikedSongs(prev => {
@@ -86,6 +100,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
   return (
     <MusicContext.Provider value={{
       ...audioState,
+      pauseSong: audioState.pauseSong,
       isQueueViewOpen, toggleQueueView,
       isLyricsViewOpen, toggleLyricsView,
       isAddToPlaylistModalOpen, openAddToPlaylistModal, closeAddToPlaylistModal, selectedSongForModal, modalPosition,
@@ -93,6 +108,8 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
       likedSongs,
       toggleLikeSong,
       isSongLiked,
+      toast,
+      showToast
     }}>
       {children}
     </MusicContext.Provider>

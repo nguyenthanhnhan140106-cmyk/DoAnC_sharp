@@ -12,6 +12,7 @@ import PlaylistPage from './Pages/PlaylistPage';
 import ListeningHistoryPage from './Pages/ListeningHistoryPage';
 
 import AddToPlaylistModal from './Components/AddToPlaylistModal';
+import Toast from './Components/Toast';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="/history" element={<ListeningHistoryPage />} />
           </Routes>
           <AddToPlaylistModal />
+          <Toast />
         </BrowserRouter>
       </MusicProvider>
     </AuthProvider>
