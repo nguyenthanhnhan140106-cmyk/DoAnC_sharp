@@ -405,7 +405,15 @@ INSERT INTO albums (Id, Title, CoverUrl, ArtistId, CreatedAt) VALUES
     12, NOW()),
 (3, 'Tuyển Tập Album Nhạc - Changg',
     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113834_dvharv.png',
-    13, NOW());
+    13, NOW()),
+(4, 'Những Bản Hit Của Jack-J97',
+    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/vebenanh_rrpaon.jpg', 2, NOW()),
+(5, 'Tuyển Tập Nhạc Rap Cực Chất',
+    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850119/Screenshot_2026-06-07_233402_u9ojgx.png', NULL, NOW()),
+(6, 'V-Pop Đình Đám 2026',
+    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846681/Screenshot_2026-06-07_223134_kngtgv.png', NULL, NOW()),
+(7, 'Nhạc Trẻ Gây Nghiện',
+    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/chatgayhai_vgatml.jpg', NULL, NOW());
 
 
 -- ─────────────────────────────────────────────────────────
@@ -452,6 +460,23 @@ INSERT INTO album_songs (AlbumId, SongId, OrderNumber) VALUES
 (3, 30, 7),
 (3, 31, 8),
 (3, 32, 9);
+
+(4, 2, 1),
+(4, 3, 2),
+(4, 7, 3),
+
+(5, 52, 1),
+(5, 53, 2),
+(5, 54, 3),
+
+(6, 34, 1),
+(6, 35, 2),
+(6, 36, 3),
+
+(7, 10, 1),
+(7, 11, 2),
+(7, 12, 3);
+
 -- UPDATE songs 
 -- SET Lyrics = '[
 --   {"time": 2.0, "text": "Em đi lướt qua nhanh"},
