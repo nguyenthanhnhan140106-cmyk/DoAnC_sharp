@@ -157,10 +157,16 @@ export function useAudioPlayer() {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play();
+      audio.play().catch(e => console.log("Play failed:", e));
       setIsPlaying(true);
     }
   };
+
+  const pauseSong = useCallback(() => {
+    const audio = audioRef.current;
+    audio.pause();
+    setIsPlaying(false);
+  }, []);
 
   const seek = (time: number) => {
     audioRef.current.currentTime = time;
@@ -240,7 +246,7 @@ export function useAudioPlayer() {
   };
 
   return {
-    currentSong, isPlaying, playSong, togglePlay,
+    currentSong, isPlaying, playSong, togglePlay, pauseSong,
     currentTime, duration, seek, volume, setVolume,
     queue, setQueue,
     isShuffle, toggleShuffle,

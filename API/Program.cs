@@ -55,6 +55,13 @@ for (int retry = 1; retry <= maxRetries; retry++)
         using var conn = new MySqlConnection(connectionString);
         conn.Open();
 
+        // 0. Tự động thêm cột BannerUrl cho bảng artists (tránh lỗi 500 do thiếu schema)
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = "ALTER TABLE artists ADD COLUMN BannerUrl VARCHAR(500) NULL;";
+            try { cmd.ExecuteNonQuery(); } catch { /* Bỏ qua nếu cột đã tồn tại */ }
+        }
+
         // 1. Tạo bảng songs
         using (var cmd = conn.CreateCommand())
         {
