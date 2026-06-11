@@ -7,6 +7,7 @@ import Header from '../Components/header';
 import PlayerBar from '../Components/PlayerBar';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
+import JSZip from 'jszip';
 import { useAuth } from '../Contexts/AuthContext';
 import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
@@ -241,6 +242,62 @@ export default function AlbumPage() {
     }
   };
 
+  const sanitizeFileName = (name: string) => name.replace(/[\\/:*?"<>|]/g, '').trim();
+
+  const handleShuffleAlbum = () => {
+    if (!album || album.songs.length === 0) return;
+    const shuffledSongs = [...album.songs].sort(() => Math.random() - 0.5);
+    setQueue(shuffledSongs, 0);
+    if (currentSong?.id !== shuffledSongs[0]?.id) {
+      playSong(shuffledSongs[0]);
+    } else if (!isPlaying) {
+      togglePlay();
+    }
+  };
+
+  const handleDownloadAlbum = async () => {
+    if (!album || album.songs.length === 0) {
+      showToast('Album không có bài hát để tải xuống.');
+      return;
+    }
+
+    const downloadableSongs = album.songs.filter(song => song.audioUrl);
+    if (downloadableSongs.length === 0) {
+      showToast('Album không có file audio để tải xuống.');
+      return;
+    }
+
+    const zip = new JSZip();
+    const folder = zip.folder(sanitizeFileName(album.title) || 'Album');
+
+    showToast(`Đang nén ${downloadableSongs.length} bài hát...`);
+
+    await Promise.all(downloadableSongs.map(async (song) => {
+      try {
+        const response = await fetch(song.audioUrl!, { mode: 'cors' });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        folder?.file(`${sanitizeFileName(song.title)}.mp3`, arrayBuffer);
+      } catch (error) {
+        console.warn('Không thể tải về bài hát:', song.title, error);
+      }
+    }));
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${sanitizeFileName(album.title)}.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showToast('Đã tạo ZIP album, kiểm tra thư mục tải xuống.');
+  };
+
   return (
     <div className={`spotify-layout ${!isLoggedIn ? 'right-hidden' : ''}`}>
       <Header />
@@ -298,7 +355,7 @@ export default function AlbumPage() {
                     <svg viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z" /></svg>
                   </button>
 
-                  <button className="album-action-icon" title="Trộn bài">
+                  <button className="album-action-icon" title="Trộn bài" onClick={handleShuffleAlbum}>
                     <svg viewBox="0 0 16 16" width="32" height="32"><path d="M13.151.922a.75.75 0 10-1.06 1.06L13.109 3H11.16a3.75 3.75 0 00-2.873 1.34l-6.173 7.356A2.25 2.25 0 01.39 12.5H0V14h.391a3.75 3.75 0 002.873-1.34l6.173-7.356a2.25 2.25 0 011.724-.804h1.947l-1.017 1.018a.75.75 0 001.06 1.06L15.98 3.75 13.15.922zM.391 3.5H0V2h.391c1.109 0 2.16.49 2.873 1.34L4.89 5.277l-.979 1.167-1.796-2.14A2.25 2.25 0 00.39 3.5zM11.16 12.5h1.95l-1.017-1.018a.75.75 0 111.06-1.06l2.829 2.828-2.829 2.828a.75.75 0 11-1.06-1.06l1.018-1.018H11.16a3.75 3.75 0 01-2.873-1.34l-1.625-1.936.979-1.167 1.625 1.936a2.25 2.25 0 001.724.804z" /></svg>
                   </button>
 
@@ -306,7 +363,7 @@ export default function AlbumPage() {
                     <svg viewBox="0 0 16 16" width="32" height="32"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm8.5-3.5v3h3v1.5h-3v3h-1.5v-3h-3v-1.5h3v-3h1.5z" /></svg>
                   </button>
 
-                  <button className="album-action-icon" title="Tải xuống">
+                  <button className="album-action-icon" title="Tải xuống" onClick={handleDownloadAlbum}>
                     <svg viewBox="0 0 16 16" width="32" height="32"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zM7.25 4v4.44l-1.47-1.47-1.06 1.06L8 11.31l3.28-3.28-1.06-1.06-1.47 1.47V4h-1.5z" /></svg>
                   </button>
 
