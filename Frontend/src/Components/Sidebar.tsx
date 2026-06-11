@@ -11,9 +11,20 @@ interface SidebarProps {
 
 export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const { isLoggedIn, user } = useAuth();
-  const { likedSongs } = useMusic() as any;
+  const { likedSongs, setQueue, playSong } = useMusic() as any;
   const navigate = useNavigate();
-  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<any[]>(() => {
+    if (user && user.id) {
+      const cached = localStorage.getItem(`sidebar_playlists_${user.id}`);
+      if (cached) {
+        try {
+          return JSON.parse(cached);
+        } catch (e) {}
+      }
+    }
+    return [];
+  });
+  const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, playlistId: number | string } | null>(null);
@@ -24,6 +35,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       fetchPlaylists();
     } else {
       setPlaylists([]);
+      setIsLoadingPlaylists(false);
     }
 
     const handlePlaylistUpdate = () => {
@@ -39,9 +51,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       if (res.ok) {
         const data = await res.json();
         setPlaylists(data);
+        localStorage.setItem(`sidebar_playlists_${user?.id}`, JSON.stringify(data));
       }
     } catch (err) {
       console.error("Lỗi lấy danh sách playlist:", err);
+    } finally {
+      setIsLoadingPlaylists(false);
     }
   };
 
@@ -50,7 +65,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       alert("Vui lòng đăng nhập để tạo danh sách phát!");
       return;
     }
-    
+
     setIsMenuOpen(false);
 
     // Tính toán số thứ tự tiếp theo cho Playlist
@@ -77,7 +92,9 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
       if (res.ok) {
         const newPlaylist = await res.json();
-        setPlaylists([...playlists, newPlaylist]);
+        const updated = [...playlists, newPlaylist];
+        setPlaylists(updated);
+        localStorage.setItem(`sidebar_playlists_${user.id}`, JSON.stringify(updated));
         navigate(`/playlist/${newPlaylist.id}`);
       } else {
         alert("Có lỗi khi tạo danh sách phát.");
@@ -94,7 +111,11 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         method: 'DELETE'
       });
       if (res.ok) {
-        setPlaylists(playlists.filter(p => p.id !== contextMenu.playlistId));
+        const updated = playlists.filter(p => p.id !== contextMenu.playlistId);
+        setPlaylists(updated);
+        if (user && user.id) {
+          localStorage.setItem(`sidebar_playlists_${user.id}`, JSON.stringify(updated));
+        }
         setContextMenu(null);
         window.dispatchEvent(new Event('playlistUpdated'));
         if (window.location.pathname === `/playlist/${contextMenu.playlistId}`) {
@@ -106,6 +127,36 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
     } catch (err) {
       console.error(err);
       alert("Có lỗi khi xóa danh sách phát.");
+    }
+  };
+
+  const handleNavigateToggle = (path: string) => {
+    if (window.location.pathname === path) {
+      navigate('/');
+    } else {
+      navigate(path);
+    }
+  };
+
+  const handleDoublePlayLiked = () => {
+    if (likedSongs && likedSongs.length > 0) {
+      setQueue(likedSongs);
+      playSong(likedSongs[0]);
+    }
+  };
+
+  const handleDoublePlayPlaylist = async (plId: number) => {
+    try {
+      const res = await fetch(`/api/playlists/${plId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.songs && data.songs.length > 0) {
+          setQueue(data.songs);
+          playSong(data.songs[0]);
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi khi phát playlist:", err);
     }
   };
 
@@ -126,13 +177,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   return (
     <aside className={`spotify-sidebar ${isCollapsed ? "collapsed" : ""}`}>
       <div className="sidebar-header">
-        <button 
-          className="library-btn" 
+        <button
+          className="library-btn"
           title={isCollapsed ? "Mở rộng Thư viện của bạn" : "Thu gọn Thư viện của bạn"}
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-            <path d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zM15.5 2.134A1 1 0 0 0 14 3v18a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6.464a1 1 0 0 0-.5-.866l-6-3.464zM9 2a1 1 0 0 0-1 1v18a1 1 0 1 0 2 0V3a1 1 0 0 0-1-1z"/>
+            <path d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zM15.5 2.134A1 1 0 0 0 14 3v18a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6.464a1 1 0 0 0-.5-.866l-6-3.464zM9 2a1 1 0 0 0-1 1v18a1 1 0 1 0 2 0V3a1 1 0 0 0-1-1z" />
           </svg>
           {!isCollapsed && <span className="library-text">Thư viện của bạn</span>}
         </button>
@@ -141,9 +192,9 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           <div className="header-actions">
             <div style={{ position: "relative" }} ref={menuRef}>
               <button className="icon-btn" title="Tạo danh sách phát hoặc thư mục" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15.25 8a.75.75 0 0 1-.75.75H8.75v5.75a.75.75 0 0 1-1.5 0V8.75H1.5a.75.75 0 0 1 0-1.5h5.75V1.5a.75.75 0 0 1 1.5 0v5.75h5.75a.75.75 0 0 1 .75.75z"/></svg>
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15.25 8a.75.75 0 0 1-.75.75H8.75v5.75a.75.75 0 0 1-1.5 0V8.75H1.5a.75.75 0 0 1 0-1.5h5.75V1.5a.75.75 0 0 1 1.5 0v5.75h5.75a.75.75 0 0 1 .75.75z" /></svg>
               </button>
-              
+
               {isMenuOpen && (
                 <div style={{
                   position: "absolute", top: "120%", left: 0,
@@ -155,10 +206,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
                     background: "transparent", border: "none", color: "#fff", cursor: "pointer",
                     textAlign: "left", borderRadius: 2
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                   >
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M15.5 2.134A1 1 0 0 0 14 3v18a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6.464a1 1 0 0 0-.5-.866l-6-3.464zM9 2a1 1 0 0 0-1 1v18a1 1 0 1 0 2 0V3a1 1 0 0 0-1-1z"/></svg>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M15.5 2.134A1 1 0 0 0 14 3v18a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6.464a1 1 0 0 0-.5-.866l-6-3.464zM9 2a1 1 0 0 0-1 1v18a1 1 0 1 0 2 0V3a1 1 0 0 0-1-1z" /></svg>
                     <div>
                       <p style={{ margin: 0, fontSize: 14, fontWeight: 500 }}>Playlist</p>
                       <p style={{ margin: 0, fontSize: 12, color: "#b3b3b3" }}>Create a playlist with songs or episodes</p>
@@ -181,19 +232,24 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       {!isCollapsed && (
         <div className="sidebar-search-sort">
           <button className="search-btn" title="Tìm kiếm trong Thư viện">
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M7 1.75a5.25 5.25 0 1 0 0 10.5 5.25 5.25 0 0 0 0-10.5zM.25 7a6.75 6.75 0 1 1 12.096 4.12l3.184 3.185a.75.75 0 1 1-1.06 1.06L11.304 12.2A6.75 6.75 0 0 1 .25 7z"/></svg>
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M7 1.75a5.25 5.25 0 1 0 0 10.5 5.25 5.25 0 0 0 0-10.5zM.25 7a6.75 6.75 0 1 1 12.096 4.12l3.184 3.185a.75.75 0 1 1-1.06 1.06L11.304 12.2A6.75 6.75 0 0 1 .25 7z" /></svg>
           </button>
           <button className="sort-btn">
             <span>Recents</span>
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15 14.5H5V13h10v1.5zm0-5.75H5v-1.5h10v1.5zM15 3H5V1.5h10V3zM3 3H1V1.5h2V3zm0 5.75H1v-1.5h2v1.5zm0 5.75H1V13h2v1.5z"/></svg>
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15 14.5H5V13h10v1.5zm0-5.75H5v-1.5h10v1.5zM15 3H5V1.5h10V3zM3 3H1V1.5h2V3zm0 5.75H1v-1.5h2v1.5zm0 5.75H1V13h2v1.5z" /></svg>
           </button>
         </div>
       )}
 
       <div className="sidebar-content">
-        <div className="playlist-item" title="Liked Songs" onClick={() => navigate('/playlist/liked')}>
+        <div
+          className="playlist-item"
+          title="Liked Songs"
+          onClick={() => handleNavigateToggle('/playlist/liked')}
+          onDoubleClick={handleDoublePlayLiked}
+        >
           <div className="playlist-cover default-cover" style={{ background: 'linear-gradient(135deg, #450af5, #8e8ee5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
           </div>
           {!isCollapsed && (
             <div className="playlist-info">
@@ -208,9 +264,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           )}
         </div>
 
-        <div className="playlist-item" title="Listening history" onClick={() => navigate('/history')}>
+        <div
+          className="playlist-item"
+          title="Listening history"
+          onClick={() => handleNavigateToggle('/history')}
+        >
           <div className="playlist-cover default-cover" style={{ background: 'linear-gradient(135deg, #1db954, #1ed760)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff"><path d="M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 1zm1.5 12.25h-4a.5.5 0 0 1 0-1h3.5V6.5a.5.5 0 0 1 1 0v6.75z"/></svg>
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff"><path d="M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 1zm1.5 12.25h-4a.5.5 0 0 1 0-1h3.5V6.5a.5.5 0 0 1 1 0v6.75z" /></svg>
           </div>
           {!isCollapsed && (
             <div className="playlist-info">
@@ -221,18 +281,19 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         </div>
 
         {playlists.map((pl) => (
-          <div 
-            key={pl.id} 
-            className="playlist-item" 
-            title={pl.name} 
-            onClick={() => navigate(`/playlist/${pl.id}`)}
+          <div
+            key={pl.id}
+            className="playlist-item"
+            title={pl.name}
+            onClick={() => handleNavigateToggle(`/playlist/${pl.id}`)}
+            onDoubleClick={() => handleDoublePlayPlaylist(pl.id)}
             onContextMenu={(e) => {
               e.preventDefault();
               setContextMenu({ x: e.clientX, y: e.clientY, playlistId: pl.id });
             }}
           >
             <div className="playlist-cover default-cover" style={pl.coverUrl ? { backgroundImage: `url(${pl.coverUrl})`, backgroundSize: 'cover' } : {}}>
-              {!pl.coverUrl && <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 3h15v15.167a3.5 3.5 0 1 1-3.5-3.5H19V5H8v13.167a3.5 3.5 0 1 1-3.5-3.5H6V3zm0 13.667H4.5a1.5 1.5 0 1 0 1.5 1.5v-1.5zm13-11.667H8v11.667h1.5a1.5 1.5 0 1 0 1.5 1.5v-13.167H19V5z"/></svg>}
+              {!pl.coverUrl && <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 3h15v15.167a3.5 3.5 0 1 1-3.5-3.5H19V5H8v13.167a3.5 3.5 0 1 1-3.5-3.5H6V3zm0 13.667H4.5a1.5 1.5 0 1 0 1.5 1.5v-1.5zm13-11.667H8v11.667h1.5a1.5 1.5 0 1 0 1.5 1.5v-13.167H19V5z" /></svg>}
             </div>
             {!isCollapsed && (
               <div className="playlist-info">
@@ -242,7 +303,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
             )}
           </div>
         ))}
-        {playlists.length === 0 && !isCollapsed && (
+        {!isLoadingPlaylists && playlists.length === 0 && !isCollapsed && (
           <div style={{ padding: "0 16px", color: "#b3b3b3", fontSize: 13, marginTop: 12 }}>
             Chưa có danh sách phát nào. Bấm dấu + để tạo.
           </div>
@@ -250,7 +311,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       </div>
 
       {contextMenu && (
-        <div 
+        <div
           ref={contextMenuRef}
           style={{
             position: 'fixed',
@@ -275,7 +336,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
             </li>
             <li className="album-dropdown-divider"></li>
             <li onClick={handleDeletePlaylist}>
-              <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15.53 2.47a.75.75 0 0 1 0 1.06L6.53 12.53a.75.75 0 0 1-1.06 0L1.47 8.53a.75.75 0 0 1 1.06-1.06l3.47 3.47 8.47-8.47a.75.75 0 0 1 1.06 0z"/></svg>
+              <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15.53 2.47a.75.75 0 0 1 0 1.06L6.53 12.53a.75.75 0 0 1-1.06 0L1.47 8.53a.75.75 0 0 1 1.06-1.06l3.47 3.47 8.47-8.47a.75.75 0 0 1 1.06 0z" /></svg>
               Delete
             </li>
           </ul>
