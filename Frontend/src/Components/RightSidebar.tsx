@@ -25,10 +25,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const [isRecentViewOpen, setIsRecentViewOpen] = useState(false);
-  const [recentSongs, setRecentSongs] = useState<any[]>([]);
-  const [isLoadingRecent, setIsLoadingRecent] = useState(false);
-  const [recentError, setRecentError] = useState<string | null>(null);
 
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
@@ -53,103 +49,18 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     const handleOpenVideoModal = () => {
       wasPlayingBeforeVideo.current = true; // Lưu cờ
       setIsVideoOpen(true);
+      // Tạm dừng nhạc
+      if (pauseSong) {
+        pauseSong();
+      } else if (isPlaying && togglePlay) {
+        togglePlay();
+      }
     };
     window.addEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
     return () => window.removeEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
-  }, []);
+  }, [isPlaying, togglePlay, pauseSong]);
 
-  // 🟢 Fetch recently played songs
-  useEffect(() => {
-    if (!isRecentViewOpen) return;
 
-    const controller = new AbortController();
-
-    const fetchRecent = async () => {
-      setIsLoadingRecent(true);
-      setRecentError(null);
-
-      try {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          const localRecent = musicContext?.recentlyPlayed || [];
-          setRecentSongs(localRecent);
-          setIsLoadingRecent(false);
-          return;
-        }
-
-        const url = 'http://localhost:5000/api/history/recent?limit=10';
-
-        const response = await fetch(url, {
-          method: "GET",
-          signal: controller.signal,
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.status === 401) {
-          localStorage.removeItem("token");
-          const localRecent = musicContext?.recentlyPlayed || [];
-          setRecentSongs(localRecent);
-          setRecentError(null);
-          setIsLoadingRecent(false);
-          return;
-        }
-
-        if (!response.ok) {
-          const bodyText = await response.text().catch(() => '');
-          console.error('Recent API error:', response.status, bodyText);
-          throw new Error(`${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        const payload = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.songs)
-          ? data.songs
-          : [];
-
-        const parsed: Song[] = payload.map((item: any) => ({
-          id: Number(item.id),
-          title: item.title ?? item.name ?? 'Unknown title',
-          artist: item.artist ?? item.artistName ?? 'Unknown artist',
-          coverUrl: item.coverUrl ?? item.imageUrl ?? undefined,
-          audioUrl: item.audioUrl ?? undefined,
-        }));
-
-        setRecentSongs(parsed);
-      } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          console.error('Failed to load recent songs:', err);
-          setRecentError('Không thể tải được danh sách vừa nghe');
-          setRecentSongs([]);
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoadingRecent(false);
-        }
-      }
-    };
-
-    fetchRecent();
-
-    return () => controller.abort();
-  }, [isRecentViewOpen]);
-
-  useEffect(() => {
-    if (!isRecentViewOpen) return;
-    if (isQueueViewOpen && toggleQueueView) toggleQueueView();
-    if (isLyricsViewOpen && toggleLyricsView) toggleLyricsView();
-  }, [isRecentViewOpen, isQueueViewOpen, isLyricsViewOpen, toggleQueueView, toggleLyricsView]);
-
-  useEffect(() => {
-    if (isQueueViewOpen || isLyricsViewOpen) {
-      setIsRecentViewOpen(false);
-    }
-  }, [isQueueViewOpen, isLyricsViewOpen]);
 
   if (!currentSong) {
     return (
@@ -169,161 +80,14 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     );
   }
 
-  if (isQueueViewOpen || isLyricsViewOpen || isRecentViewOpen) {
-    // Handler to switch between tabs
-    const handleShowRecentView = () => {
-      if (isQueueViewOpen && toggleQueueView) toggleQueueView();
-      if (isLyricsViewOpen && toggleLyricsView) toggleLyricsView();
-      setIsRecentViewOpen(true);
-    };
-
-    const handleShowQueueView = () => {
-      if (!isQueueViewOpen && toggleQueueView) toggleQueueView();
-      setIsRecentViewOpen(false);
-    };
-
+  if (isQueueViewOpen || isLyricsViewOpen) {
     const currentIndex = queue.findIndex((s: any) => s?.id === currentSong?.id);
     const nextUpQueue = currentIndex !== -1 ? queue.slice(currentIndex + 1) : queue;
 
-    // Show Recently Viewed
-    if (isRecentViewOpen && !isQueueViewOpen && !isLyricsViewOpen) {
-      return (
-        <aside className={`spotify-right-sidebar ${isCollapsed ? 'collapsed' : ''}`} style={{ padding: '24px 16px', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid #282828', flex: 1 }}>
-              <button
-                onClick={handleShowQueueView}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#b3b3b3',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  padding: '12px 8px',
-                  cursor: 'pointer',
-                  borderBottom: '2px solid transparent',
-                  transition: 'all 0.2s'
-                }}
-              >
-                Queue
-              </button>
-              <button
-                onClick={handleShowRecentView}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#1db954',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  padding: '12px 8px',
-                  cursor: 'pointer',
-                  borderBottom: '2px solid #1db954'
-                }}
-              >
-                Recently Played
-              </button>
-            </div>
-            <button onClick={() => setIsRecentViewOpen(false)} style={{ background: 'transparent', border: 'none', color: '#b3b3b3', cursor: 'pointer', padding: '4px' }}>
-              <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Recently Played Content */}
-          <div>
-            {isLoadingRecent ? (
-              <div style={{ textAlign: 'center', padding: '20px', color: '#b3b3b3', fontSize: '14px' }}>
-                Đang tải bài gần đây...
-              </div>
-            ) : recentError ? (
-              <div style={{ textAlign: 'center', padding: '20px', color: '#ff4444', fontSize: '14px' }}>
-                {recentError}
-              </div>
-            ) : recentSongs.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '20px', color: '#b3b3b3', fontSize: '14px' }}>
-                Chưa có bài gần đây
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {recentSongs.map((song: any, idx: number) => (
-                  <div
-                    key={`${song.id}-${idx}`}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      transition: 'background-color 0.2s',
-                      backgroundColor: 'transparent'
-                    }}
-                    onClick={() => musicContext?.playSong(song)}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  >
-                    <img
-                      src={song.coverUrl || `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50&h=50&fit=crop`}
-                      alt={song.title}
-                      style={{ width: '48px', height: '48px', borderRadius: '4px', objectFit: 'cover', flexShrink: 0 }}
-                    />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {song.title}
-                      </p>
-                      <p style={{ margin: 0, fontSize: '13px', color: '#b3b3b3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {song.artist}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </aside>
-      );
-    }
-
-    // Show Queue (original view with tab)
     return (
       <aside className={`spotify-right-sidebar ${isCollapsed ? 'collapsed' : ''}`} style={{ padding: '24px 16px', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          {/* Tabs */}
-          <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid #282828', flex: 1 }}>
-            <button
-              onClick={() => {}}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#1db954',
-                fontSize: '14px',
-                fontWeight: 700,
-                padding: '12px 8px',
-                cursor: 'pointer',
-                borderBottom: '2px solid #1db954'
-              }}
-            >
-              Queue
-            </button>
-            <button
-              onClick={handleShowRecentView}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#b3b3b3',
-                fontSize: '14px',
-                fontWeight: 700,
-                padding: '12px 8px',
-                cursor: 'pointer',
-                borderBottom: '2px solid transparent',
-                transition: 'all 0.2s'
-              }}
-            >
-              Recently Played
-            </button>
-          </div>
+          <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#fff' }}>Queue</h4>
           <button onClick={toggleQueueView} style={{ background: 'transparent', border: 'none', color: '#b3b3b3', cursor: 'pointer', padding: '4px' }}>
             <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
               <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z" />

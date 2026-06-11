@@ -16,6 +16,7 @@ export type RepeatMode = 'none' | 'all' | 'one';
 
 export function useAudioPlayer() {
   const { isLoggedIn, openAuthModal } = useAuth();
+  const historyTimeoutRef = useRef<any>(null);
   
   const [currentSong, setCurrentSong] = useState<Song | null>(() => {
     try {
@@ -81,10 +82,18 @@ export function useAudioPlayer() {
       return updated;
     });
 
-    // Save play history to server
-    songService.savePlayHistory(song.id).catch(err => {
-      console.error("Failed to save play history to server:", err);
-    });
+    // Xóa timeout lưu lịch sử cũ nếu người dùng bấm qua bài quá nhanh (chống spam)
+    if (historyTimeoutRef.current) {
+      clearTimeout(historyTimeoutRef.current);
+    }
+
+    // Chỉ lưu lịch sử khi nghe bài hát được 10 giây
+    historyTimeoutRef.current = setTimeout(() => {
+      songService.savePlayHistory(song.id).catch(err => {
+        // Có thể sẽ lỗi 401 nếu chưa đăng nhập, cứ bỏ qua
+        console.warn("Lưu lịch sử nghe thất bại (có thể do chưa đăng nhập):", err);
+      });
+    }, 10000);
 
     audio.play();
     setIsPlaying(true);
@@ -157,10 +166,16 @@ export function useAudioPlayer() {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play();
+      audio.play().catch(e => console.log("Play failed:", e));
       setIsPlaying(true);
     }
   };
+
+  const pauseSong = useCallback(() => {
+    const audio = audioRef.current;
+    audio.pause();
+    setIsPlaying(false);
+  }, []);
 
   const seek = (time: number) => {
     audioRef.current.currentTime = time;
@@ -240,7 +255,7 @@ export function useAudioPlayer() {
   };
 
   return {
-    currentSong, isPlaying, playSong, togglePlay,
+    currentSong, isPlaying, playSong, togglePlay, pauseSong,
     currentTime, duration, seek, volume, setVolume,
     queue, setQueue,
     isShuffle, toggleShuffle,
