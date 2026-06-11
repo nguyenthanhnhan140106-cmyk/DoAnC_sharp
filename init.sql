@@ -206,7 +206,7 @@ INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, Ar
      '',
      'friday', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12,'/lyrics/anh.lrc', NOW()),
 (24, 'Hiểu lầm', 'Changg',
-     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113834_dvharv.png',
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720503/Hi%E1%BB%83u_L%E1%BA%A7m_plbimo.mp3',
      NULL,
      '',
      'friday', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113834_dvharv.png', 13,NULL, NOW()),
