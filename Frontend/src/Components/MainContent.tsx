@@ -80,15 +80,16 @@ const VideoCard = ({ song, onHover }: { song: Song; onHover?: (url: string | nul
 
   const handleForcePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
-    playSong(song);
-
-    // Tạm dừng audio và mở modal video
+    
+    // Nếu bài hát không phải bài hiện tại, chọn nó nhưng đừng play ngay lập tức (nếu audio chậm)
+    // Việc gọi playSong sẽ đổi currentSong nhưng có thể sẽ có chút độ trễ
+    if (currentSong?.id !== song.id) {
+       playSong(song);
+    }
+    
+    // Dispatch event ngay lập tức, RightSidebar sẽ gọi pauseSong()
+    // Thời gian trễ nhẹ để đảm bảo state currentSong đã được update (nếu cần)
     setTimeout(() => {
-      const allAudios = document.getElementsByTagName("audio");
-      for (let i = 0; i < allAudios.length; i++) {
-        allAudios[i].pause();
-      }
-      if (isPlaying && togglePlay) togglePlay(); // Đồng bộ state
       window.dispatchEvent(new CustomEvent('OPEN_VIDEO_MODAL'));
     }, 50);
   };

@@ -6,6 +6,7 @@ interface MusicContextType {
   isPlaying: boolean;
   playSong: (song: Song) => void;
   togglePlay: () => void;
+  pauseSong: () => void;
   currentTime: number;
   duration: number;
   seek: (time: number) => void;
@@ -99,6 +100,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
   return (
     <MusicContext.Provider value={{
       ...audioState,
+      pauseSong: audioState.pauseSong,
       isQueueViewOpen, toggleQueueView,
       isLyricsViewOpen, toggleLyricsView,
       isAddToPlaylistModalOpen, openAddToPlaylistModal, closeAddToPlaylistModal, selectedSongForModal, modalPosition,

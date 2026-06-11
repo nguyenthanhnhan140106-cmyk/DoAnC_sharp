@@ -53,10 +53,16 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     const handleOpenVideoModal = () => {
       wasPlayingBeforeVideo.current = true; // Lưu cờ
       setIsVideoOpen(true);
+      // Tạm dừng nhạc
+      if (pauseSong) {
+        pauseSong();
+      } else if (isPlaying && togglePlay) {
+        togglePlay();
+      }
     };
     window.addEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
     return () => window.removeEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
-  }, []);
+  }, [isPlaying, togglePlay, pauseSong]);
 
   // 🟢 Fetch recently played songs
   useEffect(() => {
