@@ -178,14 +178,17 @@ export default function MainContent({ songs }: Props) {
   const [activeTab, setActiveTab] = useState<"all" | "album" | "video">("all");
   const [hoveredCover, setHoveredCover] = useState<string | null>(null);
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [albumsLoading, setAlbumsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
+    setAlbumsLoading(true);
     albumService.getAllAlbums()
       .then((list: any) => {
         if (Array.isArray(list)) setAlbums(list);
       })
-      .catch((err: any) => console.error("❌ Không lấy được Album:", err));
+      .catch((err: any) => console.error("❌ Không lấy được Album:", err))
+      .finally(() => setAlbumsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -343,7 +346,11 @@ export default function MainContent({ songs }: Props) {
               <h2 className="section-title">Album của bạn</h2>
               <button className="show-all-btn">Show all</button>
             </div>
-            {albums.length > 0 ? (
+            {albumsLoading ? (
+              <div style={{ color: "#b3b3b3", padding: "40px", textAlign: "center" }}>
+                Đang tải album...
+              </div>
+            ) : albums.length > 0 ? (
               <div className="songs-grid">
                 {albums.map((album) => <AlbumCard key={album.id} album={album} onHover={setHoveredCover} />)}
               </div>
