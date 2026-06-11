@@ -43,6 +43,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
 // --- AUTO SEED DATABASE (Đặt ở đây là chuẩn nhất) ---
 // --- AUTO SEED DATABASE ---
 var logger = app.Logger;
@@ -65,7 +70,7 @@ for (int retry = 1; retry <= maxRetries; retry++)
         // 1. Tạo bảng songs
         using (var cmd = conn.CreateCommand())
         {
-            cmd.CommandText = @"
+                    cmd.CommandText = @"
                 CREATE TABLE IF NOT EXISTS songs (
                     Id INT AUTO_INCREMENT PRIMARY KEY,
                     Title VARCHAR(255) NOT NULL,
@@ -100,6 +105,15 @@ for (int retry = 1; retry <= maxRetries; retry++)
             cmd.ExecuteNonQuery();
         }
 
+        // Seed user mặc định nếu chưa có
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                INSERT IGNORE INTO users (Id, Username, Email, PasswordHash)
+                VALUES (1, 'admin', 'admin@example.com', '');";
+            cmd.ExecuteNonQuery();
+        }
+
         // 3. Tạo bảng user_history
         using (var cmd = conn.CreateCommand())
         {
@@ -110,6 +124,37 @@ for (int retry = 1; retry <= maxRetries; retry++)
                     SongId INT NOT NULL,
                     PlayedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (UserId) REFERENCES users(Id),
+                    FOREIGN KEY (SongId) REFERENCES songs(Id)
+                );";
+            cmd.ExecuteNonQuery();
+        }
+
+        // 4. Tạo bảng playlists
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS playlists (
+                    Id INT AUTO_INCREMENT PRIMARY KEY,
+                    Name VARCHAR(255) NOT NULL,
+                    Description TEXT NULL,
+                    CoverUrl TEXT NULL,
+                    UserId INT NOT NULL,
+                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (UserId) REFERENCES users(Id)
+                );";
+            cmd.ExecuteNonQuery();
+        }
+
+        // 5. Tạo bảng playlist_songs
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS playlist_songs (
+                    PlaylistId INT NOT NULL,
+                    SongId INT NOT NULL,
+                    AddedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (PlaylistId, SongId),
+                    FOREIGN KEY (PlaylistId) REFERENCES playlists(Id) ON DELETE CASCADE,
                     FOREIGN KEY (SongId) REFERENCES songs(Id)
                 );";
             cmd.ExecuteNonQuery();

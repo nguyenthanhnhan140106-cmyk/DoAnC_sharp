@@ -6,6 +6,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // Yêu cầu phải đăng nhập
     public class HistoryController : ControllerBase
     {
         private readonly IHistoryService _historyService;
@@ -15,7 +16,6 @@ namespace API.Controllers
             _historyService = historyService;
         }
 
-        // Lấy UserId từ token JWT nếu có, không có thì dùng user mặc định 1
         private int UserId
         {
             get
@@ -24,7 +24,7 @@ namespace API.Controllers
                 {
                     return userId;
                 }
-                return 1;
+                throw new UnauthorizedAccessException("Người dùng chưa xác thực");
             }
         }
 

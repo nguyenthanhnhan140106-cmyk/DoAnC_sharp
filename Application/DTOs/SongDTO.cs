@@ -14,6 +14,8 @@ namespace Application.DTOs
         public string? Lyrics { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? AddedAt { get; set; }
+        // Duration field removed — not used by API responses anymore.
+        public DateTime? PlayedAt { get; set; }
 
         // 🟢 BỔ SUNG CÁC TRƯỜNG THÔNG TIN NGHỆ SĨ THẬT ĐỂ TRẢ VỀ FRONTEND DIALOG
         public int? ArtistId { get; set; }
