@@ -147,11 +147,11 @@ export default function ListeningHistoryPage() {
   }, [songs, filterTerm, sortDirection, sortField, activeTab]);
 
   const uniqueAlbums = useMemo(() => {
-    const albumsMap = new Map<string, ListeningHistorySong>();
+    const albumsMap = new Map<number, ListeningHistorySong>();
     songs.forEach(s => {
-      // Chỉ nhóm các bài hát có albumId thực sự
-      if (s.album && s.album !== 'Không xác định' && !albumsMap.has(s.album)) {
-        albumsMap.set(s.album, s);
+      // Chỉ gom nhóm các bài hát có albumId thực sự từ CSDL
+      if (s.albumId && !albumsMap.has(Number(s.albumId))) {
+        albumsMap.set(Number(s.albumId), s);
       }
     });
     return Array.from(albumsMap.values());
@@ -315,7 +315,7 @@ export default function ListeningHistoryPage() {
                 ) : (
                   <div className="history-grid">
                     {uniqueAlbums.map((song, index) => (
-                      <div key={index} className="history-grid-item" onClick={() => navigate(`/album/${song.albumId || song.album}`)} style={{ cursor: 'pointer' }}>
+                      <div key={index} className="history-grid-item" onClick={() => navigate(`/album/${song.albumId}`)} style={{ cursor: 'pointer' }}>
                         <img src={song.coverUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=80&h=80&fit=crop'} alt={song.album} />
                         <span className="history-grid-title">{song.album}</span>
                         <span className="history-grid-subtitle">{song.artist}</span>

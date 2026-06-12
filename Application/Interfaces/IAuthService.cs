@@ -10,5 +10,10 @@ namespace Application.Interfaces
         Task<string?> VerifyOtpAndGetToken(string email, string otp);
 
         Task<string?> LoginAsync(LoginRequestDTO request);
+
+        Task<bool> CheckEmailExistsAsync(string email);
+        Task<(bool Success, string Message)> ResetPasswordAsync(string email, string otp, string newPassword);
+
+        Task<IEnumerable<UserResponseDTO>> SearchUsersAsync(string keyword, int currentUserId);
     }
 }

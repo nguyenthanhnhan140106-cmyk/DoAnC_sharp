@@ -9,35 +9,78 @@ interface User {
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
+  token: string | null;
   login: (token: string, username: string) => void;
   logout: () => void;
   openAuthModal: (data?: { title: string, coverUrl: string }) => void;
   closeAuthModal: () => void;
 }
 
+// Hàm giải mã JWT để lấy payload (id, username...)
+function parseJwt(token: string): any {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
+// Lấy user từ token đã lưu trong localStorage
+function getUserFromToken(token: string | null): User | null {
+  if (!token) return null;
+  const payload = parseJwt(token);
+  if (!payload) return null;
+  // JWT claims: "id" và ClaimTypes.Name (http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name)
+  const id = payload['id'] ? parseInt(payload['id']) : 0;
+  const username = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] 
+    || payload['unique_name'] 
+    || payload['name'] 
+    || '';
+  if (!id) return null;
+  return { id, username };
+}
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('token');
+  });
+
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    return localStorage.getItem('isLoggedIn') === 'true';
+    return localStorage.getItem('isLoggedIn') === 'true' && !!localStorage.getItem('token');
   });
   
   const [user, setUser] = useState<User | null>(() => {
-    // Tạm thời mock user mặc định nếu đã login
-    return localStorage.getItem('isLoggedIn') === 'true' ? { id: 1, username: 'testuser' } : null;
+    const savedToken = localStorage.getItem('token');
+    return getUserFromToken(savedToken);
   });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState<{ title: string, coverUrl: string } | null>(null);
 
-  const login = (token: string, username: string) => {
+  const login = (newToken: string, username: string) => {
+    // Giải mã token để lấy thông tin user thực tế
+    const parsedUser = getUserFromToken(newToken);
+    setToken(newToken);
     setIsLoggedIn(true);
-    setUser({ id: 1, username: username });
+    // Dùng user từ token nếu có, hoặc fallback về username được truyền vào
+    setUser(parsedUser || { id: 0, username: username });
     localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('token', token);
+    localStorage.setItem('token', newToken);
   };
 
   const logout = () => {
+    setToken(null);
     setIsLoggedIn(false);
     setUser(null);
     localStorage.removeItem('isLoggedIn');
@@ -54,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, login, logout, openAuthModal, closeAuthModal }}>
+    <AuthContext.Provider value={{ isLoggedIn, user, token, login, logout, openAuthModal, closeAuthModal }}>
       {children}
       {modalOpen && (
         <AuthModal 
@@ -67,9 +110,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 function AuthModal({ data, onClose }: { data: { title: string, coverUrl: string } | null, onClose: () => void }) {
-  // Navigate function won't work easily here outside Router if AuthProvider is outside Router.
-  // Wait, in App.tsx AuthProvider is OUTSIDE BrowserRouter!
-  // We can just use window.location.href or pass a simple handler.
   const handleSignup = () => {
     onClose();
     window.location.href = '/signup';
