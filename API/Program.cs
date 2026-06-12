@@ -27,8 +27,18 @@ builder.Services.AddScoped<IUserService>(_ => new UserService(connectionString))
 builder.Services.AddScoped<IArtistService>(_ => new ArtistService(connectionString));
 builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connectionString));
 builder.Services.AddScoped<AlbumService>(_ => new AlbumService(connectionString));
-// SỬA LẠI DÒNG NÀY (Dòng 29 theo lỗi của bạn)
-// Sử dụng GetRequiredService để lấy các dependency đã đăng ký từ provider
+// Đăng ký HttpClient để gọi API AI (tránh cạn kiệt socket)
+builder.Services.AddHttpClient<Application.Services.AiService>();
+
+// Đăng ký AiService sử dụng API Key từ cấu hình
+// Đăng ký AiService
+builder.Services.AddHttpClient<Application.Services.AiService>();
+builder.Services.AddScoped<AiService>(s => {
+    var http = s.GetRequiredService<HttpClient>();
+    var config = s.GetRequiredService<IConfiguration>();
+    // Lấy chuỗi kết nối từ biến đã khai báo ở dòng 9
+    return new AiService(http, config, connectionString); 
+});// Sử dụng GetRequiredService để lấy các dependency đã đăng ký từ provider
 builder.Services.AddScoped<IOtpService, OtpService>(); // Hãy thay OtpService bằng class thực tế của bạn
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService>(provider => 

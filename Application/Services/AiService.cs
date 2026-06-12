@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Dapper;
 using MySqlConnector;
+using Microsoft.Extensions.Configuration; // Dòng này là bắt buộc
 
 namespace Application.Services
 {
-    /// <summary>
-    /// DTO nhận từ Frontend gửi lên: lịch sử hội thoại + câu hỏi mới
-    /// </summary>
     public class ChatRequest
     {
         public string Message { get; set; } = string.Empty;
@@ -21,13 +19,10 @@ namespace Application.Services
 
     public class ChatHistoryItem
     {
-        public string Role { get; set; } = string.Empty; // "user" | "bot"
+        public string Role { get; set; } = string.Empty;
         public string Text { get; set; } = string.Empty;
     }
 
-    /// <summary>
-    /// DTO trả về Frontend
-    /// </summary>
     public class ChatResponse
     {
         public string Reply { get; set; } = string.Empty;
@@ -35,163 +30,76 @@ namespace Application.Services
         public string? Error { get; set; }
     }
 
-    /// <summary>
-    /// Service gọi Gemini API server-side để trả lời câu hỏi của người dùng
-    /// </summary>
     public class AiService
     {
         private readonly HttpClient _http;
-        private readonly string _geminiKey;
         private readonly string _connectionString;
-        private const string GEMINI_URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+        private readonly string _aiServerUrl;
+        
+        // URL Ngrok trỏ tới máy bàn (KoboldCPP)
+        private const string AI_SERVER_URL = "https://stitch-pronounce-frisk.ngrok-free.dev/v1/chat/completions";
 
-        // System prompt định nghĩa nhân cách TuneBot
-        private const string SYSTEM_PROMPT = @"Bạn là TuneBot - trợ lý AI thông minh của TuneVault, một ứng dụng nghe nhạc trực tuyến.
+        private const string SYSTEM_PROMPT = @"Bạn là TuneBot - trợ lý AI thông minh của TuneVault. Trả lời ngắn gọn, thân thiện bằng tiếng Việt.";
 
-Nhiệm vụ:
-- Hỗ trợ người dùng sử dụng ứng dụng TuneVault
-- Gợi ý bài hát, nghệ sĩ, thể loại phù hợp tâm trạng
-- Giải thích các tính năng của ứng dụng: tìm kiếm, phát nhạc, xem album, thể loại (V-Sound, Friday, Rap)
-- Trả lời ngắn gọn, thân thiện, dùng emoji phù hợp
-
-Quy tắc:
-- Luôn trả lời bằng tiếng Việt trừ khi người dùng hỏi bằng tiếng Anh
-- Không trả lời các chủ đề ngoài âm nhạc và ứng dụng
-- Câu trả lời tối đa 150 từ, ngắn gọn súc tích
-- Dùng markdown (**, -, emoji) để format đẹp";
-
-        public AiService(HttpClient http, string geminiKey, string connectionString = "")
+        public AiService(HttpClient http, IConfiguration config, string connectionString = "")
         {
             _http = http;
-            _geminiKey = geminiKey;
             _connectionString = connectionString;
+        
+        // Đọc từ mục "Gemini:ApiKey" (bạn có thể đổi tên key thành "AiServerUrl" sau này)
+            _aiServerUrl = config["Gemini:ApiKey"] ?? "https://default-fallback.ngrok-free.dev/v1/chat/completions";
         }
-
+        // --- Hàm Chat cho người dùng ---
         public async Task<ChatResponse> ChatAsync(ChatRequest request)
         {
-            // Xây dựng full prompt bao gồm lịch sử
-            var historyText = string.Join("\n", request.History.ConvertAll(h =>
-                $"{(h.Role == "user" ? "Người dùng" : "TuneBot")}: {h.Text}"));
-
-            var fullPrompt = $"{SYSTEM_PROMPT}\n\nLịch sử:\n{historyText}\n\nNgười dùng: {request.Message}\nTuneBot:";
-
-            var body = new
+            var messages = new List<object> { new { role = "system", content = SYSTEM_PROMPT } };
+            foreach (var h in request.History)
             {
-                contents = new[]
-                {
-                    new { parts = new[] { new { text = fullPrompt } } }
-                },
-                generationConfig = new
-                {
-                    temperature = 0.7,
-                    maxOutputTokens = 300
-                }
-            };
+                messages.Add(new { role = h.Role == "user" ? "user" : "assistant", content = h.Text });
+            }
+            messages.Add(new { role = "user", content = request.Message });
+
+            var body = new { messages, temperature = 0.7, max_tokens = 300 };
 
             try
             {
-                var url = $"{GEMINI_URL}?key={_geminiKey}";
-                var json = JsonSerializer.Serialize(body);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+                var res = await _http.PostAsync(AI_SERVER_URL, content);
 
-                var res = await _http.PostAsync(url, content);
-
-                if (!res.IsSuccessStatusCode)
-                {
-                    var errBody = await res.Content.ReadAsStringAsync();
-                    return new ChatResponse
-                    {
-                        Success = false,
-                        Error = $"Gemini API lỗi {(int)res.StatusCode}",
-                        Reply = GetFallbackReply(request.Message)
-                    };
-                }
+                if (!res.IsSuccessStatusCode) throw new Exception($"Lỗi máy bàn: {res.StatusCode}");
 
                 var data = await res.Content.ReadFromJsonAsync<JsonElement>();
-                var reply = data
-                    .GetProperty("candidates")[0]
-                    .GetProperty("content")
-                    .GetProperty("parts")[0]
-                    .GetProperty("text")
-                    .GetString() ?? GetFallbackReply(request.Message);
+                var reply = data.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
 
-                return new ChatResponse { Reply = reply.Trim(), Success = true };
+                return new ChatResponse { Reply = reply?.Trim() ?? "AI không phản hồi", Success = true };
             }
             catch (Exception ex)
             {
-                return new ChatResponse
-                {
-                    Success = false,
-                    Error = ex.Message,
-                    Reply = GetFallbackReply(request.Message)
-                };
+                return new ChatResponse { Success = false, Error = ex.Message, Reply = GetFallbackReply(request.Message) };
             }
         }
 
-        // Fallback khi API lỗi — trả về câu trả lời mock
-        private static string GetFallbackReply(string message)
-        {
-            var q = message.ToLower();
-
-            if (q.Contains("chào") || q.Contains("hello") || q.Contains("hi"))
-                return "👋 Xin chào! Tôi là TuneBot 🎵\nTôi có thể giúp bạn tìm nhạc, hướng dẫn tính năng. Bạn cần gì?";
-
-            if (q.Contains("tìm") || q.Contains("search") || q.Contains("kiếm"))
-                return "🔍 Dùng thanh search ở đầu trang để tìm bài hát hoặc nghệ sĩ nhé!";
-
-            if (q.Contains("phát") || q.Contains("play") || q.Contains("nghe"))
-                return "▶️ Click vào bài hát bất kỳ để phát nhạc. PlayerBar ở dưới sẽ xuất hiện!";
-
-            if (q.Contains("thể loại") || q.Contains("category") || q.Contains("vsound") || q.Contains("friday") || q.Contains("rap"))
-                return "📂 TuneVault có 3 thể loại:\n- 🇻🇳 V-Sound: Nhạc Việt\n- 🎉 Friday: Nhạc mới\n- 🎤 Rap: Hip-hop";
-
-            if (q.Contains("cảm ơn") || q.Contains("thanks"))
-                return "😊 Không có gì! Chúc bạn nghe nhạc vui vẻ 🎶";
-
-            return "🤔 Tôi chưa hiểu câu hỏi đó. Hãy hỏi về:\n- 🔍 Tìm bài hát\n- ▶️ Cách phát nhạc\n- 📂 Thể loại nhạc";
-        }
-
+        // --- Hàm AutoTag (Đã chuyển sang dùng AI Local trên máy bàn) ---
         public async Task<List<string>> AutoTagSongAsync(int songId)
         {
-            if (string.IsNullOrEmpty(_connectionString))
-                throw new Exception("Connection string is not configured.");
+            if (string.IsNullOrEmpty(_connectionString)) throw new Exception("Connection string not configured.");
 
             using var conn = new MySqlConnection(_connectionString);
             var song = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT Title, Artist FROM songs WHERE Id = @Id", new { Id = songId });
+            if (song == null) throw new Exception($"Không tìm thấy bài hát Id = {songId}");
+
+            var prompt = $"Phân tích bài hát '{song.Title}' của '{song.Artist}' và trả về 3-5 thẻ thể loại (Pop, Rap, v.v.). Chỉ trả về danh sách, phân tách bằng dấu phẩy.";
+
+            // Sử dụng cùng AI_SERVER_URL
+            var body = new { messages = new[] { new { role = "user", content = prompt } }, temperature = 0.3, max_tokens = 50 };
             
-            if (song == null)
-                throw new Exception($"Không tìm thấy bài hát có Id = {songId}");
-
-            string title = song.Title;
-            string artist = song.Artist;
-
-            var prompt = $"Đóng vai một chuyên gia âm nhạc. Phân tích bài hát '{title}' của '{artist}' và trả về 3-5 thẻ (tags) thể loại nhạc phù hợp nhất (ví dụ: Pop, Lo-fi, Rap, Acoustic). Chỉ trả về danh sách các tag, phân tách bằng dấu phẩy, không có bất kỳ văn bản nào khác.";
-
-            var body = new
-            {
-                contents = new[] { new { parts = new[] { new { text = prompt } } } },
-                generationConfig = new { temperature = 0.5, maxOutputTokens = 50 }
-            };
-
-            var url = $"{GEMINI_URL}?key={_geminiKey}";
-            var json = JsonSerializer.Serialize(body);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var res = await _http.PostAsync(url, content);
-            if (!res.IsSuccessStatusCode)
-            {
-                var err = await res.Content.ReadAsStringAsync();
-                throw new Exception($"Lỗi gọi Gemini API: {err}");
-            }
+            var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+            var res = await _http.PostAsync(AI_SERVER_URL, content);
+            
+            if (!res.IsSuccessStatusCode) throw new Exception("Lỗi gọi AI Local khi gắn thẻ.");
 
             var data = await res.Content.ReadFromJsonAsync<JsonElement>();
-            var reply = data
-                .GetProperty("candidates")[0]
-                .GetProperty("content")
-                .GetProperty("parts")[0]
-                .GetProperty("text")
-                .GetString() ?? "";
+            var reply = data.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
 
             var tags = new List<string>();
             foreach (var t in reply.Split(','))
@@ -200,11 +108,12 @@ Quy tắc:
                 if (!string.IsNullOrEmpty(tag))
                 {
                     tags.Add(tag);
-                    // Lưu tag vào DB, bỏ qua nếu đã có (tránh duplicate thì dùng INSERT IGNORE, tuy nhiên table không unique constraint nên ta cứ insert)
                     await conn.ExecuteAsync("INSERT INTO media_tags (SongId, Tag) VALUES (@SongId, @Tag)", new { SongId = songId, Tag = tag });
                 }
             }
             return tags;
         }
+
+        private static string GetFallbackReply(string message) => "👋 Xin chào! TuneBot đang sẵn sàng giúp bạn.";
     }
 }
