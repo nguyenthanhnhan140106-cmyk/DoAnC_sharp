@@ -70,7 +70,11 @@ export function useAudioPlayer() {
   const internalPlay = useCallback((song: Song, index: number) => {
     currentIndexRef.current = index;
     const audio = audioRef.current;
+
+    // Dừng bài đang phát trước khi đổi src, tránh AbortError
+    audio.pause();
     audio.src = song.audioUrl || '';
+    audio.load(); // Reset trạng thái buffer
     
     setCurrentSong(song);
     localStorage.setItem('lastPlayedSong', JSON.stringify(song));
@@ -95,7 +99,14 @@ export function useAudioPlayer() {
       });
     }, 10000);
 
-    audio.play();
+    // Xử lý Promise của play() để tránh UnhandledPromiseRejection
+    // AbortError là bình thường khi bài bị chuyển nhanh, bỏ qua
+    audio.play().catch(err => {
+      if (err.name !== 'AbortError') {
+        console.error('Lỗi phát nhạc:', err);
+        setIsPlaying(false);
+      }
+    });
     setIsPlaying(true);
 
     audio.ontimeupdate = () => setCurrentTime(audio.currentTime);
@@ -194,6 +205,14 @@ export function useAudioPlayer() {
     setQueueState(songs);
   };
 
+  // Nối thêm danh sách bài vào cuối queue hiện tại (không làm gán đoạn bài đang phát)
+  const addToQueue = (songs: Song[]) => {
+    const merged = [...queueRef.current, ...songs];
+    originalQueueRef.current = merged;
+    queueRef.current = merged;
+    setQueueState(merged);
+  };
+
   const toggleShuffle = () => {
     setIsShuffle(prev => {
       if (!prev) {
@@ -257,7 +276,7 @@ export function useAudioPlayer() {
   return {
     currentSong, isPlaying, playSong, togglePlay, pauseSong,
     currentTime, duration, seek, volume, setVolume,
-    queue, setQueue,
+    queue, setQueue, addToQueue,
     isShuffle, toggleShuffle,
     repeatMode, cycleRepeat,
     playNext, playPrev,

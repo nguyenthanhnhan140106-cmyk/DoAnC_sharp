@@ -1,12 +1,15 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MusicProvider } from './Contexts/MusicContext';
 import { AuthProvider } from './Contexts/AuthContext';
+import { NotificationProvider } from './Contexts/NotificationContext';
+import ProtectedRoute from './Components/ProtectedRoute';
 import HomePage from './Pages/HomePage';
 import AlbumPage from './Pages/AlbumPage';
 import CategoryPage from './Pages/CategoryPage';
 import SearchPage from './Pages/SearchPage';
 import LoginPage from './Pages/LoginPage';
 import SignupPage from './Pages/SignupPage';
+import ForgotPasswordPage from './Pages/ForgotPasswordPage';
 import ProfilePage from './Pages/ProfilePage';
 import PlaylistPage from './Pages/PlaylistPage';
 import ListeningHistoryPage from './Pages/ListeningHistoryPage';
@@ -19,25 +22,31 @@ import Toast from './Components/Toast';
 function App() {
   return (
     <AuthProvider>
-      <MusicProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/album/:id" element={<AlbumPage />} />
-            <Route path="/playlist/:id" element={<PlaylistPage />} />
-            <Route path="/category/:catId" element={<CategoryPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/history" element={<ListeningHistoryPage />} />
-            <Route path="/upload" element={<UploadPage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-          </Routes>
-          <AddToPlaylistModal />
-          <Toast />
-        </BrowserRouter>
-      </MusicProvider>
+      <NotificationProvider>
+        <MusicProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes - không cần đăng nhập */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+              {/* Protected routes - cần đăng nhập */}
+              <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+              <Route path="/album/:id" element={<ProtectedRoute><AlbumPage /></ProtectedRoute>} />
+              <Route path="/playlist/:id" element={<ProtectedRoute><PlaylistPage /></ProtectedRoute>} />
+              <Route path="/category/:catId" element={<ProtectedRoute><CategoryPage /></ProtectedRoute>} />
+              <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/history" element={<ProtectedRoute><ListeningHistoryPage /></ProtectedRoute>} />
+              <Route path="/upload" element={<ProtectedRoute><UploadPage /></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+            </Routes>
+            <AddToPlaylistModal />
+            <Toast />
+          </BrowserRouter>
+        </MusicProvider>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

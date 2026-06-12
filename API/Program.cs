@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Infrastructure.Services; // Thêm dòng này để tìm thấy EmailService
+using API.Hubs; // SignalR Hub
 var builder = WebApplication.CreateBuilder(args);
 
 // Lấy connection string
@@ -13,11 +14,17 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // CORS, Controllers, Swagger...
 builder.Services.AddCors(options => {
-    options.AddPolicy("AllowReact", p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("AllowReact", p => p
+        .WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:3000") // Liệt kê rõ các domain frontend
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials()); // 🟢 BẮT BUỘC để SignalR kết nối được
 });
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR(); // BỔ SUNG SignalR
+builder.Services.AddSingleton<Microsoft.AspNetCore.SignalR.IUserIdProvider, CustomUserIdProvider>();
 
 // Đăng ký các Service
 builder.Services.AddScoped<IOtpRepository>(_ => new OtpRepository(connectionString));
@@ -47,6 +54,10 @@ builder.Services.AddScoped<Application.Interfaces.INotificationRepository, Infra
 
 builder.Services.AddScoped<Application.Services.NotificationService>();
 
+// 🟢 BỔ SUNG: Đăng ký Library Repository (lưu album vào thư viện)
+builder.Services.AddScoped<Application.Interfaces.ILibraryRepository>(_ => new Infrastructure.Repositories.LibraryRepository(connectionString));
+
+
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
@@ -54,7 +65,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("Chuoi_Bi_Mat_Cuc_Ky_Dai_Va_An_Toan_123456")),
             ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateAudience = false,
+            NameClaimType = "id" // Map JWT "id" tới ClaimTypes.NameIdentifier để SignalR hiểu UserIdentifier
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notification"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -207,6 +232,21 @@ for (int retry = 1; retry <= maxRetries; retry++)
             cmd.ExecuteNonQuery();
         }
 
+        // 🟢 7. BỔ SUNG: Tạo bảng user_saved_albums để lưu album vào thư viện
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS user_saved_albums (
+                    Id INT AUTO_INCREMENT PRIMARY KEY,
+                    UserId INT NOT NULL,
+                    AlbumId INT NOT NULL,
+                    SavedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uniq_user_album (UserId, AlbumId),
+                    FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
+                );";
+            cmd.ExecuteNonQuery();
+        }
+
         logger.LogInformation("[TuneVault DB] 🟢 Kết nối và khởi tạo bảng thành công!");
         break;
     }
@@ -225,5 +265,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notification"); // BỔ SUNG endpoint SignalR
 
 app.Run(); // Chỉ có 1 app.Run() duy nhất ở cuối
+
+public class CustomUserIdProvider : Microsoft.AspNetCore.SignalR.IUserIdProvider
+{
+    public string? GetUserId(Microsoft.AspNetCore.SignalR.HubConnectionContext connection)
+    {
+        return connection.User?.FindFirst("id")?.Value;
+    }
+}

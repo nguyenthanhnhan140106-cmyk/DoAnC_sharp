@@ -1,7 +1,20 @@
+import { useEffect } from 'react';
 import { useMusic } from '../Contexts/MusicContext';
 
 export default function Toast() {
-  const { toast } = useMusic() as any;
+  const { toast, showToast } = useMusic() as any;
+
+  useEffect(() => {
+    const handleShowToast = (e: any) => {
+      if (e.detail && typeof e.detail === 'string') {
+        showToast(e.detail);
+      } else if (e.detail && e.detail.message) {
+        showToast(e.detail.message, e.detail.coverUrl);
+      }
+    };
+    window.addEventListener('show-toast', handleShowToast);
+    return () => window.removeEventListener('show-toast', handleShowToast);
+  }, [showToast]);
 
   if (!toast) return null;
 

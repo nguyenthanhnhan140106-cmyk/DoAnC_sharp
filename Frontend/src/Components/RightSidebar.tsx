@@ -2,7 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { useMusic } from '../Contexts/MusicContext';
 import LyricsView from './LyricsView';
 import type { Song } from '../hooks/useAudioPlayer';
-import './Styles/HomePage.css';
+import '../Components/Styles/HomePage.css';
+import { useAuth } from '../Contexts/AuthContext';
+import ShareModal from './ShareModal';
 
 interface RightSidebarProps {
   isCollapsed: boolean;
@@ -25,6 +27,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
@@ -130,6 +133,16 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
             )}
           </div>
         </div>
+
+        {currentSong && (
+          <ShareModal 
+            isOpen={isShareModalOpen} 
+            onClose={() => setIsShareModalOpen(false)} 
+            songId={currentSong.id} 
+            songTitle={currentSong.title} 
+            songCover={currentSong.coverUrl || ''} 
+          />
+        )}
       </aside>
     );
   }
@@ -198,6 +211,10 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
                 </li>
                 <li>
                   <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 0 1 7.187 6H13.5a.75.75 0 0 0 0-1.5H7.187a5.484 5.484 0 0 1 .779-1.5h5.534a.75.75 0 0 0 0-1.5H6.984a6.967 6.967 0 0 0-1.28-1.077L4.496.643a.75.75 0 0 0-1.06 1.06l1.284 1.284A6.974 6.974 0 0 0 .5 8c0 3.866 3.134 7 7 7 2.1 0 4.02-.924 5.334-2.392l-1.121-1.015A5.483 5.483 0 0 1 7.5 13.5a5.5 5.5 0 1 1 0-11c1.332 0 2.554.474 3.512 1.26l-1.26 1.26a.75.75 0 0 0 .531 1.28h3.5a.75.75 0 0 0 .75-.75v-3.5a.75.75 0 0 0-1.28-.53l-1.287 1.287zM7.5 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></svg>
+                  <span>Add to playlist</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8-6A4.5 4.5 0 0 1 2.5 0v1.5a3 3 0 1 0 0 6V9a4.5 4.5 0 0 1 4.5-4.5z" /></svg>
                   <span>Add to queue</span>
                 </li>
                 <li className="album-dropdown-divider"></li>
@@ -209,8 +226,10 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
                   <svg className="submenu-arrow" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M5.5 13.5l5.5-5.5-5.5-5.5v11z" /></svg>
                 </li>
                 <li className="album-dropdown-divider"></li>
-                <li>
-                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M12.5 2.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-3.5 2a3.5 3.5 0 1 1 6.5 1.77L9.57 10.3A3.492 3.492 0 0 1 10.5 12a3.5 3.5 0 1 1-6.196-2.247l2.844-3.555A3.493 3.493 0 0 1 6.5 4.5a3.5 3.5 0 0 1 2.5-1.02v1.02a2 2 0 1 0-1.748 3.01l3.056 3.82a2 2 0 1 0 1.636-2.73l-2.944-3.68v.58z" /></svg>
+                <li onClick={() => { setIsMoreMenuOpen(false); setIsShareModalOpen(true); }}>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" />
+                  </svg>
                   <span>Share</span>
                 </li>
               </ul>

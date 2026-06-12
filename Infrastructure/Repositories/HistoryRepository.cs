@@ -49,7 +49,9 @@ namespace Infrastructure.Repositories
                            COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
                            a.Bio, 
                            COALESCE(a.IsVerified, 1) as IsVerified,
-                           uh.LastPlayed as PlayedAt
+                           uh.LastPlayed as PlayedAt,
+                           al.Id as AlbumId,
+                           al.Title as AlbumName
                     FROM (
                         SELECT SongId, MAX(PlayedAt) as LastPlayed
                         FROM user_history
@@ -58,6 +60,12 @@ namespace Infrastructure.Repositories
                     ) uh
                     INNER JOIN songs s ON uh.SongId = s.Id
                     LEFT JOIN artists a ON s.ArtistId = a.Id
+                    LEFT JOIN (
+                        SELECT SongId, MIN(AlbumId) as MinAlbumId
+                        FROM album_songs
+                        GROUP BY SongId
+                    ) als ON s.Id = als.SongId
+                    LEFT JOIN albums al ON als.MinAlbumId = al.Id
                     ORDER BY uh.LastPlayed DESC
                     LIMIT @Limit";
                     

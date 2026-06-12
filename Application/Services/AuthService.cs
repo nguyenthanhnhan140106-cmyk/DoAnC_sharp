@@ -30,8 +30,8 @@ namespace Application.Services
         public async Task<bool> SendOtpAsync(string email)
         {
             string otp = new Random().Next(100000, 999999).ToString();
-            await _otpService.SaveOtpAsync(email, otp, TimeSpan.FromMinutes(5));
-            await _emailService.SendEmailAsync(email, "Mã xác thực TuneVault", $"Mã OTP của bạn là: {otp}. Mã có hiệu lực trong 5 phút.");
+            await _otpService.SaveOtpAsync(email, otp, TimeSpan.FromMinutes(15));
+            await _emailService.SendEmailAsync(email, "Mã xác thực TuneVault", $"Mã OTP của bạn là: {otp}. Mã có hiệu lực trong 15 phút.");
             return true;
         }
 
@@ -85,6 +85,47 @@ namespace Application.Services
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+        }
+
+        public async Task<IEnumerable<UserResponseDTO>> SearchUsersAsync(string keyword, int currentUserId)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            string sql = @"
+                SELECT Id, Username, Email 
+                FROM users 
+                WHERE (Username LIKE @Keyword OR Email LIKE @Keyword)
+                  AND Id != @CurrentUserId
+                LIMIT 20";
+            
+            return await conn.QueryAsync<UserResponseDTO>(sql, new { Keyword = $"%{keyword}%", CurrentUserId = currentUserId });
+        }
+
+        public async Task<bool> CheckEmailExistsAsync(string email)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            var count = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM users WHERE Email = @Email", new { Email = email });
+            return count > 0;
+        }
+
+        public async Task<(bool Success, string Message)> ResetPasswordAsync(string email, string otp, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(newPassword))
+                return (false, "Mật khẩu mới không được để trống.");
+
+            var isValid = await _otpService.VerifyOtp(email, otp);
+            if (!isValid)
+                return (false, "Mã OTP không hợp lệ hoặc đã hết hạn.");
+
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(newPassword, 12);
+            using var conn = new MySqlConnection(_connectionString);
+            
+            string sql = "UPDATE users SET PasswordHash = @PasswordHash WHERE Email = @Email";
+            var affectedRows = await conn.ExecuteAsync(sql, new { PasswordHash = passwordHash, Email = email });
+
+            if (affectedRows > 0)
+                return (true, "Đổi mật khẩu thành công!");
+            else
+                return (false, "Không tìm thấy người dùng để đổi mật khẩu.");
         }
     }
 }

@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Contexts/AuthContext";
 import { useMusic } from "../Contexts/MusicContext";
+import API from "../Services/api";
+import { libraryService } from "../Services/libraryService";
+import type { SavedAlbum } from "../Services/libraryService";
 import "./Styles/HomePage.css";
 
 interface SidebarProps {
@@ -24,6 +27,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
     }
     return [];
   });
+  const [savedAlbums, setSavedAlbums] = useState<SavedAlbum[]>([]);
   const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -33,30 +37,46 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   useEffect(() => {
     if (isLoggedIn && user) {
       fetchPlaylists();
+      fetchSavedAlbums();
     } else {
       setPlaylists([]);
+      setSavedAlbums([]);
       setIsLoadingPlaylists(false);
     }
 
     const handlePlaylistUpdate = () => {
       if (isLoggedIn && user) fetchPlaylists();
     };
+    const handleLibraryUpdate = () => {
+      if (isLoggedIn && user) fetchSavedAlbums();
+    };
     window.addEventListener('playlistUpdated', handlePlaylistUpdate);
-    return () => window.removeEventListener('playlistUpdated', handlePlaylistUpdate);
+    window.addEventListener('libraryUpdated', handleLibraryUpdate);
+    return () => {
+      window.removeEventListener('playlistUpdated', handlePlaylistUpdate);
+      window.removeEventListener('libraryUpdated', handleLibraryUpdate);
+    };
   }, [isLoggedIn, user]);
 
   const fetchPlaylists = async () => {
     try {
-      const res = await fetch(`/api/playlists/user/${user?.id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setPlaylists(data);
-        localStorage.setItem(`sidebar_playlists_${user?.id}`, JSON.stringify(data));
-      }
+      const res = await API.get(`/playlists/user/${user?.id}`);
+      const data = res.data;
+      setPlaylists(data);
+      localStorage.setItem(`sidebar_playlists_${user?.id}`, JSON.stringify(data));
     } catch (err) {
       console.error("Lỗi lấy danh sách playlist:", err);
     } finally {
       setIsLoadingPlaylists(false);
+    }
+  };
+
+  const fetchSavedAlbums = async () => {
+    try {
+      const albums = await libraryService.getSavedAlbums();
+      setSavedAlbums(albums);
+    } catch (err) {
+      console.error("Lỗi lấy danh sách album đã lưu:", err);
     }
   };
 
@@ -80,49 +100,36 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
     const nextNumber = maxNumber + 1;
 
     try {
-      const res = await fetch(`/api/playlists/user/${user.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: `Playlist #${nextNumber}`,
-          description: "",
-          coverUrl: ""
-        })
+      const res = await API.post(`/playlists/user/${user.id}`, {
+        name: `Playlist #${nextNumber}`,
+        description: "",
+        coverUrl: ""
       });
 
-      if (res.ok) {
-        const newPlaylist = await res.json();
-        const updated = [...playlists, newPlaylist];
-        setPlaylists(updated);
-        localStorage.setItem(`sidebar_playlists_${user.id}`, JSON.stringify(updated));
-        navigate(`/playlist/${newPlaylist.id}`);
-      } else {
-        alert("Có lỗi khi tạo danh sách phát.");
-      }
+      const newPlaylist = res.data;
+      const updated = [...playlists, newPlaylist];
+      setPlaylists(updated);
+      localStorage.setItem(`sidebar_playlists_${user.id}`, JSON.stringify(updated));
+      navigate(`/playlist/${newPlaylist.id}`);
     } catch (err) {
-      console.error(err);
+      console.error("Có lỗi khi tạo danh sách phát:", err);
+      alert("Có lỗi khi tạo danh sách phát.");
     }
   };
 
   const handleDeletePlaylist = async () => {
     if (!contextMenu || !contextMenu.playlistId) return;
     try {
-      const res = await fetch(`/api/playlists/${contextMenu.playlistId}`, {
-        method: 'DELETE'
-      });
-      if (res.ok) {
-        const updated = playlists.filter(p => p.id !== contextMenu.playlistId);
-        setPlaylists(updated);
-        if (user && user.id) {
-          localStorage.setItem(`sidebar_playlists_${user.id}`, JSON.stringify(updated));
-        }
-        setContextMenu(null);
-        window.dispatchEvent(new Event('playlistUpdated'));
-        if (window.location.pathname === `/playlist/${contextMenu.playlistId}`) {
-          navigate('/');
-        }
-      } else {
-        alert("Có lỗi khi xóa danh sách phát.");
+      await API.delete(`/playlists/${contextMenu.playlistId}`);
+      const updated = playlists.filter(p => p.id !== contextMenu.playlistId);
+      setPlaylists(updated);
+      if (user && user.id) {
+        localStorage.setItem(`sidebar_playlists_${user.id}`, JSON.stringify(updated));
+      }
+      setContextMenu(null);
+      window.dispatchEvent(new Event('playlistUpdated'));
+      if (window.location.pathname === `/playlist/${contextMenu.playlistId}`) {
+        navigate('/');
       }
     } catch (err) {
       console.error(err);
@@ -147,13 +154,11 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
   const handleDoublePlayPlaylist = async (plId: number) => {
     try {
-      const res = await fetch(`/api/playlists/${plId}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.songs && data.songs.length > 0) {
-          setQueue(data.songs);
-          playSong(data.songs[0]);
-        }
+      const res = await API.get(`/playlists/${plId}`);
+      const data = res.data;
+      if (data.songs && data.songs.length > 0) {
+        setQueue(data.songs);
+        playSong(data.songs[0]);
       }
     } catch (err) {
       console.error("Lỗi khi phát playlist:", err);
@@ -281,6 +286,36 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
             )}
           </div>
         )}
+
+        {/* Section Albums đã lưu vào thư viện */}
+        {isLoggedIn && savedAlbums.length > 0 && savedAlbums.map((album) => (
+          <div
+            key={`album-${album.id}`}
+            className="playlist-item"
+            title={album.title}
+            onClick={() => navigate(`/album/${album.id}`)}
+          >
+            <div
+              className="playlist-cover default-cover"
+              style={album.coverUrl
+                ? { backgroundImage: `url(${album.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                : { background: 'linear-gradient(135deg, #5038a0, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }
+              }
+            >
+              {!album.coverUrl && (
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff">
+                  <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
+              )}
+            </div>
+            {!isCollapsed && (
+              <div className="playlist-info">
+                <p className="playlist-title">{album.title}</p>
+                <p className="playlist-subtitle">Album • {album.artistName}</p>
+              </div>
+            )}
+          </div>
+        ))}
 
         {playlists.map((pl) => (
           <div

@@ -432,6 +432,25 @@
   color: #ffffff;
 }
 
+/* Khi đang ở trang thông báo → chuông sáng trắng */
+.notification-btn.active {
+  color: #ffffff;
+}
+
+/* Animation rung nhẹ khi active */
+.notification-btn.active svg {
+  animation: bell-ring 0.4s ease;
+}
+
+@keyframes bell-ring {
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(-15deg); }
+  40%  { transform: rotate(15deg); }
+  60%  { transform: rotate(-10deg); }
+  80%  { transform: rotate(10deg); }
+  100% { transform: rotate(0deg); }
+}
+
 .header-circle-btn {
   background: rgba(255, 255, 255, 0.05);
   border: none;
@@ -1267,6 +1286,26 @@
 }
 
 .main-view:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ── Thanh scrollbar dọc cho spotify-right-sidebar ── */
+.spotify-right-sidebar::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+.spotify-right-sidebar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.spotify-right-sidebar:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.spotify-right-sidebar:hover::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
 

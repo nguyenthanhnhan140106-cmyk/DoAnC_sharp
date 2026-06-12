@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMusic } from '../Contexts/MusicContext';
 import { albumService } from '../Services/albumService';
+import { libraryService } from '../Services/libraryService';
 import Sidebar from '../Components/Sidebar';
 import Header from '../Components/header';
 import PlayerBar from '../Components/PlayerBar';
@@ -34,7 +35,7 @@ interface Album {
 export default function AlbumPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { playSong, currentSong, isPlaying, togglePlay, setQueue, toggleLikeSong, isSongLiked, openAddToPlaylistModal, showToast } = useMusic() as any;
+  const { playSong, currentSong, isPlaying, togglePlay, setQueue, addToQueue, toggleLikeSong, isSongLiked, openAddToPlaylistModal, showToast } = useMusic() as any;
   const { isLoggedIn, user } = useAuth() as any;
   const [album, setAlbum] = useState<Album | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,6 +43,9 @@ export default function AlbumPage() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [submenuSearchQuery, setSubmenuSearchQuery] = useState('');
+  const [isInLibrary, setIsInLibrary] = useState(false);
+  const [libraryLoading, setLibraryLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Viết thêm một hàm useEffect để khi bạn nhấn chuột ra ngoài, cái Menu sẽ tự động biến mất!
   useEffect(() => {
@@ -227,8 +231,99 @@ export default function AlbumPage() {
       albumService.getAlbumById(id)
         .then((res: any) => setAlbum(res))
         .catch((err: any) => console.error(err));
+      // Kiểm tra trạng thái đã lưu vào thư viện chưa
+      if (isLoggedIn) {
+        libraryService.getAlbumStatus(Number(id))
+          .then(saved => setIsInLibrary(saved))
+          .catch(() => setIsInLibrary(false));
+      }
     }
-  }, [id]);
+  }, [id, isLoggedIn]);
+
+  // Xáo trộn và phát album
+  const handleShufflePlay = () => {
+    if (!album || album.songs.length === 0) return;
+    const shuffled = [...album.songs].sort(() => Math.random() - 0.5);
+    setQueue(shuffled, 0);
+    playSong(shuffled[0]);
+  };
+
+  // Toggle lưu/xóa album khỏi thư viện
+  const handleToggleLibrary = async () => {
+    if (!isLoggedIn || !album) return;
+    setLibraryLoading(true);
+    try {
+      if (isInLibrary) {
+        await libraryService.removeAlbum(album.id);
+        setIsInLibrary(false);
+        showToast?.('Đã xóa khỏi thư viện');
+      } else {
+        await libraryService.saveAlbum(album.id);
+        setIsInLibrary(true);
+        showToast?.(`Đã thêm "${album.title}" vào thư viện`, album.coverUrl);
+      }
+      window.dispatchEvent(new Event('libraryUpdated'));
+    } catch (err) {
+      console.error('Library toggle error:', err);
+    } finally {
+      setLibraryLoading(false);
+    }
+  };
+
+  // Thêm fl_attachment vào Cloudinary URL để ép trình duyệt tải xuống
+  const toDownloadUrl = (url: string) => {
+    // Chèn fl_attachment sau /upload/ trong URL Cloudinary
+    if (url.includes('cloudinary.com') && url.includes('/upload/')) {
+      return url.replace('/upload/', '/upload/fl_attachment/');
+    }
+    return url;
+  };
+
+  // Tải xuống tất cả bài hát
+  const handleDownloadAll = async () => {
+    if (!album || album.songs.length === 0) return;
+    setIsDownloading(true);
+    const songsWithAudio = album.songs.filter(s => s.audioUrl);
+    if (songsWithAudio.length === 0) {
+      showToast?.('Không có bài hát nào có link nhạc để tải.');
+      setIsDownloading(false);
+      return;
+    }
+
+    showToast?.(`Đang tải ${songsWithAudio.length} bài hát...`);
+
+    // Tải từng bài tuần tự: fetch blob → tạo link download → click
+    for (let i = 0; i < songsWithAudio.length; i++) {
+      const song = songsWithAudio[i];
+      try {
+        const downloadUrl = toDownloadUrl(song.audioUrl!);
+        const response = await fetch(downloadUrl);
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = `${song.title} - ${song.artist}.mp3`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Giải phóng bộ nhớ
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+
+        // Delay giữa các bài để trình duyệt không bị overwhelm
+        if (i < songsWithAudio.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+        }
+      } catch (err) {
+        console.error(`Lỗi tải bài "${song.title}":`, err);
+        showToast?.(`Không thể tải: ${song.title}`);
+      }
+    }
+
+    setIsDownloading(false);
+    showToast?.(`Đã tải xong ${songsWithAudio.length} bài hát!`);
+  };
 
   const handlePlayClick = (song: Song, index: number) => {
     if (currentSong?.id === song.id) {
@@ -298,16 +393,58 @@ export default function AlbumPage() {
                     <svg viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z" /></svg>
                   </button>
 
-                  <button className="album-action-icon" title="Trộn bài">
+                  {/* Nút Shuffle - xáo trộn thứ tự bài rồi phát */}
+                  <button
+                    className="album-action-icon"
+                    title="Phát ngẫu nhiên"
+                    onClick={handleShufflePlay}
+                    style={{ color: '#b3b3b3', transition: 'color 0.15s, transform 0.15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.08)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#b3b3b3'; e.currentTarget.style.transform = 'scale(1)'; }}
+                  >
                     <svg viewBox="0 0 16 16" width="32" height="32"><path d="M13.151.922a.75.75 0 10-1.06 1.06L13.109 3H11.16a3.75 3.75 0 00-2.873 1.34l-6.173 7.356A2.25 2.25 0 01.39 12.5H0V14h.391a3.75 3.75 0 002.873-1.34l6.173-7.356a2.25 2.25 0 011.724-.804h1.947l-1.017 1.018a.75.75 0 001.06 1.06L15.98 3.75 13.15.922zM.391 3.5H0V2h.391c1.109 0 2.16.49 2.873 1.34L4.89 5.277l-.979 1.167-1.796-2.14A2.25 2.25 0 00.39 3.5zM11.16 12.5h1.95l-1.017-1.018a.75.75 0 111.06-1.06l2.829 2.828-2.829 2.828a.75.75 0 11-1.06-1.06l1.018-1.018H11.16a3.75 3.75 0 01-2.873-1.34l-1.625-1.936.979-1.167 1.625 1.936a2.25 2.25 0 001.724.804z" /></svg>
                   </button>
 
-                  <button className="album-action-icon" title="Thêm vào thư viện">
-                    <svg viewBox="0 0 16 16" width="32" height="32"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm8.5-3.5v3h3v1.5h-3v3h-1.5v-3h-3v-1.5h3v-3h1.5z" /></svg>
+                  {/* Nút + Thêm vào thư viện — xanh khi đã lưu */}
+                  <button
+                    className="album-action-icon"
+                    title={isInLibrary ? 'Xóa khỏi thư viện' : 'Thêm vào thư viện'}
+                    onClick={handleToggleLibrary}
+                    disabled={libraryLoading}
+                    style={{
+                      color: isInLibrary ? '#1db954' : '#b3b3b3',
+                      transition: 'color 0.15s, transform 0.15s',
+                      opacity: libraryLoading ? 0.5 : 1
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                  >
+                    {isInLibrary ? (
+                      // Icon ✓ tròn xanh khi đã lưu
+                      <svg viewBox="0 0 16 16" width="32" height="32" fill="currentColor">
+                        <circle cx="8" cy="8" r="7" fill="#1db954" />
+                        <path d="M11.5 5.5l-4.5 4.5-2-2" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 16 16" width="32" height="32" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm8.5-3.5v3h3v1.5h-3v3h-1.5v-3h-3v-1.5h3v-3h1.5z" /></svg>
+                    )}
                   </button>
 
-                  <button className="album-action-icon" title="Tải xuống">
-                    <svg viewBox="0 0 16 16" width="32" height="32"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zM7.25 4v4.44l-1.47-1.47-1.06 1.06L8 11.31l3.28-3.28-1.06-1.06-1.47 1.47V4h-1.5z" /></svg>
+                  {/* Nút Tải xuống */}
+                  <button
+                    className="album-action-icon"
+                    title={isDownloading ? 'Đang tải...' : 'Tải xuống tất cả bài hát'}
+                    onClick={handleDownloadAll}
+                    disabled={isDownloading}
+                    style={{
+                      color: isDownloading ? '#1db954' : '#b3b3b3',
+                      transition: 'color 0.15s, transform 0.15s',
+                      opacity: isDownloading ? 0.6 : 1
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.08)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = isDownloading ? '#1db954' : '#b3b3b3'; e.currentTarget.style.transform = 'scale(1)'; }}
+                  >
+                    <svg viewBox="0 0 16 16" width="32" height="32" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zM7.25 4v4.44l-1.47-1.47-1.06 1.06L8 11.31l3.28-3.28-1.06-1.06-1.47 1.47V4h-1.5z" /></svg>
                   </button>
 
                   <div className="album-more-menu-container" ref={menuRef}>
@@ -316,12 +453,31 @@ export default function AlbumPage() {
                     </button>
                     {isMenuOpen && (
                       <ul className="album-dropdown-menu">
-                        <li>
-                          <svg viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm8.5-3.5v3h3v1.5h-3v3h-1.5v-3h-3v-1.5h3v-3h1.5z" /></svg>
-                          Add to Your Library
+                        {/* Add/Remove from Library — đổi giao diện khi đã lưu */}
+                        <li
+                          onClick={() => { handleToggleLibrary(); setIsMenuOpen(false); }}
+                          style={{ color: isInLibrary ? '#1db954' : '#fff' }}
+                        >
+                          {isInLibrary ? (
+                            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                              <circle cx="8" cy="8" r="8" fill="#1db954" />
+                              <path d="M11.466 5.255a.75.75 0 0 1 1.05 1.048l-5.602 5.862a.75.75 0 0 1-1.077.018l-2.45-2.585a.75.75 0 0 1 1.085-1.026l1.928 2.034 5.066-5.351z" fill="#000" />
+                            </svg>
+                          ) : (
+                            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm8.5-3.5v3h3v1.5h-3v3h-1.5v-3h-3v-1.5h3v-3h1.5z" /></svg>
+                          )}
+                          {isInLibrary ? 'Remove from Your Library' : 'Add to Your Library'}
                         </li>
-                        <li>
-                          <svg viewBox="0 0 16 16"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 017.187 3H14V1.5H7.187a5.484 5.484 0 01.779-1.5H16v6H7.966zM2 2V.5h3.5v6H2v-1.5H.5V2H2z" /></svg>
+                        <li
+                          onClick={() => {
+                            if (album.songs.length > 0) {
+                              addToQueue(album.songs);
+                              showToast?.(`Đã thêm ${album.songs.length} bài vào hàng chờ`);
+                              setIsMenuOpen(false);
+                            }
+                          }}
+                        >
+                          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 017.187 3H14V1.5H7.187a5.484 5.484 0 01.779-1.5H16v6H7.966zM2 2V.5h3.5v6H2v-1.5H.5V2H2z" /></svg>
                           Add to queue
                         </li>
                         <li className="album-dropdown-divider"></li>

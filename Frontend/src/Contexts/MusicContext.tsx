@@ -14,6 +14,7 @@ interface MusicContextType {
   setVolume: (v: number) => void;
   queue: Song[];
   setQueue: (songs: Song[], startIndex?: number) => void;
+  addToQueue: (songs: Song[]) => void;
   isShuffle: boolean;
   toggleShuffle: () => void;
   repeatMode: RepeatMode;

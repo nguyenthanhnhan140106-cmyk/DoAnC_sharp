@@ -35,7 +35,7 @@ namespace Application.Services
         {
             var otp = new Random().Next(100000, 999999).ToString();
             // Gọi hàm SaveOtpAsync ngay tại đây để tái sử dụng logic
-            await SaveOtpAsync(email, otp, TimeSpan.FromMinutes(5));
+            await SaveOtpAsync(email, otp, TimeSpan.FromMinutes(15));
             return otp;
         }
 

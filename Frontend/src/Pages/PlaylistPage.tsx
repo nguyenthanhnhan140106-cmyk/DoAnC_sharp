@@ -35,7 +35,7 @@ interface Playlist {
 export default function PlaylistPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { playSong, currentSong, isPlaying, togglePlay, setQueue, toggleLikeSong, isSongLiked, likedSongs, openAddToPlaylistModal, showToast } = useMusic() as any;
+  const { playSong, currentSong, isPlaying, togglePlay, setQueue, addToQueue, toggleLikeSong, isSongLiked, likedSongs, openAddToPlaylistModal, showToast } = useMusic() as any;
   const { isLoggedIn, user } = useAuth() as any;
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -47,6 +47,7 @@ export default function PlaylistPage() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [submenuSearchQuery, setSubmenuSearchQuery] = useState('');
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -310,6 +311,59 @@ export default function PlaylistPage() {
     }
   };
 
+  // Xáo trộn và phát playlist
+  const handleShufflePlay = () => {
+    if (!playlist || playlist.songs.length === 0) return;
+    const shuffled = [...playlist.songs].sort(() => Math.random() - 0.5);
+    setQueue(shuffled, 0);
+    playSong(shuffled[0]);
+  };
+
+  // Thêm fl_attachment vào Cloudinary URL để ép tải xuống
+  const toDownloadUrl = (url: string) => {
+    if (url.includes('cloudinary.com') && url.includes('/upload/')) {
+      return url.replace('/upload/', '/upload/fl_attachment/');
+    }
+    return url;
+  };
+
+  // Tải xuống tất cả bài hát
+  const handleDownloadAll = async () => {
+    if (!playlist || playlist.songs.length === 0) return;
+    setIsDownloading(true);
+    const songsWithAudio = playlist.songs.filter(s => s.audioUrl);
+    if (songsWithAudio.length === 0) {
+      showToast?.('Không có bài hát nào có link nhạc để tải.');
+      setIsDownloading(false);
+      return;
+    }
+    showToast?.(`Đang tải ${songsWithAudio.length} bài hát...`);
+    for (let i = 0; i < songsWithAudio.length; i++) {
+      const song = songsWithAudio[i];
+      try {
+        const downloadUrl = toDownloadUrl(song.audioUrl!);
+        const response = await fetch(downloadUrl);
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = `${song.title} - ${song.artist}.mp3`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        if (i < songsWithAudio.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+        }
+      } catch (err) {
+        console.error(`Lỗi tải bài "${song.title}":`, err);
+        showToast?.(`Không thể tải: ${song.title}`);
+      }
+    }
+    setIsDownloading(false);
+    showToast?.(`Đã tải xong ${songsWithAudio.length} bài hát!`);
+  };
+
   const coverUrl = id === 'liked' ? '' : playlist?.coverUrl || "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop";
 
   return (
@@ -372,19 +426,35 @@ export default function PlaylistPage() {
                   </button>
 
                   {/* Nút Shuffle */}
-                  <button className="playlist-icon-btn" title="Trộn bài">
+                  <button
+                    className="playlist-icon-btn"
+                    title="Phát ngẫu nhiên"
+                    onClick={handleShufflePlay}
+                    style={{ color: '#b3b3b3', transition: 'color 0.15s, transform 0.15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.08)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#b3b3b3'; e.currentTarget.style.transform = 'scale(1)'; }}
+                  >
                     <svg viewBox="0 0 16 16" width="32" height="32" fill="currentColor"><path d="M13.151.922a.75.75 0 10-1.06 1.06L13.109 3H11.16a3.75 3.75 0 00-2.873 1.34l-6.173 7.356A2.25 2.25 0 01.39 12.5H0V14h.391a3.75 3.75 0 002.873-1.34l6.173-7.356a2.25 2.25 0 011.724-.804h1.947l-1.017 1.018a.75.75 0 001.06 1.06L15.98 3.75 13.15.922zM.391 3.5H0V2h.391c1.109 0 2.16.49 2.873 1.34L4.89 5.277l-.979 1.167-1.796-2.14A2.25 2.25 0 00.39 3.5zM11.16 12.5h1.95l-1.017-1.018a.75.75 0 111.06-1.06l2.829 2.828-2.829 2.828a.75.75 0 11-1.06-1.06l1.018-1.018H11.16a3.75 3.75 0 01-2.873-1.34l-1.625-1.936.979-1.167 1.625 1.936a2.25 2.25 0 001.724.804z" /></svg>
                   </button>
 
                   {id !== 'liked' && (
                     <>
-                      {/* Nút Invite Collaborators */}
-                      <button className="playlist-collaborator-btn" title="Invite collaborators">
-                        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15.25 8a.75.75 0 0 1-.75.75H8.75v5.75a.75.75 0 0 1-1.5 0V8.75H1.5a.75.75 0 0 1 0-1.5h5.75V1.5a.75.75 0 0 1 1.5 0v5.75h5.75a.75.75 0 0 1 .75.75z"/></svg>
-                      </button>
+
 
                       {/* Nút Download */}
-                      <button className="playlist-icon-btn" title="Tải xuống">
+                      <button
+                        className="playlist-icon-btn"
+                        title={isDownloading ? 'Đang tải...' : 'Tải xuống tất cả bài hát'}
+                        onClick={handleDownloadAll}
+                        disabled={isDownloading}
+                        style={{
+                          color: isDownloading ? '#1db954' : '#b3b3b3',
+                          opacity: isDownloading ? 0.6 : 1,
+                          transition: 'color 0.15s, transform 0.15s'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.08)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = isDownloading ? '#1db954' : '#b3b3b3'; e.currentTarget.style.transform = 'scale(1)'; }}
+                      >
                         <svg viewBox="0 0 16 16" width="32" height="32" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zM7.25 4v4.44l-1.47-1.47-1.06 1.06L8 11.31l3.28-3.28-1.06-1.06-1.47 1.47V4h-1.5z" /></svg>
                       </button>
 
@@ -395,52 +465,17 @@ export default function PlaylistPage() {
                         </button>
                         {isMenuOpen && (
                           <ul className="album-dropdown-menu">
-                            <li>
-                              <svg viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm8.5-3.5v3h3v1.5h-3v3h-1.5v-3h-3v-1.5h3v-3h1.5z" /></svg>
-                              Add to Your Library
-                            </li>
-                        <li>
-                          <svg viewBox="0 0 16 16"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 017.187 3H14V1.5H7.187a5.484 5.484 0 01.779-1.5H16v6H7.966zM2 2V.5h3.5v6H2v-1.5H.5V2H2z" /></svg>
+                        <li
+                          onClick={() => {
+                            if (playlist.songs.length > 0) {
+                              addToQueue(playlist.songs);
+                              showToast?.(`Đã thêm ${playlist.songs.length} bài vào hàng chờ`);
+                              setIsMenuOpen(false);
+                            }
+                          }}
+                        >
+                          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 017.187 3H14V1.5H7.187a5.484 5.484 0 01.779-1.5H16v6H7.966zM2 2V.5h3.5v6H2v-1.5H.5V2H2z" /></svg>
                           Add to queue
-                        </li>
-                        <li className="album-dropdown-divider"></li>
-                        <li className="has-submenu" onClick={(e) => e.stopPropagation()}>
-                          <svg viewBox="0 0 16 16"><path d="M15 15H1v-1.5h14V15zm0-4.5H1V9h14v1.5zm-8.034-6A5.484 5.484 0 016.187 3H13V1.5H6.187a5.484 5.484 0 01.779-1.5H15v6H6.966zM1 2V.5h3.5v6H1v-1.5H.5V2H1z" /></svg>
-                          Add to playlist
-                          <svg viewBox="0 0 16 16" className="submenu-arrow"><path d="M14 8L6 14V2z" /></svg>
-                          <div className="album-submenu" style={{ left: 'auto', right: '100%', marginRight: 0, paddingRight: 8, top: 0, backgroundColor: 'transparent', boxShadow: 'none', paddingTop: 0, paddingBottom: 0, width: 228 }}>
-                            <div style={{ backgroundColor: '#282828', borderRadius: 4, boxShadow: '0 16px 24px rgba(0, 0, 0, 0.5)', padding: '4px 0', width: 220 }}>
-                              <div className="submenu-search" onClick={(e) => e.stopPropagation()}>
-                                <svg viewBox="0 0 16 16"><path d="M7 1.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM0 7a7 7 0 1112.59 4.53l3.94 3.94-1.06 1.06-3.94-3.94A7 7 0 010 7z" /></svg>
-                                <input 
-                                  type="text" 
-                                  placeholder="Find a playlist" 
-                                  value={submenuSearchQuery}
-                                  onChange={(e) => setSubmenuSearchQuery(e.target.value)}
-                                />
-                              </div>
-                              <div className="submenu-item" onClick={(e) => { e.stopPropagation(); handleCreatePlaylistAndAddSongs(playlist.songs); }}>
-                                <svg viewBox="0 0 16 16"><path d="M14 7v1.5h-4.5V13h-1.5V8.5H3.5V7h4.5V2.5h1.5V7H14z" /></svg>
-                                New playlist
-                              </div>
-                              <div className="album-dropdown-divider"></div>
-                              <div className="submenu-playlists-list" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                {playlists
-                                  .filter(pl => pl.name.toLowerCase().includes(submenuSearchQuery.toLowerCase()))
-                                  .map(pl => (
-                                    <div 
-                                      key={pl.id} 
-                                      className="submenu-item" 
-                                      onClick={(e) => { e.stopPropagation(); handleAddAllSongsToPlaylist(playlist.songs, pl.id); }}
-                                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', fontSize: 13 }}
-                                    >
-                                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pl.name}</span>
-                                    </div>
-                                  ))
-                                }
-                              </div>
-                            </div>
-                          </div>
                         </li>
                         <li className="album-dropdown-divider"></li>
                         <li onClick={() => { alert('Chức năng Share đang được phát triển!'); setIsMenuOpen(false); }}>

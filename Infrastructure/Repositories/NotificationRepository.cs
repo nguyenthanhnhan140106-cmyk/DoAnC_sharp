@@ -34,5 +34,26 @@ namespace Infrastructure.Repositories
 
             return rowsAffected > 0;
         }
+        public async Task<IEnumerable<Notification>> GetNotificationsByUserIdAsync(int userId)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            var sql = "SELECT * FROM notifications WHERE UserId = @UserId ORDER BY Id DESC";
+            return await conn.QueryAsync<Notification>(sql, new { UserId = userId });
+        }
+
+        public async Task<bool> MarkAsReadAsync(int notificationId, int userId)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            var sql = "UPDATE notifications SET IsRead = 1 WHERE Id = @Id AND UserId = @UserId";
+            var rowsAffected = await conn.ExecuteAsync(sql, new { Id = notificationId, UserId = userId });
+            return rowsAffected > 0;
+        }
+
+        public async Task<int> MarkAllAsReadAsync(int userId)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            var sql = "UPDATE notifications SET IsRead = 1 WHERE UserId = @UserId AND IsRead = 0";
+            return await conn.ExecuteAsync(sql, new { UserId = userId });
+        }
     }
 }
