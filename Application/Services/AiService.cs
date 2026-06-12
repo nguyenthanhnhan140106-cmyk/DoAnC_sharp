@@ -6,51 +6,28 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Dapper;
+using Application.DTOs;
 using MySqlConnector;
-using Microsoft.Extensions.Configuration; // Dòng này là bắt buộc
+using Microsoft.Extensions.Configuration;
 
 namespace Application.Services
 {
-    public class ChatRequest
-    {
-        public string Message { get; set; } = string.Empty;
-        public List<ChatHistoryItem> History { get; set; } = new();
-    }
-
-    public class ChatHistoryItem
-    {
-        public string Role { get; set; } = string.Empty;
-        public string Text { get; set; } = string.Empty;
-    }
-
-    public class ChatResponse
-    {
-        public string Reply { get; set; } = string.Empty;
-        public bool Success { get; set; } = true;
-        public string? Error { get; set; }
-    }
-
     public class AiService
     {
         private readonly HttpClient _http;
         private readonly string _connectionString;
-        private readonly string _aiServerUrl;
-        
-        // URL Ngrok trỏ tới máy bàn (KoboldCPP)
-        private const string AI_SERVER_URL = "https://stitch-pronounce-frisk.ngrok-free.dev/v1/chat/completions";
-
+        private readonly string _aiServerUrl; // Biến này chứa link Ngrok
         private const string SYSTEM_PROMPT = @"Bạn là TuneBot - trợ lý AI thông minh của TuneVault. Trả lời ngắn gọn, thân thiện bằng tiếng Việt.";
 
         public AiService(HttpClient http, IConfiguration config, string connectionString = "")
         {
             _http = http;
             _connectionString = connectionString;
-        
-        // Đọc từ mục "Gemini:ApiKey" (bạn có thể đổi tên key thành "AiServerUrl" sau này)
-            _aiServerUrl = config["Gemini:ApiKey"] ?? "https://default-fallback.ngrok-free.dev/v1/chat/completions";
+            // Đọc từ appsettings.json, nếu không có thì dùng link mặc định
+            _aiServerUrl = config["AiSettings:BaseUrl"] ?? "https://stitch-pronounce-frisk.ngrok-free.dev/v1/chat/completions";
         }
-        // --- Hàm Chat cho người dùng ---
-        public async Task<ChatResponse> ChatAsync(ChatRequest request)
+
+        public async Task<ChatResponse> ChatAsync(ChatRequestDTO request)
         {
             var messages = new List<object> { new { role = "system", content = SYSTEM_PROMPT } };
             foreach (var h in request.History)
@@ -64,7 +41,8 @@ namespace Application.Services
             try
             {
                 var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
-                var res = await _http.PostAsync(AI_SERVER_URL, content);
+                // Gọi tới _aiServerUrl đã được thiết lập đúng
+                var res = await _http.PostAsync(_aiServerUrl, content);
 
                 if (!res.IsSuccessStatusCode) throw new Exception($"Lỗi máy bàn: {res.StatusCode}");
 
@@ -79,7 +57,6 @@ namespace Application.Services
             }
         }
 
-        // --- Hàm AutoTag (Đã chuyển sang dùng AI Local trên máy bàn) ---
         public async Task<List<string>> AutoTagSongAsync(int songId)
         {
             if (string.IsNullOrEmpty(_connectionString)) throw new Exception("Connection string not configured.");
@@ -88,13 +65,12 @@ namespace Application.Services
             var song = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT Title, Artist FROM songs WHERE Id = @Id", new { Id = songId });
             if (song == null) throw new Exception($"Không tìm thấy bài hát Id = {songId}");
 
-            var prompt = $"Phân tích bài hát '{song.Title}' của '{song.Artist}' và trả về 3-5 thẻ thể loại (Pop, Rap, v.v.). Chỉ trả về danh sách, phân tách bằng dấu phẩy.";
-
-            // Sử dụng cùng AI_SERVER_URL
+            var prompt = $"Phân tích bài hát '{song.Title}' của '{song.Artist}' và trả về 3-5 thẻ thể loại. Chỉ trả về danh sách, phân tách bằng dấu phẩy.";
+            
             var body = new { messages = new[] { new { role = "user", content = prompt } }, temperature = 0.3, max_tokens = 50 };
             
             var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
-            var res = await _http.PostAsync(AI_SERVER_URL, content);
+            var res = await _http.PostAsync(_aiServerUrl, content);
             
             if (!res.IsSuccessStatusCode) throw new Exception("Lỗi gọi AI Local khi gắn thẻ.");
 

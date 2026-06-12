@@ -1,15 +1,23 @@
 namespace Application.DTOs
 {
-    public class ChatRequest
+    // Đảm bảo tên class là ChatRequest
+    public class ChatRequestDTO
     {
-        // Chữ hoa đầu từ để khớp với JSON serializer của .NET
-        public string Message { get; set; } 
-        public List<MessageDto> History { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public List<MessageDTO> History { get; set; } = new();
+    }
+    
+    public class MessageDTO
+    {
+        public string Role { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
     }
 
-    public class MessageDto
+    // Đảm bảo có cả class ChatResponse để AiService không lỗi
+    public class ChatResponse
     {
-        public string Role { get; set; }
-        public string Text { get; set; }
+        public string Reply { get; set; } = string.Empty;
+        public bool Success { get; set; } = true;
+        public string? Error { get; set; }
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Services;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Application.DTOs;
 
 namespace API.Controllers
 {
@@ -17,7 +18,7 @@ namespace API.Controllers
         }
 
         [HttpPost("ask")]
-        public async Task<IActionResult> Ask([FromBody] ChatRequest request)
+        public async Task<IActionResult> Ask([FromBody] ChatRequestDTO request)
         {
             if (string.IsNullOrWhiteSpace(request.Message))
             {
