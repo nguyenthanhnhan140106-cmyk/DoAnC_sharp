@@ -459,7 +459,7 @@ INSERT INTO album_songs (AlbumId, SongId, OrderNumber) VALUES
 (3, 29, 6),
 (3, 30, 7),
 (3, 31, 8),
-(3, 32, 9);
+(3, 32, 9),
 
 (4, 2, 1),
 (4, 3, 2),

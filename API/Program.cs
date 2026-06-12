@@ -5,7 +5,7 @@ using MySqlConnector;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
+using Infrastructure.Services; // Thêm dòng này để tìm thấy EmailService
 var builder = WebApplication.CreateBuilder(args);
 
 // Lấy connection string
@@ -19,15 +19,26 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// 🟢 Đăng ký các Service & Repository
+// Đăng ký các Service
+builder.Services.AddScoped<IOtpRepository>(_ => new OtpRepository(connectionString));
 builder.Services.AddScoped<ISongRepository, SongRepository>();
 builder.Services.AddScoped<ISongService, SongService>();
 builder.Services.AddScoped<IUserService>(_ => new UserService(connectionString));
 builder.Services.AddScoped<IArtistService>(_ => new ArtistService(connectionString));
 builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connectionString));
 builder.Services.AddScoped<AlbumService>(_ => new AlbumService(connectionString));
-builder.Services.AddScoped<IAuthService>(provider => new AuthService(connectionString, builder.Configuration));
-builder.Services.AddScoped<IHistoryRepository>(_ => new HistoryRepository(connectionString));
+// SỬA LẠI DÒNG NÀY (Dòng 29 theo lỗi của bạn)
+// Sử dụng GetRequiredService để lấy các dependency đã đăng ký từ provider
+builder.Services.AddScoped<IOtpService, OtpService>(); // Hãy thay OtpService bằng class thực tế của bạn
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IAuthService>(provider => 
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var otpService = provider.GetRequiredService<IOtpService>();
+    var emailService = provider.GetRequiredService<IEmailService>();
+    
+    return new AuthService(connectionString, config, otpService, emailService);
+});builder.Services.AddScoped<IHistoryRepository>(_ => new HistoryRepository(connectionString));
 builder.Services.AddScoped<IHistoryService, HistoryService>();
 
 // 🟢 BỔ SUNG: Đăng ký Notification Repository và Service
@@ -163,6 +174,20 @@ for (int retry = 1; retry <= maxRetries; retry++)
                     FOREIGN KEY (PlaylistId) REFERENCES playlists(Id) ON DELETE CASCADE,
                     FOREIGN KEY (SongId) REFERENCES songs(Id)
                 );";
+            cmd.ExecuteNonQuery();
+        }
+        // Create user_otps TABLE
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS user_otps (
+                        Id INT AUTO_INCREMENT PRIMARY KEY,
+                        EMail VARCHAR(100) NOT NULL,
+                        OtpCode VARCHAR(255) NOT NULL,
+                        ExpiryTime DATETIME NOT NULL,
+                        IsUsed TINYINT(1) DEFAULT 0,
+                        CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+                        );";
             cmd.ExecuteNonQuery();
         }
 

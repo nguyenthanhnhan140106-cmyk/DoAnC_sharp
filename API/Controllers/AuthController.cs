@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
 using Application.DTOs;
+using System.Text.Json.Serialization;
 
 namespace API.Controllers
 {
@@ -9,22 +10,22 @@ namespace API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IOtpService _otpService;
+        private readonly IEmailService _emailService;
 
-        // DI sẽ tự lấy IAuthService đã đăng ký trong Program.cs
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IOtpService otpService, IEmailService emailService)
         {
             _authService = authService;
+            _otpService = otpService;
+            _emailService = emailService;
         }
 
+        // --- CÁC API ĐÃ CÓ ---
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDTO request)
         {
-            // Gọi service và nhận kết quả Tuple
-            if (request == null) return BadRequest("Dữ liệu gửi lên trống.");
             var result = await _authService.RegisterAsync(request);
-            
-            // Dùng thuộc tính .Success của Tuple thay vì toán tử !
-               if (!result.Success) return BadRequest(new { Message = result.Message }); 
+            if (!result.Success) return BadRequest(new { Message = result.Message }); 
             return Ok(new { Message = result.Message });
         }
 
@@ -32,10 +33,27 @@ namespace API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
         {
             var token = await _authService.LoginAsync(request);
-            if (token == null) 
-                return Unauthorized(new { Message = "Tên đăng nhập hoặc mật khẩu không đúng." });
-            
+            if (token == null) return Unauthorized(new { Message = "Tên đăng nhập hoặc mật khẩu không đúng." });
             return Ok(new { Token = token });
         }
+
+        // --- CÁC API MỚI CHO OTP ---
+        [HttpPost("send-otp")]
+        public async Task<IActionResult> SendOtp([FromBody] OtpRequest request)
+        {
+    // Đã sửa: Truyền request.Email thay vì biến email không tồn tại
+            var success = await _authService.SendOtpAsync(request.Email);
+            if (!success) return BadRequest(new { Message = "Không thể gửi mã OTP." });
+            return Ok(new { Message = "Mã đã được gửi đến email của bạn." });
+        }
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request)
+        {
+            var isValid = await _otpService.VerifyOtp(request.Email, request.Otp);
+            if (!isValid) return BadRequest(new { Message = "Mã không hợp lệ hoặc đã hết hạn." });
+            return Ok(new { Message = "Xác thực thành công!" });
+        }
     }
+
+    // Các DTO hỗ trợ (Bạn có thể để trong file riêng hoặc để ở đây nếu muốn gọn)
 }
