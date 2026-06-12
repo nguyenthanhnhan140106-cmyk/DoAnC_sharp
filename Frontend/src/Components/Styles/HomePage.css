@@ -1201,6 +1201,20 @@
   scrollbar-width: none;
 }
 
+.albums-wrap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
+  padding-left: 4px;
+  padding-bottom: 32px;
+}
+
+.albums-wrap-grid .song-card-item {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
 .song-card-item {
   min-width: calc((100% - (6 * 16px)) / 7);
   max-width: calc((100% - (6 * 16px)) / 7);
@@ -1897,11 +1911,138 @@
 }
 
 /* ========================================================= */
+/* LỜI CHÀO VÀ BANNER CHÍNH TRÊN CÙNG                        */
+/* ========================================================= */
+.home-greeting-section {
+  margin-bottom: 32px;
+}
+
+.home-greeting {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.04em;
+}
+
+.home-banners-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.promo-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #282828;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.promo-nav-btn:hover {
+  background: #3e3e3e;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.left-nav {
+  left: -16px;
+}
+
+.right-nav {
+  right: -16px;
+}
+
+.promo-cards-track {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.promo-card {
+  flex: 0 0 calc(33.3333% - 16px);
+  height: 160px;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+  box-sizing: border-box;
+}
+
+.promo-card:hover {
+  transform: scale(1.02);
+}
+
+.promo-card-img {
+  width: 128px;
+  height: 128px;
+  border-radius: 4px;
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.promo-card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.promo-card-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 8px;
+  border-radius: 12px;
+  align-self: flex-start;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.promo-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.promo-card-desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+
+/* ========================================================= */
 /* THẺ NGHE GẦN ĐÂY (RECENT CARD) - ẢNH BÊN TRÁI             */
 /* ========================================================= */
 .recent-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 12px 24px;
   margin-bottom: 40px;
   padding-left: 4px;

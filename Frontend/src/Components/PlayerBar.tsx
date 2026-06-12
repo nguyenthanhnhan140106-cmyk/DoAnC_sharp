@@ -32,6 +32,16 @@ export default function PlayerBar() {
   const inactiveColor = '#b3b3b3';
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [previousVolume, setPreviousVolume] = useState(1);
+
+  const handleToggleMute = () => {
+    if (volume > 0) {
+      setPreviousVolume(volume);
+      setVolume(0);
+    } else {
+      setVolume(previousVolume > 0 ? previousVolume : 1);
+    }
+  };
 
   return (
     <footer className="spotify-player">
@@ -244,10 +254,20 @@ export default function PlayerBar() {
           {isQueueViewOpen && <div className="active-dot" style={{ position: 'absolute', bottom: '-4px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', backgroundColor: '#1db954', borderRadius: '50%' }}></div>}
         </button>
 
-        <button className="control-btn" title="Âm lượng">
-          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.332l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35zm8.683 4.29V5.56a2.75 2.75 0 0 1 0 4.88z" />
-          </svg>
+        <button 
+          className="control-btn" 
+          title={volume > 0 ? "Tắt tiếng" : "Mở tiếng"}
+          onClick={handleToggleMute}
+        >
+          {volume === 0 ? (
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M13.86 12.896l1.14-1.138-2.52-2.52 2.52-2.52-1.14-1.14-2.52 2.52-2.52-2.52-1.14 1.14 2.52 2.52-2.52 2.52 1.14 1.14 2.52-2.52 2.52 2.52zM9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.332l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35z"/>
+            </svg>
+          ) : (
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.332l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35zm8.683 4.29V5.56a2.75 2.75 0 0 1 0 4.88z" />
+            </svg>
+          )}
         </button>
         <input
           type="range"
