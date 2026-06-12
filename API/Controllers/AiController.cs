@@ -1,6 +1,7 @@
 using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Application.DTOs;
 
 namespace API.Controllers
 {
@@ -20,7 +21,7 @@ namespace API.Controllers
         /// Body: { "message": "...", "history": [ { "role": "user"|"bot", "text": "..." } ] }
         /// </summary>
         [HttpPost("chat")]
-        public async Task<IActionResult> Chat([FromBody] ChatRequest request)
+        public async Task<IActionResult> Chat([FromBody] ChatRequestDTO request)
         {
             if (string.IsNullOrWhiteSpace(request.Message))
                 return BadRequest(new { error = "Tin nhắn không được để trống." });

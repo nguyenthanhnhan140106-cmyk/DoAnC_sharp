@@ -1,5 +1,5 @@
-// src/Frontend/src/components/TuneBot/useTuneBot.ts
 import { useState, useEffect } from "react";
+import API from "../../Services/api";
 
 export interface Message {
   role: "user" | "bot";
@@ -7,69 +7,7 @@ export interface Message {
   time: string;
 }
 
-export default function useTuneBot() {
-  const [messages, setMessages] = useState<Message[]>(() => {
-    // khôi phục lịch sử nếu có
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("tunebotMessages");
-      return stored ? JSON.parse(stored) : [];
-    }
-    return [];
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Lưu lịch sử sau mỗi thay đổi
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("tunebotMessages", JSON.stringify(messages));
-    }
-  }, [messages]);
-
-  const send = async (text: string) => {
-    const now = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
-    const userMsg: Message = { role: "user", text, time: now };
-
-    setMessages(prev => [...prev, userMsg]);
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Gọi backend /api/ai/chat — server sẽ gọi Gemini và trả về reply
-      const res = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: text,
-          history: messages.map(m => ({ role: m.role, text: m.text })),
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
-      const reply = data.reply || "Xin lỗi, tôi chưa hiểu câu hỏi.";
-      const botMsg: Message = { role: "bot", text: reply, time: now };
-      setMessages(prev => [...prev, botMsg]);
-
-    } catch (e: any) {
-      // Nếu backend lỗi, dùng mock fallback client-side
-      console.warn("[TuneBot] Backend lỗi, dùng mock:", e.message);
-      const mockReply = getClientFallback(text);
-      const botMsg: Message = { role: "bot", text: mockReply, time: now };
-      setMessages(prev => [...prev, botMsg]);
-      // Không hiện lỗi cho người dùng vì đã có fallback
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { messages, loading, error, send, setMessages };
-}
-
-// Client-side fallback khi backend không khả dụng
+// 1. Hàm fallback (để riêng biệt, nằm ngoài hàm chính)
 function getClientFallback(question: string): string {
   const q = question.toLowerCase();
   const fallbacks = [
@@ -94,4 +32,54 @@ function getClientFallback(question: string): string {
     "🎵 Tôi là TuneBot! Tôi giỏi tư vấn nhạc và hướng dẫn dùng TuneVault 😊",
   ];
   return genericReplies[Math.floor(Math.random() * genericReplies.length)];
+}
+
+// 2. Hook chính
+export default function useTuneBot() {
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("tunebotMessages");
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("tunebotMessages", JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  const send = async (text: string) => {
+    const now = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    const userMsg: Message = { role: "user", text, time: now };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await API.post("/ai/chat", {
+        message: text,
+        history: messages.map((m) => ({ role: m.role, text: m.text })),
+      });
+
+      // Lấy câu trả lời từ API
+      const reply = res.data.reply || "Xin lỗi, tôi chưa hiểu câu hỏi.";
+      const botMsg: Message = { role: "bot", text: reply, time: now };
+      setMessages((prev) => [...prev, botMsg]);
+    } catch (e: any) {
+      console.error("Backend lỗi, chuyển sang fallback:", e);
+      // Fallback khi gọi API thất bại
+      const mockReply = getClientFallback(text);
+      const botMsg: Message = { role: "bot", text: mockReply, time: now };
+      setMessages((prev) => [...prev, botMsg]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { messages, loading, error, send, setMessages };
 }
