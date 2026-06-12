@@ -415,19 +415,18 @@ export default function MainContent({ songs }: Props) {
               </div>
             </div>
 
+            {albums.length > 0 && (
+              <div className="playlist-section">
+                <div className="section-header">
+                  <h2 className="section-title">Album của bạn</h2>
+                  {/* Nếu muốn Show All Album, có thể bấm sang Tab Album kế bên nên tạm ẩn nút */}
+                </div>
+                <div className="songs-grid">
+                  {albums.slice(0, 10).map((album) => <AlbumCard key={album.id} album={album} onHover={setHoveredCover} />)}
+                </div>
+              </div>
+            )}
           </>
-        )}
-
-        {albums.length > 0 && (
-          <div className="playlist-section">
-            <div className="section-header">
-              <h2 className="section-title">Album của bạn</h2>
-              {/* Nếu muốn Show All Album, có thể bấm sang Tab Album kế bên nên tạm ẩn nút */}
-            </div>
-            <div className="songs-grid">
-              {albums.slice(0, 10).map((album) => <AlbumCard key={album.id} album={album} onHover={setHoveredCover} />)}
-            </div>
-          </div>
         )}
 
         {/* ── TAB DÀNH RIÊNG CHO TOÀN BỘ ALBUM ── */}
