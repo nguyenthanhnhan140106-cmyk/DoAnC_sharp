@@ -413,7 +413,17 @@ INSERT INTO albums (Id, Title, CoverUrl, ArtistId, CreatedAt) VALUES
 (6, 'V-Pop Đình Đám 2026',
     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846681/Screenshot_2026-06-07_223134_kngtgv.png', NULL, NOW()),
 (7, 'Nhạc Trẻ Gây Nghiện',
-    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/chatgayhai_vgatml.jpg', NULL, NOW());
+    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/chatgayhai_vgatml.jpg', NULL, NOW()),
+(8, 'Bolero Tình Ca Giao Thời',
+    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=500&fit=crop', NULL, NOW()),
+(9, 'Ballad Xoa Dịu Trái Tim',
+    'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=500&fit=crop', NULL, NOW()),
+(10, 'Acoustic Thư Giãn Cuối Tuần',
+    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop', NULL, NOW()),
+(11, 'Nhạc Sàn Sôi Động Nhất',
+    'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=500&fit=crop', NULL, NOW()),
+(12, 'Indie Khám Phá Âm Nhạc Mới',
+    'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=500&fit=crop', NULL, NOW());
 
 
 -- ─────────────────────────────────────────────────────────
@@ -475,7 +485,22 @@ INSERT INTO album_songs (AlbumId, SongId, OrderNumber) VALUES
 
 (7, 10, 1),
 (7, 11, 2),
-(7, 12, 3);
+(7, 12, 3),
+
+(8, 10, 1),
+(8, 11, 2),
+
+(9, 20, 1),
+(9, 21, 2),
+
+(10, 30, 1),
+(10, 31, 2),
+
+(11, 40, 1),
+(11, 41, 2),
+
+(12, 50, 1),
+(12, 51, 2);
 
 -- UPDATE songs 
 -- SET Lyrics = '[

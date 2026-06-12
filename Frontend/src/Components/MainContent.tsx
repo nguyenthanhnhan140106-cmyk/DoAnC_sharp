@@ -180,6 +180,41 @@ export default function MainContent({ songs }: Props) {
   const [albums, setAlbums] = useState<Album[]>([]);
   const navigate = useNavigate();
 
+  // 🟢 Slider Logic
+  const [currentBannerIdx, setCurrentBannerIdx] = useState(0);
+
+  const promoColors = [
+    "linear-gradient(135deg, #e52d6a 0%, #a41c48 100%)",
+    "linear-gradient(135deg, #4d4d4d 0%, #2b2b2b 100%)",
+    "linear-gradient(135deg, #b07d35 0%, #6e4e21 100%)",
+    "linear-gradient(135deg, #1e3264 0%, #121e3d 100%)",
+    "linear-gradient(135deg, #509bf5 0%, #2d5b94 100%)"
+  ];
+
+  const promoItems = albums.slice(0, 5).map((album, idx) => ({
+    id: album.id,
+    type: 'album',
+    albumId: album.id,
+    img: album.coverUrl || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=150&h=150&fit=crop",
+    title: album.title,
+    desc: album.artistName || "Nhiều Nghệ Sĩ",
+    bgColor: promoColors[idx % promoColors.length]
+  }));
+
+  const handleNextPromo = () => {
+    setCurrentBannerIdx(prev => prev >= promoItems.length - 3 ? 0 : prev + 1);
+  };
+
+  const handlePrevPromo = () => {
+    setCurrentBannerIdx(prev => prev <= 0 ? promoItems.length - 3 : prev - 1);
+  };
+
+  const handleBannerClick = (banner: any) => {
+    if (banner.type === 'album') {
+      navigate(`/album/${banner.albumId}`);
+    }
+  };
+
   useEffect(() => {
     albumService.getAllAlbums()
       .then((list: any) => {
@@ -211,6 +246,13 @@ export default function MainContent({ songs }: Props) {
   };
 
   const shuffledSongs = useMemo(() => shuffleArray(songs), [songs]);
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  }, []);
 
   const activeCover = songData?.coverUrl || "";
   const displayCover = hoveredCover || activeCover;
@@ -280,6 +322,58 @@ export default function MainContent({ songs }: Props) {
 
         {activeTab === "all" && (
           <>
+            {/* ── KHỐI LỜI CHÀO & BANNERS TRÊN CÙNG ── */}
+            <div className="home-greeting-section">
+              <h1 className="home-greeting">{greeting}</h1>
+              <div className="home-banners-wrapper" style={{ overflow: 'visible', position: 'relative' }}>
+                
+                {/* Nút lùi (Luôn hiển thị) */}
+                <button 
+                  className="promo-nav-btn left-nav" 
+                  onClick={handlePrevPromo}
+                >
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                    <path fillRule="evenodd" d="M11.03 1.53a.75.75 0 0 1 0 1.06L4.56 8l6.47 5.41a.75.75 0 1 1-1.06 1.06L2.44 8l7.53-6.47a.75.75 0 0 1 1.06 0z" />
+                  </svg>
+                </button>
+
+                <div style={{ overflow: 'hidden', width: '100%', padding: '4px 0' }}>
+                  <div 
+                    className="promo-cards-track" 
+                    style={{ 
+                      transform: `translateX(calc(-${currentBannerIdx} * (33.3333% + 8px)))`
+                    }}
+                  >
+                    {promoItems.map(item => (
+                      <div 
+                        className="promo-card" 
+                        key={item.id} 
+                        onClick={() => handleBannerClick(item)}
+                        style={{ background: item.bgColor }}
+                      >
+                        <img className="promo-card-img" src={item.img} alt={item.title} />
+                        <div className="promo-card-content">
+                          <span className="promo-card-badge">Có thể bạn thích</span>
+                          <h3 className="promo-card-title">{item.title}</h3>
+                          <p className="promo-card-desc">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Nút tiến (Luôn hiển thị) */}
+                <button 
+                  className="promo-nav-btn right-nav" 
+                  onClick={handleNextPromo}
+                >
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.97 1.53a.75.75 0 0 0 0 1.06L11.44 8l-6.47 5.41a.75.75 0 1 0 1.06 1.06L13.56 8 6.03 1.53a.75.75 0 0 0-1.06 0z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
             {isLoggedIn && (recentlyPlayed.length > 0 || songs.length > 0 || albums.length > 0) && (
               <div className="recent-grid">
                 {recentlyPlayed.length > 0 ? (
@@ -437,7 +531,7 @@ export default function MainContent({ songs }: Props) {
               <button className="show-all-btn">Show all</button>
             </div>
             {albums.length > 0 ? (
-              <div className="songs-grid">
+              <div className="albums-wrap-grid">
                 {albums.map((album) => <AlbumCard key={album.id} album={album} onHover={setHoveredCover} />)}
               </div>
             ) : (
