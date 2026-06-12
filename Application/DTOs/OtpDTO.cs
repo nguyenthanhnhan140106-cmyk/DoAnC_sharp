@@ -9,4 +9,14 @@ public class VerifyOtpRequest {
     public string Email { get; set; }
     [JsonPropertyName("otp")]
     public string Otp { get; set; }
-}}
+}
+
+public class ResetPasswordRequest {
+    [JsonPropertyName("email")]
+    public string Email { get; set; }
+    [JsonPropertyName("otp")]
+    public string Otp { get; set; }
+    [JsonPropertyName("newPassword")]
+    public string NewPassword { get; set; }
+}
+}

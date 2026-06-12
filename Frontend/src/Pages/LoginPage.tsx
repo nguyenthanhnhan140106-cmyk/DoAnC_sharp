@@ -63,6 +63,12 @@ export default function LoginPage() {
             />
           </div>
 
+          <div style={{ textAlign: 'right', marginBottom: '20px' }}>
+            <a href="/forgot-password" style={{ color: '#1db954', fontSize: '14px', textDecoration: 'none' }}>
+              Quên mật khẩu?
+            </a>
+          </div>
+
           <button type="submit" className="auth-submit-btn">Continue</button>
         </form>
 

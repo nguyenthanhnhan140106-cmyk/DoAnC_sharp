@@ -6,6 +6,11 @@ export const songService = {
     return response.data;
   },
 
+  getSongById: async (id: number) => {
+    const response = await API.get(`/songs/${id}`);
+    return response.data;
+  },
+
   searchSongs: async (query: string) => {
     const response = await API.get(`/songs/search?q=${encodeURIComponent(query)}`);
     return response.data;
