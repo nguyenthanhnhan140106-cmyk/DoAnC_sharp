@@ -24,7 +24,7 @@ interface Song {
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth() as any;
   const { playSong, currentSong, isPlaying, setQueue, likedSongs } = useMusic() as any;
   const [songs, setSongs] = useState<Song[]>([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -82,15 +82,18 @@ export default function ProfilePage() {
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                 </svg>
+                <div className="profile-avatar-overlay">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 48, height: 48, marginBottom: 8 }}>
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                  </svg>
+                  <span>Choose photo</span>
+                </div>
               </div>
               <div className="profile-info">
                 <span className="profile-badge">Profile</span>
-                <h1 className="profile-name">Văn Nam</h1>
+                <h1 className="profile-name">{user?.username || 'User'}</h1>
               </div>
-            </div>
-            {/* The edit details button is positioned relatively within header content */}
-            <div className="profile-edit-btn-wrapper">
-              <button className="profile-edit-btn">Edit details</button>
             </div>
           </div>
 
