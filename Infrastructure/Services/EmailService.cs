@@ -14,16 +14,21 @@ namespace Infrastructure.Services
         public async Task SendEmailAsync(string toEmail, string subject, string message)
         {
             var emailSettings = _config.GetSection("EmailSettings");
+            var senderName = emailSettings["SenderName"] ?? "TuneVault";
+            var senderEmail = emailSettings["SenderEmail"] ?? "";
+            var smtpServer = emailSettings["SmtpServer"] ?? "";
+            var password = emailSettings["Password"] ?? "";
+            var portString = emailSettings["Port"] ?? "587";
             
             var email = new MimeMessage();
-            email.From.Add(new MailboxAddress(emailSettings["SenderName"], emailSettings["SenderEmail"]));
+            email.From.Add(new MailboxAddress(senderName, senderEmail));
             email.To.Add(MailboxAddress.Parse(toEmail));
             email.Subject = subject;
             email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = message };
 
             using var smtp = new SmtpClient();
-            await smtp.ConnectAsync(emailSettings["SmtpServer"], int.Parse(emailSettings["Port"]!), MailKit.Security.SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(emailSettings["SenderEmail"], emailSettings["Password"]);
+            await smtp.ConnectAsync(smtpServer, int.Parse(portString), MailKit.Security.SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync(senderEmail, password);
             
             await smtp.SendAsync(email);
             await smtp.DisconnectAsync(true);

@@ -15,14 +15,14 @@ namespace Application.Services
     public class AiService
     {
         private readonly HttpClient _http;
-        private readonly string _connectionString;
+        private readonly Application.Interfaces.ISongRepository _songRepository;
         private readonly string _aiServerUrl; // Biến này chứa link Ngrok
         private const string SYSTEM_PROMPT = @"Bạn là TuneBot - trợ lý AI thông minh của TuneVault. Trả lời ngắn gọn, thân thiện bằng tiếng Việt.";
 
-        public AiService(HttpClient http, IConfiguration config, string connectionString = "")
+        public AiService(HttpClient http, IConfiguration config, Application.Interfaces.ISongRepository songRepository)
         {
             _http = http;
-            _connectionString = string.IsNullOrEmpty(connectionString) ? config.GetConnectionString("DefaultConnection") ?? "" : connectionString;
+            _songRepository = songRepository;
             // Đọc từ appsettings.json, nếu không có thì dùng link mặc định
             _aiServerUrl = config["AiSettings:BaseUrl"] ?? "https://stitch-pronounce-frisk.ngrok-free.dev/v1/chat/completions";
         }
@@ -59,13 +59,10 @@ namespace Application.Services
 
         public async Task<List<string>> AutoTagSongAsync(int songId)
         {
-            if (string.IsNullOrEmpty(_connectionString)) throw new Exception("Connection string not configured.");
-
-            using var conn = new MySqlConnection(_connectionString);
-            var song = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT Title, Artist FROM songs WHERE Id = @Id", new { Id = songId });
+            var song = await _songRepository.GetByIdAsync(songId);
             if (song == null) throw new Exception($"Không tìm thấy bài hát Id = {songId}");
 
-            var prompt = $"Phân tích bài hát '{song.Title}' của '{song.Artist}' và trả về 3-5 thẻ thể loại. Chỉ trả về danh sách, phân tách bằng dấu phẩy.";
+            var prompt = $"Phân tích bài hát '{song.Title}' của '{song.Artist}' và trả về 3-5 thẻ thể loại. Bắt buộc chỉ trả về định dạng mảng chuỗi JSON hợp lệ, ví dụ: [\"Pop\", \"V-Pop\", \"Ballad\"]. KHÔNG trả về gì khác ngoài mảng JSON.";
             
             var body = new { messages = new[] { new { role = "user", content = prompt } }, temperature = 0.3, max_tokens = 50 };
             
@@ -75,18 +72,31 @@ namespace Application.Services
             if (!res.IsSuccessStatusCode) throw new Exception("Lỗi gọi AI Local khi gắn thẻ.");
 
             var data = await res.Content.ReadFromJsonAsync<JsonElement>();
-            var reply = data.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
+            var reply = data.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "[]";
 
+            // Làm sạch chuỗi JSON nếu AI trả về markdown
+            reply = reply.Replace("```json", "").Replace("```", "").Trim();
+            
             var tags = new List<string>();
-            foreach (var t in reply.Split(','))
+            try 
             {
-                var tag = t.Trim();
-                if (!string.IsNullOrEmpty(tag))
+                tags = JsonSerializer.Deserialize<List<string>>(reply) ?? new List<string>();
+            } 
+            catch 
+            {
+                // Fallback nếu AI không tuân thủ JSON
+                foreach (var t in reply.Split(','))
                 {
-                    tags.Add(tag);
-                    await conn.ExecuteAsync("INSERT INTO media_tags (SongId, Tag) VALUES (@SongId, @Tag)", new { SongId = songId, Tag = tag });
+                    var tag = t.Trim().Replace("\"", "").Replace("[", "").Replace("]", "");
+                    if (!string.IsNullOrEmpty(tag)) tags.Add(tag);
                 }
             }
+
+            if (tags.Count > 0)
+            {
+                await _songRepository.AddTagsToSongAsync(songId, tags);
+            }
+            
             return tags;
         }
 

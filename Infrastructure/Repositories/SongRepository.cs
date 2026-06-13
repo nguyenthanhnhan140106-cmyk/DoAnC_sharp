@@ -15,7 +15,7 @@ namespace Infrastructure.Repositories
 
         public SongRepository(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
         private IDbConnection CreateConnection() => new MySqlConnection(_connectionString);
@@ -88,6 +88,23 @@ namespace Infrastructure.Repositories
             return await connection.QuerySingleOrDefaultAsync<Song>(query, new { Id = id });
         }
 
+        public async Task<IEnumerable<Song>> GetByArtistIdAsync(int artistId)
+        {
+            const string query = @"
+                SELECT s.*, 
+                       COALESCE(a.WorldRank, 0) as WorldRank, 
+                       COALESCE(a.Followers, 0) as Followers, 
+                       COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
+                       a.Bio, 
+                       COALESCE(a.IsVerified, 1) as IsVerified
+                FROM songs s
+                LEFT JOIN artists a ON s.ArtistId = a.Id
+                WHERE s.ArtistId = @ArtistId";
+
+            using var connection = CreateConnection();
+            return await connection.QueryAsync<Song>(query, new { ArtistId = artistId });
+        }
+
         public async Task<int> CreateAsync(Song song)
         {
                         const string query = @"
@@ -127,6 +144,15 @@ namespace Infrastructure.Repositories
             using var connection = CreateConnection();
             var rowsAffected = await connection.ExecuteAsync(query, new { Id = id });
             return rowsAffected > 0;
+        }
+
+        public async Task AddTagsToSongAsync(int songId, List<string> tags)
+        {
+            using var connection = CreateConnection();
+            foreach (var tag in tags)
+            {
+                await connection.ExecuteAsync("INSERT IGNORE INTO media_tags (SongId, Tag) VALUES (@SongId, @Tag)", new { SongId = songId, Tag = tag });
+            }
         }
     }
 }

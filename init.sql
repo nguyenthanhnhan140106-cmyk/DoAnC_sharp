@@ -10,6 +10,23 @@ DROP TABLE IF EXISTS playlists;
 DROP TABLE IF EXISTS album_songs;
 DROP TABLE IF EXISTS media_tags;
 DROP TABLE IF EXISTS albums;
+DROP TABLE IF EXISTS follows;
+DROP TABLE IF EXISTS songs;
+DROP TABLE IF EXISTS artists;
+-- =========================================================
+-- TUNEVAULT - SCRIPT KHỞI TẠO DATABASE VỚI CLOUDINARY LINKS
+-- =========================================================
+SET NAMES utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS playlist_songs;
+DROP TABLE IF EXISTS playlists;
+DROP TABLE IF EXISTS album_songs;
+DROP TABLE IF EXISTS media_tags;
+DROP TABLE IF EXISTS albums;
+DROP TABLE IF EXISTS user_follows;
+DROP TABLE IF EXISTS follows;
 DROP TABLE IF EXISTS songs;
 DROP TABLE IF EXISTS artists;
 DROP TABLE IF EXISTS users;
@@ -23,11 +40,15 @@ CREATE TABLE IF NOT EXISTS users (
     Username VARCHAR(50) NOT NULL UNIQUE,
     Email VARCHAR(100) NOT NULL UNIQUE,
     PasswordHash VARCHAR(255) NOT NULL,
+    AvatarUrl VARCHAR(255) NULL,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO users (Id, Username, Email, PasswordHash) VALUES 
-(1, 'testuser', 'test@example.com', 'hashed');
+INSERT INTO users (Id, Username, Email, PasswordHash, AvatarUrl) VALUES 
+(1, 'testuser', 'test@example.com', 'hashed', 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500&h=500&fit=crop'),
+(2, 'johndoe', 'john@example.com', 'hashed', 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=500&h=500&fit=crop'),
+(3, 'janedoe', 'jane@example.com', 'hashed', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&h=500&fit=crop');
+
 CREATE TABLE artists (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL UNIQUE,
@@ -40,8 +61,8 @@ CREATE TABLE artists (
 
 INSERT INTO artists (Id, Name, WorldRank, Followers, MonthlyListeners, Bio, IsVerified) VALUES 
 (1,  'Sơn Tùng M-TP',      36,  3446275, 62093978, 'Sơn Tùng M-TP là ca sĩ, nhạc sĩ tiên phong của dòng nhạc Pop hiện đại tại Việt Nam, sở hữu lượng fan hâm mộ quốc tế đông đảo.', 1),
-(2,  'Jack-J97',           120, 1546275, 24093978, 'Jack - Trịnh Trần Phương Tuấn là nam ca sĩ sở hữu chất giọng miền Tây đặc trưng cùng hàng loạt bản hit kỷ lục trăm triệu views.', 1),
-(3,  'Jack-J97,K-ICM,ICM',  88, 2100500, 31500200, 'Bộ ba kết hợp đình đám tạo nên kỷ nguyên nhạc điện tử phối khí nhạc cụ dân tộc độc bản tại thị trường nhạc Việt.', 1),
+(2,  'Jack',           120, 1546275, 24093978, 'Jack - Trịnh Trần Phương Tuấn là nam ca sĩ sở hữu chất giọng miền Tây đặc trưng cùng hàng loạt bản hit kỷ lục trăm triệu views.', 1),
+(3,  'Jack, K-ICM',  88, 2100500, 31500200, 'Bộ ba kết hợp đình đám tạo nên kỷ nguyên nhạc điện tử phối khí nhạc cụ dân tộc độc bản tại thị trường nhạc Việt.', 1),
 (4,  'DatKaa',             450,  446275,  3421895, 'DatKaa (Nguyễn Tấn Đạt) mang đến làn gió âm nhạc mộc mạc, chất phác nhưng đầy lôi cuốn của người con Nam Bộ.', 1),
 (5,  'Quang Hùng MasterD',  95, 1285400, 18560000, 'Nam ca sĩ, nhạc sĩ tài năng sở hữu lượng người hâm mộ cực khủng tại Thái Lan và các nước Đông Nam Á.', 1),
 (6,  'Dương Domic',        154,  856000,  7230000, 'Dương Domic là nhân tố bùng nổ sở hữu tư duy tạo hit thời thượng cùng khả năng trình diễn sân khấu toàn diện.', 1),
@@ -51,7 +72,25 @@ INSERT INTO artists (Id, Name, WorldRank, Followers, MonthlyListeners, Bio, IsVe
 (10, 'Minh Huy, Pinny',    720,   95000,   560000, 'Cặp đôi nghệ sĩ trẻ tự do với phong cách âm nhạc Acoustic nhẹ nhàng, mang đậm hơi thở thanh xuân.', 1),
 (11, 'Thiên Đình',         810,   45000,   310000, 'Dự án âm nhạc thể nghiệm mang màu sắc cổ trang kết hợp điện tử huyền ảo độc đáo.', 1),
 (12, 'Elly', 320, 580000, 4200000, 'Elly là nghệ sĩ Lofi Chill nổi tiếng với những giai điệu nhẹ nhàng, thư giãn mang đậm phong cách chill độc đáo.', 1),
-(13, 'Changg', 250, 450000, 3200000, 'Changg là một giọng ca trẻ đầy tiềm năng với những bản hit nổi bật trên các nền tảng mạng xã hội.', 1);
+(13, 'Changg', 250, 450000, 3200000, 'Changg là một giọng ca trẻ đầy tiềm năng với những bản hit nổi bật trên các nền tảng mạng xã hội.', 1),
+(14, 'Various Artists', 999, 1000000, 5000000, 'Tập hợp các nghệ sĩ nổi bật với đa dạng thể loại âm nhạc.', 1),
+(15, 'Paris', 350, 450000, 2100000, 'Giọng ca trẻ với phong cách R&B lôi cuốn và đầy năng lượng.', 1),
+(16, 'Andree Right Hand', 200, 1500000, 6800000, 'Rapper đình đám với những bản hit Hip-hop đầy chất chơi và phóng khoáng.', 1),
+(17, 'Vũ Cát Tường', 110, 2800000, 9500000, 'Ca - nhạc sĩ đa tài với chất giọng phi giới tính và phong cách âm nhạc độc bản.', 1),
+(18, 'Hiếu Thứ Hai', 95, 3200000, 11000000, 'Nam Rapper điển trai sở hữu hàng loạt bản hit Top 1 Trending mang màu sắc hiện đại.', 1),
+(19, 'Hoãng', 670, 80000, 320000, 'Nghệ sĩ Indie với những giai điệu lofi cực chill và mộc mạc.', 0),
+(20, 'Hngle', 450, 230000, 1400000, 'Nhân tố mới nổi bật với các sáng tác mang đậm tính tự sự và sâu lắng.', 0),
+(21, 'Bray, Amee', 180, 2100000, 8000000, 'Sự kết hợp hoàn hảo giữa giọng rap gai góc và chất giọng ngọt ngào.', 1),
+(22, 'Bray', 130, 2500000, 7500000, 'B Ray - Rapper với khả năng chơi chữ đỉnh cao và câu chuyện đường phố.', 1),
+(23, 'Parys', 890, 50000, 200000, 'Tài năng trẻ đang từng bước chinh phục khán giả qua những bài hát đầy cảm xúc.', 0),
+(24, 'gigi D`Agostino', 45, 8000000, 22000000, 'Huyền thoại DJ và nhà sản xuất âm nhạc người Ý với các siêu phẩm Electronic.', 1),
+(25, 'GREYD', 145, 1200000, 4500000, 'Tân binh quái vật của V-Pop với tư duy âm nhạc cực kỳ hiện đại và bắt tai.', 1),
+(26, 'LowG', 210, 1100000, 5300000, 'Chủ nhân của dòng rap Flexing cực mượt với phong cách delivery độc nhất.', 1),
+(27, 'JustaTee', 105, 3000000, 8200000, 'Ông hoàng R&B Việt Nam, người tiên phong mang giai điệu Melodic Rap đến đại chúng.', 1),
+(28, 'Hiếu Thứ Hai, HURRYKNG', 160, 1800000, 6100000, 'Sự kết hợp cực cháy từ tổ đội GERDNANG khuấy đảo mọi sân khấu.', 1),
+(29, 'Karik', 85, 4100000, 10500000, 'Lão đại của làng Rap Việt với những bản hit quốc dân gắn liền với thanh xuân.', 1),
+(30, 'MCK', 125, 2700000, 9100000, 'Nghệ sĩ gen Z tài năng với phong cách mumble rap và autotune đặc trưng.', 1),
+(31, 'Ronboogz', 320, 600000, 2800000, 'Nhà sản xuất âm nhạc kiêm rapper với chất nhạc US-UK mang hơi thở đường phố.', 1);
 
 
 -- ─────────────────────────────────────────────────────────
@@ -81,13 +120,13 @@ INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, Ar
      '/lyrics/thanhtan.lrc',
      NOW()),
 
-(2,  'Về bên anh',          'Jack-J97',
+(2,  'Về bên anh',          'Jack',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/vebenanh_rrpaon.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657507/vebenanh_kf3kmi.mp3',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727870/vebenanh_vipbk1.mp4',
      'vsound', 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=240&fit=crop', 2, '/lyrics/vebenanh.lrc',NOW()),
 
-(3,  'Sóng gió',            'Jack-J97,K-ICM,ICM',
+(3,  'Sóng gió',            'Jack,K-ICM',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/songgio_kb1ndq.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657506/songgio_zreqh8.mp3',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780751992/songgio_dhzhih.mp4',
@@ -113,7 +152,7 @@ INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, Ar
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727856/matketnoi_ueyvel.mp4',
      'vsound', 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500&h=240&fit=crop', 6,'/lyrics/matketnoi.lrc', NOW()),
 
-(7,  'Hồng nhan',           'Jack-J97, K-ICM, ICM',
+(7,  'Hồng nhan',           'Jack, K-ICM',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/hongnhan_isqcez.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657499/hongnhan_f6rlrh.mp3',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727853/hongnhan_ncrnah.mp4',
@@ -149,7 +188,7 @@ INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, Ar
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727871/chatgayhai_foijpe.mp4',
      'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 5,'/lyrics/chatgayhai.lrc', NOW()),
 
-(13, 'Bạc phận',            'Jack-J97, K-ICM, ICM',
+(13, 'Bạc phận',            'Jack, K-ICM',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/bacphan_cylj9h.jpg',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780657500/bacphan_mstj0s.mp3',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780727849/bacphan_axk2ow.mp4',
@@ -251,140 +290,140 @@ INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, Ar
      '',
      'rap', 'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721004/Screenshot_2026-06-06_114054_gyrsup.png', 13,NULL, NOW()),
 
-(33, 'Trạm dừng chân', 'Various Artists',
+(33, 'Trạm dừng chân', 'Jack',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846681/Screenshot_2026-06-07_223134_kngtgv.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846859/Tr%E1%BA%A1m_D%E1%BB%ABng_Ch%C3%A2n_vfg9th.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 2, NULL, NOW()),
 
-(34, 'Yêu kiều', 'Various Artists',
+(34, 'Yêu kiều', 'Paris',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846687/Screenshot_2026-06-07_223527_vcgvnx.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846860/Y%C3%AAu_Ki%E1%BB%81u_wd9nkb.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 15, NULL, NOW()),
 
-(35, 'Quá khứ kia của anh', 'Various Artists',
+(35, 'Quá khứ kia của anh', 'Andree Right Hand',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780847819/Screenshot_2026-06-07_225609_gn2vzw.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846859/Qu%C3%A1_Kh%E1%BB%A9_Kia_C%E1%BB%A7a_Anh_hu4di4.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 16, NULL, NOW()),
 
-(36, 'Người như anh xứng đáng cô đơn', 'Various Artists',
+(36, 'Người như anh xứng đáng cô đơn', 'Vũ Cát Tường',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846691/Screenshot_2026-06-07_223711_l0u2is.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846858/NG%C6%AF%E1%BB%9CI_NH%C6%AF_ANH_X%E1%BB%A8NG_%C4%90%C3%81NG_C%C3%94_%C4%90%C6%A0N_ofcwwr.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 17, NULL, NOW()),
 
-(37, 'Người im lặng gặp người hay nói', 'Various Artists',
+(37, 'Người im lặng gặp người hay nói', 'Hiếu Thứ Hai',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846683/Screenshot_2026-06-07_223322_g8vcih.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846857/Ng%C6%B0%E1%BB%9Di_Im_L%E1%BA%B7ng_G%E1%BA%B7p_Ng%C6%B0%E1%BB%9Di_Hay_N%C3%B3i_n8b5gj.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 18, NULL, NOW()),
 
-(38, 'Nói anh nghe', 'Various Artists',
+(38, 'Nói anh nghe', 'Hoãng',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846685/Screenshot_2026-06-07_223459_wmz8cq.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846856/N%C3%B3i_Anh_Nghe_xbm1rh.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 19, NULL, NOW()),
 
-(39, 'Hoa vô sắc', 'Various Artists',
+(39, 'Hoa vô sắc', 'Jack',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846682/Screenshot_2026-06-07_223258_a4orju.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846856/Hoa_V%C3%B4_S%E1%BA%AFc_ediafm.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 2, NULL, NOW()),
 
-(40, 'Liễu Thanh Yên', 'Various Artists',
+(40, 'Liễu Thanh Yên', 'Jack',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846682/Screenshot_2026-06-07_223231_h094pm.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846856/LI%E1%BB%84U_THANH_Y%C3%8AN_dtfowy.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 2, NULL, NOW()),
 
-(41, 'Không buông', 'Various Artists',
+(41, 'Không buông', 'Hngle',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846684/Screenshot_2026-06-07_223339_sgndlp.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846855/Kh%C3%B4ng_Bu%C3%B4ng_xewwxp.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 20, NULL, NOW()),
 
-(42, 'Đứa trẻ mùa đông chí', 'Various Artists',
+(42, 'Đứa trẻ mùa đông chí', 'Jack',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846681/Screenshot_2026-06-07_223156_hmi530.png',
-     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846854/%C4%90%E1%BB%A9a_Tr%E1%BA%BB_M%C3%B9a_%C4%90%C3%B4ng_Ch%C3%AD_utjnrl.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846854/%C4%90%E1%BB%A9a_Tr%E1%BA%BB_M%C3%B9a_%C4%90%C3%B4_Ch%C3%AD_utjnrl.mp3',
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 2, NULL, NOW()),
 
-(43, 'Chúng ta rồi sẽ hạnh phúc', 'Various Artists',
+(43, 'Chúng ta rồi sẽ hạnh phúc', 'Jack',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846682/Screenshot_2026-06-07_223214_uq4cre.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846853/Ch%C3%BAng_Ta_R%E1%BB%93i_S%E1%BA%BD_H%E1%BA%A1nh_Ph%C3%BAc_ehqsfp.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 2, NULL, NOW()),
 
-(44, 'Chờ anh về', 'Various Artists',
+(44, 'Chờ anh về', 'Bray, Amee',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846690/Screenshot_2026-06-07_223657_fkanu6.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846852/CH%E1%BB%9C_ANH_V%E1%BB%80_v71laf.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 21, NULL, NOW()),
 
-(45, 'Cho con', 'Various Artists',
+(45, 'Cho con', 'Bray',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846689/Screenshot_2026-06-07_223643_oouwbf.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846851/Cho_Con_Lullaby_pt.2_bxhnef.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 22, NULL, NOW()),
 
-(46, 'Cô ta', 'Various Artists',
+(46, 'Cô ta', 'Parys',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846686/Screenshot_2026-06-07_223512_lafvrz.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846851/c%C3%B4_ta_ruxfnn.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 23, NULL, NOW()),
 
-(47, 'Cô đơn', 'Various Artists',
+(47, 'Cô đơn', 'Hngle',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846685/Screenshot_2026-06-07_223405_fidx6e.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846850/C%C3%B4_%C4%90%C6%A1n_gsbti5.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 20, NULL, NOW()),
 
-(48, 'BLA BLA BLA', 'Various Artists',
+(48, 'BLA BLA BLA', 'gigi D`Agostino',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780845053/Screenshot_2026-06-07_220417_urcipc.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846849/BLA_BLA_BLA_ey9grv.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 24, NULL, NOW()),
 
-(49, 'Buông', 'Various Artists',
+(49, 'Buông', 'Hngle',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846684/Screenshot_2026-06-07_223353_xltkdy.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846849/Bu%C3%B4ng_ugahyj.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 20, NULL, NOW()),
 
-(50, '100 cuộc gọi nhỡ', 'Various Artists',
+(50, '100 cuộc gọi nhỡ', 'GREYD',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846688/Screenshot_2026-06-07_223601_u40yti.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846849/100_Cu%E1%BB%99c_G%E1%BB%8Di_Nh%E1%BB%A1_usiqsa.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 25, NULL, NOW()),
 
-(51, '01 ngoại lệ', 'Various Artists',
+(51, '01 ngoại lệ', 'Jack',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846682/Screenshot_2026-06-07_223245_pn5utx.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780846848/01_Ngo%E1%BA%A1i_L%E1%BB%87_k62l9q.mp3',
-     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'vsound', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 2, NULL, NOW()),
 
-(52, 'Thủ đô Cypher', 'Various Artists',
+(52, 'Thủ đô Cypher', 'LowG',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850119/Screenshot_2026-06-07_233402_u9ojgx.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780850255/Th%E1%BB%A7_%C4%90%C3%B4_Cypher_Remix_ccxjau.mp3',
-     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 26, NULL, NOW()),
 
-(53, 'Ex hate me', 'Various Artists',
+(53, 'Ex hate me', 'Bray, Amee',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850118/Screenshot_2026-06-07_233332_rlp3vn.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780850254/Ex_s_Hate_Me_cfshpt.mp3',
-     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 21, NULL, NOW()),
 
-(54, 'She never know', 'Various Artists',
+(54, 'She never know', 'JustaTee',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850119/Screenshot_2026-06-07_233316_ctl8fr.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780850255/She_Neva_Knows_bbw5hd.mp3',
-     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 27, NULL, NOW()),
 
-(55, 'Kim phút kim giờ', 'Various Artists',
+(55, 'Kim phút kim giờ', 'Hiếu Thứ Hai, HURRYKNG',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850119/Screenshot_2026-06-07_233234_ljnmdg.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780850255/KIM_PH%C3%9AT_KIM_GI%E1%BB%9C_xwiatm.mp3',
-     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 28, NULL, NOW()),
 
-(56, 'Bạn đời', 'Various Artists',
+(56, 'Bạn đời', 'Karik',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850118/Screenshot_2026-06-07_233244_x50lfi.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780850254/B%E1%BA%A1n_%C4%90%E1%BB%9Di_rw0m4z.mp3',
-     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 29, NULL, NOW()),
 
-(57, 'Ngủ trong phòng thu', 'Various Artists',
+(57, 'Ngủ trong phòng thu', 'MCK',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850119/Screenshot_2026-06-07_233423_awyhk8.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780850254/Ng%E1%BB%A7_Trong_Ph%C3%B2ng_Thu_Remix_dkmvf8.mp3',
-     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
+     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 30, NULL, NOW()),
 
-(58, 'Don''t côi', 'Various Artists',
+(58, 'Don''t côi', 'Ronboogz',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850119/Screenshot_2026-06-07_233351_hr5loy.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780850253/Don_t_C%C3%B4i_dxrsmi.mp3',
      NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW()),
 
-(59, 'Ex sign', 'Various Artists',
+(59, 'Ex sign', 'Hiếu Thứ Hai',
      'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850118/Screenshot_2026-06-07_233226_uvzxur.png',
      'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780850253/Exit_Sign_zijxdw.mp3',
-     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', NULL,NULL, NOW());
+     NULL, 'rap', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 18, NULL, NOW());
 
 
 CREATE TABLE albums (
@@ -409,21 +448,21 @@ INSERT INTO albums (Id, Title, CoverUrl, ArtistId, CreatedAt) VALUES
 (4, 'Những Bản Hit Của Jack-J97',
     'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657517/vebenanh_rrpaon.jpg', 2, NOW()),
 (5, 'Tuyển Tập Nhạc Rap Cực Chất',
-    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850119/Screenshot_2026-06-07_233402_u9ojgx.png', NULL, NOW()),
+    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780850119/Screenshot_2026-06-07_233402_u9ojgx.png', 43, NOW()),
 (6, 'V-Pop Đình Đám 2026',
-    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846681/Screenshot_2026-06-07_223134_kngtgv.png', NULL, NOW()),
+    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780846681/Screenshot_2026-06-07_223134_kngtgv.png', 43, NOW()),
 (7, 'Nhạc Trẻ Gây Nghiện',
-    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/chatgayhai_vgatml.jpg', NULL, NOW()),
+    'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/chatgayhai_vgatml.jpg', 43, NOW()),
 (8, 'Bolero Tình Ca Giao Thời',
-    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=500&fit=crop', NULL, NOW()),
+    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=500&fit=crop', 43, NOW()),
 (9, 'Ballad Xoa Dịu Trái Tim',
-    'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=500&fit=crop', NULL, NOW()),
+    'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=500&fit=crop', 43, NOW()),
 (10, 'Acoustic Thư Giãn Cuối Tuần',
-    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop', NULL, NOW()),
+    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop', 43, NOW()),
 (11, 'Nhạc Sàn Sôi Động Nhất',
-    'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=500&fit=crop', NULL, NOW()),
+    'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=500&fit=crop', 43, NOW()),
 (12, 'Indie Khám Phá Âm Nhạc Mới',
-    'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=500&fit=crop', NULL, NOW());
+    'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=500&fit=crop', 43, NOW());
 
 
 -- ─────────────────────────────────────────────────────────
@@ -502,15 +541,6 @@ INSERT INTO album_songs (AlbumId, SongId, OrderNumber) VALUES
 (12, 50, 1),
 (12, 51, 2);
 
--- UPDATE songs 
--- SET Lyrics = '[
---   {"time": 2.0, "text": "Em đi lướt qua nhanh"},
---   {"time": 4.5, "text": "Hương thơm vương lại khiến anh đảo điên"},
---   {"time": 7.5, "text": "Phải chăng em là chất gây hại?"},
---   {"time": 10.0, "text": "Nhìn nụ cười em anh say mất rồi..."}
--- ]'
--- WHERE Id = 12;
-
 -- ─────────────────────────────────────────────────────────
 -- 5. BẢNG PLAYLISTS VÀ PLAYLIST_SONGS
 -- ─────────────────────────────────────────────────────────
@@ -532,5 +562,33 @@ CREATE TABLE playlist_songs (
     FOREIGN KEY (PlaylistId) REFERENCES playlists(Id) ON DELETE CASCADE,
     FOREIGN KEY (SongId) REFERENCES songs(Id) ON DELETE CASCADE
 );
+
+-- ─────────────────────────────────────────────────────────
+-- 6. BẢNG FOLLOWS (User follow Artist)
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS follows (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    UserId INT NOT NULL,
+    ArtistId INT NOT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ArtistId) REFERENCES artists(Id) ON DELETE CASCADE,
+    UNIQUE KEY (UserId, ArtistId)
+);
+
+CREATE TABLE user_follows (
+    FollowerId INT NOT NULL,
+    FollowedUserId INT NOT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (FollowerId, FollowedUserId),
+    FOREIGN KEY (FollowerId) REFERENCES users(Id) ON DELETE CASCADE,
+    FOREIGN KEY (FollowedUserId) REFERENCES users(Id) ON DELETE CASCADE
+);
+
+INSERT INTO user_follows (FollowerId, FollowedUserId) VALUES 
+(1, 2),
+(1, 3),
+(2, 1);
+
 SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;

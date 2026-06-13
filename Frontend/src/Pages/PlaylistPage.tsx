@@ -272,6 +272,12 @@ export default function PlaylistPage() {
 
   const handleAddSong = async (song: Song) => {
     if (!playlist) return;
+
+    if (playlist.songs.some(s => s.id === song.id)) {
+      showToast?.("Bài hát này đã có trong danh sách phát.");
+      return;
+    }
+
     try {
       const res = await fetch(`/api/playlists/${playlist.id}/songs/${song.id}`, {
         method: 'POST'
@@ -533,7 +539,7 @@ export default function PlaylistPage() {
 
                       return (
                         <div
-                          key={song.id}
+                          key={`playlist-song-${song.id}-${idx}`}
                           onMouseEnter={() => setHoveredIndex(idx)}
                           onMouseLeave={() => setHoveredIndex(null)}
                           style={{
@@ -701,8 +707,8 @@ export default function PlaylistPage() {
                       {/* Kết quả tìm kiếm */}
                       {searchResults.length > 0 && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 100 }}>
-                          {searchResults.map(song => (
-                            <div key={song.id} style={{
+                          {searchResults.map((song, idx) => (
+                            <div key={`search-song-${song.id}-${idx}`} style={{
                               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                               padding: '8px 16px', borderRadius: 4, transition: 'background-color 0.2s',
                             }}
@@ -716,18 +722,31 @@ export default function PlaylistPage() {
                                   <span style={{ color: '#b3b3b3', fontSize: 14 }}>{song.artist}</span>
                                 </div>
                               </div>
-                              <button
-                                onClick={() => handleAddSong(song)}
-                                style={{
-                                  padding: '4px 16px', borderRadius: 20, border: '1px solid #b3b3b3',
-                                  background: 'transparent', color: '#fff', fontSize: 13, fontWeight: 600,
-                                  cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#b3b3b3'; e.currentTarget.style.transform = 'scale(1)'; }}
-                              >
-                                Add
-                              </button>
+                              {playlist.songs.some(s => s.id === song.id) ? (
+                                <button
+                                  disabled
+                                  style={{
+                                    padding: '4px 16px', borderRadius: 20, border: '1px solid #1db954',
+                                    background: 'transparent', color: '#1db954', fontSize: 13, fontWeight: 600,
+                                    cursor: 'not-allowed', opacity: 0.7
+                                  }}
+                                >
+                                  Added
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleAddSong(song)}
+                                  style={{
+                                    padding: '4px 16px', borderRadius: 20, border: '1px solid #b3b3b3',
+                                    background: 'transparent', color: '#fff', fontSize: 13, fontWeight: 600,
+                                    cursor: 'pointer', transition: 'all 0.2s'
+                                  }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#b3b3b3'; e.currentTarget.style.transform = 'scale(1)'; }}
+                                >
+                                  Add
+                                </button>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -738,8 +757,8 @@ export default function PlaylistPage() {
               </div>
             </>
           )}
+          <Footer />
         </div>
-        <Footer />
       </div>
 
       <RightSidebar isCollapsed={!isLoggedIn} setIsCollapsed={() => { }} />

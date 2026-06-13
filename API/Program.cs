@@ -58,6 +58,8 @@ builder.Services.AddScoped<Application.Services.NotificationService>();
 // 🟢 BỔ SUNG: Đăng ký Library Repository (lưu album vào thư viện)
 builder.Services.AddScoped<Application.Interfaces.ILibraryRepository>(_ => new Infrastructure.Repositories.LibraryRepository(connectionString));
 
+// 🟢 BỔ SUNG: Đăng ký Follow Repository (theo dõi nghệ sĩ)
+builder.Services.AddScoped<Application.Interfaces.IFollowRepository, Infrastructure.Repositories.FollowRepository>();
 
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -229,6 +231,21 @@ for (int retry = 1; retry <= maxRetries; retry++)
                     IsRead BOOLEAN DEFAULT FALSE,
                     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
+                );";
+            cmd.ExecuteNonQuery();
+        }
+
+        // 🟢 6.1 BỔ SUNG: Tạo bảng user_follows để lưu trữ bạn bè (Follow user khác)
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS user_follows (
+                    FollowerId INT NOT NULL,
+                    FollowedUserId INT NOT NULL,
+                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (FollowerId, FollowedUserId),
+                    FOREIGN KEY (FollowerId) REFERENCES users(Id) ON DELETE CASCADE,
+                    FOREIGN KEY (FollowedUserId) REFERENCES users(Id) ON DELETE CASCADE
                 );";
             cmd.ExecuteNonQuery();
         }

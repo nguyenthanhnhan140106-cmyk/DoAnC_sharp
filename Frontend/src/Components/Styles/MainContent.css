@@ -1,0 +1,988 @@
+/* =========================================================
+   6. CHI TIẾT MAIN VIEW COMPONENTS
+   ========================================================= */
+.content-wrapper {
+  padding: 24px;
+  flex-grow: 1;
+}
+
+.song-card {
+  background: #181818;
+  padding: 16px;
+  border-radius: 8px;
+  width: 180px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.song-card:hover {
+  background: #282828;
+}
+
+.song-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+}
+
+.auto-tag-btn {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+  display: block;
+  width: max-content;
+}
+
+.auto-tag-btn:hover:not(:disabled) {
+  background: #1db954;
+  color: #000;
+  border-color: #1db954;
+}
+
+.auto-tag-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========================================================= */
+/* NÚT PLAY NỔI LÊN (HOVER) CHO BÀI NHẠC & ALBUM             */
+/* ========================================================= */
+.card-play-btn {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #1db954;
+  border: none;
+  box-shadow: 0 8px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.card-play-btn::before {
+  content: "▶";
+  color: #000;
+  font-size: 20px;
+  margin-left: 4px;
+}
+
+/* Nút Play sẽ hiện lên khi hover vào thẻ Card chứa nó */
+.song-card-item:hover .card-play-btn, .video-card-item:hover .card-play-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-play-btn:hover {
+  background-color: #1ed760;
+  transform: scale(1.05) !important;
+}
+
+/* Trạng thái đang Play (Icon thay đổi thành Pause) */
+.card-play-btn.playing {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-play-btn.playing::before {
+  content: "⏸";
+  margin-left: 0;
+}
+
+/* ========================================================= */
+/* LỜI CHÀO VÀ BANNER CHÍNH TRÊN CÙNG                        */
+/* ========================================================= */
+.home-greeting-section {
+  margin-bottom: 32px;
+}
+
+.home-greeting {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.04em;
+}
+
+.home-banners-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.promo-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #282828;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.promo-nav-btn:hover {
+  background: #3e3e3e;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.left-nav {
+  left: -16px;
+}
+
+.right-nav {
+  right: -16px;
+}
+
+.promo-cards-track {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.promo-card {
+  flex: 0 0 calc(33.3333% - 16px);
+  height: 160px;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+  box-sizing: border-box;
+}
+
+.promo-card:hover {
+  transform: scale(1.02);
+}
+
+.promo-card-img {
+  width: 128px;
+  height: 128px;
+  border-radius: 4px;
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.promo-card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.promo-card-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 8px;
+  border-radius: 12px;
+  align-self: flex-start;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.promo-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.promo-card-desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+
+/* ========================================================= */
+/* THẺ NGHE GẦN ĐÂY (RECENT CARD) - ẢNH BÊN TRÁI             */
+/* ========================================================= */
+.recent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px 24px;
+  margin-bottom: 40px;
+  padding-left: 4px;
+}
+
+.recent-card {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  height: 48px;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+  position: relative;
+}
+
+.recent-card:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.recent-card-img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.recent-card-info {
+  flex: 1;
+  padding: 0 12px;
+  overflow: hidden;
+}
+
+.recent-card-title {
+  margin: 0;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ghi đè CSS của nút Play cho thẻ Recent */
+.recent-card .card-play-btn {
+  right: 12px;
+  bottom: 6px;
+  width: 36px;
+  height: 36px;
+}
+
+.recent-card .card-play-btn::before {
+  font-size: 14px;
+}
+
+/* ========================================================= */
+/* THANH CÔNG CỤ TRONG TRANG ALBUM (PLAY, SHUFFLE, ADD,...)  */
+/* ========================================================= */
+.album-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 0;
+  margin-bottom: 16px;
+}
+
+.album-play-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #1db954;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 8px 8px rgba(0, 0, 0, 0.3);
+}
+
+.album-play-btn:hover {
+  transform: scale(1.05);
+  background-color: #1ed760;
+}
+
+.album-play-btn svg {
+  fill: #000;
+  width: 24px;
+  height: 24px;
+  margin-left: 4px;
+}
+
+.album-action-icon {
+  color: #b3b3b3;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, transform 0.2s;
+  padding: 0;
+}
+
+.album-action-icon:hover {
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.album-action-icon svg {
+  fill: currentColor;
+  width: 32px;
+  height: 32px;
+}
+
+/* ========================================================= */
+/* MENU TÙY CHỌN KHÁC (DROPDOWN) TRONG TRANG ALBUM           */
+/* ========================================================= */
+.album-more-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.album-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 16px;
+  background-color: #282828;
+  border-radius: 4px;
+  padding: 4px 0;
+  width: 260px;
+  box-shadow: 0 16px 24px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  list-style: none;
+}
+
+.album-dropdown-menu li {
+  padding: 12px 16px;
+  color: #eaeaea;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.album-dropdown-menu li:hover {
+  background-color: #3e3e3e;
+  color: #fff;
+}
+
+.album-dropdown-menu li svg {
+  fill: currentColor;
+  width: 18px;
+  height: 18px;
+}
+
+/* Vạch kẻ ngăn cách ở giữa */
+.album-dropdown-divider {
+  height: 1px;
+  background-color: #3e3e3e;
+  margin: 4px 0;
+  padding: 0 !important;
+}
+
+/* ========================================================= */
+/* MENU CON (SUBMENU) CHO "ADD TO PLAYLIST"                  */
+/* ========================================================= */
+
+.album-dropdown-menu li.has-submenu {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Biểu tượng mũi tên */
+.submenu-arrow {
+  margin-left: auto;
+  fill: #b3b3b3 !important;
+}
+
+.album-dropdown-menu li.has-submenu:hover .submenu-arrow {
+  fill: #fff !important;
+}
+
+/* Khối Sub-menu ẨN MẶC ĐỊNH */
+.album-submenu {
+  position: absolute;
+  top: -4px;
+  /* Nằm ngang hàng với menu cha */
+  left: 100%;
+  /* Trôi ra khỏi menu cha về bên phải */
+  background-color: #282828;
+  border-radius: 4px;
+  width: 220px;
+  /* <-- KÍCH THƯỚC ĐÃ THU NHỎ LẠI */
+  box-shadow: 0 16px 24px rgba(0, 0, 0, 0.5);
+  display: none;
+  /* <-- TÀNG HÌNH (Chỉ hiện khi trỏ chuột) */
+  flex-direction: column;
+  padding: 4px 0;
+  z-index: 101;
+  cursor: default;
+}
+
+/* CHỈ KHI TRỎ CHUỘT (HOVER) VÀO LI CHA THÌ NÓ MỚI HIỆN RA */
+.album-dropdown-menu li.has-submenu:hover .album-submenu {
+  display: flex;
+}
+
+/* Style cho Ô tìm kiếm */
+.submenu-search {
+  display: flex;
+  align-items: center;
+  background-color: #3e3e3e;
+  margin: 6px 8px;
+  border-radius: 4px;
+  padding: 6px 10px;
+  gap: 8px;
+}
+
+.submenu-search svg {
+  fill: #b3b3b3 !important;
+  width: 14px;
+  height: 14px;
+}
+
+.submenu-search input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+}
+
+.submenu-search input::placeholder {
+  color: #b3b3b3;
+}
+
+/* Các hàng (item) bên trong submenu */
+.submenu-item {
+  padding: 8px 12px;
+  color: #eaeaea;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.submenu-item:hover {
+  background-color: #3e3e3e;
+  color: #fff;
+}
+
+.submenu-item svg {
+  fill: currentColor !important;
+  width: 16px;
+  height: 16px;
+}
+
+/* ========================================================= */
+/* FOOTER                                                    */
+/* ========================================================= */
+
+.spotify-footer {
+  padding: 40px 32px 80px 32px;
+  color: #a7a7a7;
+  margin-top: 32px;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.footer-links-grid {
+  display: flex;
+  gap: 80px;
+  flex-wrap: wrap;
+}
+
+.footer-col h4 {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-col li {
+  font-size: 14px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.footer-col li:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 16px;
+}
+
+.social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #292929;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.social-btn:hover {
+  background-color: #404040;
+}
+
+.social-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: #fff;
+}
+
+.footer-divider {
+  border: none;
+  height: 1px;
+  background-color: #292929;
+  margin: 0 0 32px 0;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-legal-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-legal-links li {
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.footer-legal-links li:hover {
+  color: #fff;
+}
+
+.footer-copyright {
+  font-size: 13px;
+}
+
+/* ── Search Dropdown Gợi Ý ── */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #282828;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  overflow: hidden;
+  animation: fadeInDown 0.15s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-suggestion-item:hover {
+  background: #3e3e3e;
+}
+
+.suggestion-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.suggestion-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.suggestion-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-artist {
+  color: #b3b3b3;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-suggestion-footer {
+  padding: 10px 14px;
+  color: #b3b3b3;
+  font-size: 13px;
+  cursor: pointer;
+  border-top: 1px solid #3e3e3e;
+  transition: background 0.15s;
+}
+
+.search-suggestion-footer:hover {
+  background: #3e3e3e;
+  color: #fff;
+}
+
+/* ── Nút tìm kiếm nâng cao bên trong search-wrapper ── */
+.search-advanced-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.search-advanced-btn:hover {
+  color: #fff;
+}
+
+/* ── Bộ lọc trong SearchPage ── */
+.search-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  color: #b3b3b3;
+  font-size: 13px;
+  min-width: 72px;
+}
+
+.filter-chip {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid #3e3e3e;
+  background: transparent;
+  color: #b3b3b3;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-chip:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+.filter-chip.active {
+  background: #fff;
+  border-color: #fff;
+  color: #000;
+  font-weight: 600;
+}
+
+/* ── L\u1ecbch s\u1eed t\u00ecm ki\u1ebfm (Search History) ── */
+.search-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b3b3b3;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.search-history-clear {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.search-history-clear:hover {
+  color: #fff;
+  background: #3e3e3e;
+}
+
+.search-history-delete {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  border-radius: 50%;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.search-history-delete:hover {
+  color: #fff;
+  background: #555;
+}
+
+.search-history-empty {
+  padding: 20px 14px;
+  text-align: center;
+  color: #6a6a6a;
+  font-size: 13px;
+}
+
+/* ── K\u1ebft qu\u1ea3 t\u00ecm ki\u1ebfm d\u1ea1ng danh s\u00e1ch ── */
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.search-result-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-result-row:hover {
+  background: #2a2a2a;
+}
+
+.search-result-row.active {
+  background: #1a2a1a;
+}
+
+/* S\u1ed1 th\u1ee9 t\u1ef1 / icon play */
+.search-result-index {
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.row-number {
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.row-play-icon {
+  display: none;
+  color: #fff;
+}
+
+.search-result-row:hover .row-number {
+  display: none;
+}
+
+.search-result-row:hover .row-play-icon {
+  display: block;
+}
+
+/* \u1ea2nh b\u00eca */
+.search-result-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Th\u00f4ng tin b\u00e0i h\u00e1t */
+.search-result-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.search-result-title {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-artist {
+  font-size: 13px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge th\u1ec3 lo\u1ea1i */
+.search-result-badge {
+  background: #2a2a2a;
+  border: 1px solid #3e3e3e;
+  color: #b3b3b3;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.search-result-row:hover .search-result-badge {
+  border-color: #fff;
+  color: #fff;
+}
+
+/* N\u00fat th\u00eam */
+.search-result-add {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: color 0.15s, background 0.15s, opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.search-result-row:hover .search-result-add {
+  opacity: 1;
+}
+
+.search-result-add:hover {
+  color: #fff;
+  background: #3e3e3e;
+}/* ── Video Card Styles ── */
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding-bottom: 24px;
+}
+.video-card-item {
+  background: #181818;
+  padding: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  width: 100%;
+}
+.video-card-item:hover {
+  background: #282828;
+}
+.video-card-img-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+.video-card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+

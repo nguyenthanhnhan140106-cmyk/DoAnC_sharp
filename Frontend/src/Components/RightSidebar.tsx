@@ -1,10 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useMusic } from '../Contexts/MusicContext';
 import LyricsView from './LyricsView';
 import type { Song } from '../hooks/useAudioPlayer';
 import '../Components/Styles/HomePage.css';
 import { useAuth } from '../Contexts/AuthContext';
 import ShareModal from './ShareModal';
+import API from '../Services/api';
 
 interface RightSidebarProps {
   isCollapsed: boolean;
@@ -12,6 +14,9 @@ interface RightSidebarProps {
 }
 
 export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSidebarProps) {
+  const location = useLocation();
+  const isProfilePage = location.pathname.startsWith('/user/');
+
   // Lấy chính xác các thuộc tính điều khiển từ MusicContext
   const musicContext = useMusic() as any;
   const currentSong = musicContext?.currentSong;
@@ -28,7 +33,10 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
 
+  const { isLoggedIn, user, openAuthModal } = useAuth() as any;
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
   // Close more menu when clicking outside
@@ -43,6 +51,53 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // 🟢 Kiểm tra trạng thái follow khi bài hát thay đổi
+  const checkFollowStatus = useCallback(async () => {
+    if (!isLoggedIn || !currentSong?.artistId) {
+      setIsFollowing(false);
+      return;
+    }
+    try {
+      const res = await API.get(`/follow/check/${currentSong.artistId}`);
+      setIsFollowing(res.data?.isFollowing ?? false);
+    } catch {
+      setIsFollowing(false);
+    }
+  }, [currentSong?.artistId, isLoggedIn]);
+
+  useEffect(() => {
+    checkFollowStatus();
+  }, [checkFollowStatus]);
+
+  // 🟢 Xử lý Follow/Unfollow
+  const handleFollow = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isLoggedIn) {
+      openAuthModal();
+      return;
+    }
+
+    if (!currentSong?.artistId) return;
+
+    try {
+      setIsFollowLoading(true);
+      if (isFollowing) {
+        await API.delete(`/follow/${currentSong.artistId}`);
+        setIsFollowing(false);
+        window.dispatchEvent(new CustomEvent('SHOW_LIBRARY_TOAST', { detail: { message: 'Đã bỏ theo dõi nghệ sĩ' } }));
+      } else {
+        await API.post(`/follow/${currentSong.artistId}`);
+        setIsFollowing(true);
+        window.dispatchEvent(new CustomEvent('SHOW_LIBRARY_TOAST', { detail: { message: 'Đã theo dõi nghệ sĩ' } }));
+      }
+    } catch (error) {
+      console.error('Lỗi khi follow/unfollow:', error);
+      window.dispatchEvent(new CustomEvent('SHOW_LIBRARY_TOAST', { detail: { message: 'Có lỗi xảy ra, vui lòng thử lại sau' } }));
+    } finally {
+      setIsFollowLoading(false);
+    }
+  };
 
   // Sử dụng ref để nhớ trạng thái nhạc trước khi bật MV
   const wasPlayingBeforeVideo = useRef(false);
@@ -65,13 +120,123 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
 
 
 
-  if (!currentSong) {
+  const [friends, setFriends] = useState<any[]>([]);
+  const [suggestedUsers, setSuggestedUsers] = useState<any[]>([]);
+
+  const isFriendActivityViewOpen = musicContext?.isFriendActivityViewOpen || false;
+
+  useEffect(() => {
+    const fetchFriendsAndSuggestions = async () => {
+      if (isLoggedIn) {
+        try {
+          const res = await API.get(`/follow/user/following?t=${new Date().getTime()}`);
+          setFriends(res.data);
+          
+          if (res.data.length === 0 && user?.id) {
+            const usersRes = await API.get('/Users');
+            const allUsers = usersRes.data || [];
+            // Lọc bỏ user hiện tại, đảo ngược để lấy người dùng mới nhất, và lấy 5 người đầu tiên
+            const suggestions = allUsers
+              .filter((u: any) => u.id !== user.id)
+              .reverse()
+              .slice(0, 5);
+            setSuggestedUsers(suggestions);
+          }
+        } catch (e) {
+          console.error("Lỗi lấy danh sách friends/suggestions:", e);
+        }
+      } else {
+        setFriends([]);
+        setSuggestedUsers([]);
+      }
+    };
+    fetchFriendsAndSuggestions();
+    
+    const handleFollowUpdated = () => fetchFriendsAndSuggestions();
+    window.addEventListener('followUpdated', handleFollowUpdated);
+    return () => window.removeEventListener('followUpdated', handleFollowUpdated);
+  }, [isLoggedIn]);
+
+  if (!currentSong || isProfilePage || isFriendActivityViewOpen) {
     return (
-      <aside className={`spotify-right-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-        <div className="right-sidebar-no-song-wrapper" style={{ textAlign: 'center', padding: '20px', color: '#b3b3b3' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 8px 0', color: '#fff' }}>Chưa phát bài nào</h3>
-          <p style={{ fontSize: '14px', margin: 0 }}>Hãy chọn 1 bài hát dưới playlist nhen Nam!</p>
-        </div>
+      <aside className={`spotify-right-sidebar ${isCollapsed ? 'collapsed' : ''}`} style={!isCollapsed ? { padding: '24px 16px', overflowY: 'auto' } : undefined}>
+        {!isCollapsed && (
+          <div className="right-sidebar-full-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#fff' }}>Friend Activity</h4>
+            </div>
+            
+            {isLoggedIn ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {friends.length > 0 ? (
+                  friends.map((f: any) => (
+                    <div key={f.userId} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => window.location.href = `/user/${f.userId}`}>
+                      <div style={{
+                        width: "48px", height: "48px", borderRadius: "50%",
+                        backgroundImage: f.avatarUrl ? `url(${f.avatarUrl})` : "none",
+                        backgroundColor: "#282828", backgroundSize: "cover", backgroundPosition: "center",
+                        display: "flex", alignItems: "center", justifyContent: "center"
+                      }}>
+                        {!f.avatarUrl && (
+                          <svg viewBox="0 0 24 24" width="24" height="24" fill="#b3b3b3">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                          </svg>
+                        )}
+                      </div>
+                      <div>
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#fff' }}>{f.username}</p>
+                        <p style={{ margin: 0, fontSize: '12px', color: '#b3b3b3' }}>Online</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div>
+                    <p style={{ fontSize: '14px', color: '#b3b3b3', margin: '0 0 16px 0' }}>Bạn chưa follow ai. Gợi ý cho bạn:</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {suggestedUsers.map((su: any) => (
+                        <div key={`suggest-${su.id}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '4px 0' }} onClick={() => window.location.href = `/user/${su.id}`}>
+                          <div style={{
+                            width: "40px", height: "40px", borderRadius: "50%",
+                            backgroundImage: su.avatarUrl ? `url(${su.avatarUrl})` : "none",
+                            backgroundColor: "#282828", backgroundSize: "cover", backgroundPosition: "center",
+                            display: "flex", alignItems: "center", justifyContent: "center"
+                          }}>
+                            {!su.avatarUrl && (
+                              <svg viewBox="0 0 24 24" width="20" height="20" fill="#b3b3b3">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                              </svg>
+                            )}
+                          </div>
+                          <div>
+                            <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#fff' }}>{su.username}</p>
+                            <p style={{ margin: 0, fontSize: '12px', color: '#b3b3b3' }}>Gợi ý kết bạn</p>
+                          </div>
+                        </div>
+                      ))}
+                      {suggestedUsers.length === 0 && (
+                        <p style={{ fontSize: '12px', color: '#b3b3b3' }}>Không tìm thấy gợi ý.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', color: '#b3b3b3', marginTop: '20px' }}>
+                <p style={{ fontSize: '14px', margin: '0 0 16px 0' }}>Log in to see what your friends are playing.</p>
+                <button 
+                  onClick={openAuthModal}
+                  style={{
+                    background: "white", color: "black", border: "none", borderRadius: "32px",
+                    padding: "8px 24px", fontSize: "14px", fontWeight: 700, cursor: "pointer"
+                  }}
+                >
+                  Log in
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {isCollapsed && (
           <button className="right-expand-btn" onClick={() => setIsCollapsed(false)} title="Mở rộng">
             <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
@@ -327,9 +492,26 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
               <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#fff' }}>{songData.artist}</p>
               <p style={{ margin: 0, fontSize: '13px', color: '#b3b3b3' }}>Main Artist • Producer</p>
             </div>
-            <button style={{ background: 'transparent', border: '1px solid #727272', borderRadius: '500px', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '4px 14px', cursor: 'pointer' }}>
-              Follow
-            </button>
+            {currentSong?.artistId && (
+              <button
+                onClick={handleFollow}
+                disabled={isFollowLoading}
+                style={{
+                  background: isFollowing ? 'transparent' : 'transparent',
+                  border: `1px solid ${isFollowing ? '#1db954' : '#727272'}`,
+                  borderRadius: '500px',
+                  color: isFollowing ? '#1db954' : '#fff',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  padding: '4px 14px',
+                  cursor: isFollowLoading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  opacity: isFollowLoading ? 0.6 : 1,
+                }}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </button>
+            )}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

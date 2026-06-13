@@ -36,7 +36,7 @@ namespace Application.DTOs
         public string Artist { get; set; } = string.Empty;
         public string? CoverUrl { get; set; }
         public string? AudioUrl { get; set; }
-        public string VideoUrl { get; set; }
+        public string? VideoUrl { get; set; }
         public string? Category { get; set; }
         public string? LyricsUrl { get; set; }
         public int? ArtistId { get; set; } // Thêm nếu sau này làm giao diện Admin tạo bài hát gắn với Ca sĩ
@@ -48,7 +48,7 @@ namespace Application.DTOs
         public string? Artist { get; set; }
         public string? CoverUrl { get; set; }
         public string? AudioUrl { get; set; }
-        public string VideoUrl { get; set; }
+        public string? VideoUrl { get; set; }
         public string? Category { get; set; }
         public string? LyricsUrl { get; set; }
         public int? ArtistId { get; set; }

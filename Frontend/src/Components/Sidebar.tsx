@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Contexts/AuthContext";
 import { useMusic } from "../Contexts/MusicContext";
 import API from "../Services/api";
@@ -16,6 +16,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const { isLoggedIn, user } = useAuth();
   const { likedSongs, setQueue, playSong } = useMusic() as any;
   const navigate = useNavigate();
+  const location = useLocation();
   const [playlists, setPlaylists] = useState<any[]>(() => {
     if (user && user.id) {
       const cached = localStorage.getItem(`sidebar_playlists_${user.id}`);
@@ -28,19 +29,25 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
     return [];
   });
   const [savedAlbums, setSavedAlbums] = useState<SavedAlbum[]>([]);
+  const [followedArtists, setFollowedArtists] = useState<any[]>([]);
+  const [followedUsers, setFollowedUsers] = useState<any[]>([]);
   const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, playlistId: number | string } | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
+  const [libraryToast, setLibraryToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (isLoggedIn && user) {
       fetchPlaylists();
       fetchSavedAlbums();
+      fetchFollowedArtists();
     } else {
       setPlaylists([]);
       setSavedAlbums([]);
+      setFollowedArtists([]);
       setIsLoadingPlaylists(false);
     }
 
@@ -50,11 +57,29 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
     const handleLibraryUpdate = () => {
       if (isLoggedIn && user) fetchSavedAlbums();
     };
+    const handleFollowUpdate = () => {
+      if (isLoggedIn && user) {
+        fetchFollowedArtists();
+      }
+    };
+
     window.addEventListener('playlistUpdated', handlePlaylistUpdate);
     window.addEventListener('libraryUpdated', handleLibraryUpdate);
+    window.addEventListener('followUpdated', handleFollowUpdate);
+
+    const handleLibraryToast = (e: Event) => {
+      const msg = (e as CustomEvent).detail?.message || '';
+      setLibraryToast({ message: msg, visible: true });
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = setTimeout(() => setLibraryToast({ message: '', visible: false }), 3000);
+    };
+    window.addEventListener('SHOW_LIBRARY_TOAST', handleLibraryToast);
+
     return () => {
       window.removeEventListener('playlistUpdated', handlePlaylistUpdate);
       window.removeEventListener('libraryUpdated', handleLibraryUpdate);
+      window.removeEventListener('followUpdated', handleFollowUpdate);
+      window.removeEventListener('SHOW_LIBRARY_TOAST', handleLibraryToast);
     };
   }, [isLoggedIn, user]);
 
@@ -77,6 +102,26 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       setSavedAlbums(albums);
     } catch (err) {
       console.error("Lỗi lấy danh sách album đã lưu:", err);
+    }
+  };
+
+  const fetchFollowedArtists = async () => {
+    try {
+      const res = await API.get(`/follow/following?t=${new Date().getTime()}`);
+      if (Array.isArray(res.data)) {
+        setFollowedArtists(res.data);
+      }
+    } catch (err) {
+      console.error("Lỗi lấy danh sách nghệ sĩ follow:", err);
+    }
+  };
+
+  const fetchFollowedUsers = async () => {
+    try {
+      const res = await API.get('/follow/user/following');
+      setFollowedUsers(res.data);
+    } catch (err) {
+      console.error("Lỗi lấy danh sách user đang theo dõi:", err);
     }
   };
 
@@ -180,6 +225,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   }, []);
 
   return (
+    <>
     <aside className={`spotify-sidebar ${isCollapsed ? "collapsed" : ""}`}>
       <div className="sidebar-header">
         <button
@@ -317,6 +363,43 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           </div>
         ))}
 
+        {/* Section Followed Artists */}
+        {isLoggedIn && followedArtists.length > 0 && followedArtists.map((artist) => (
+          <div
+            key={`artist-${artist.artistId || artist.id}`}
+            className="playlist-item"
+            title={artist.name}
+            onClick={() => {
+              const targetPath = `/artist/${artist.artistId || artist.id}`;
+              if (location.pathname === targetPath) {
+                navigate("/");
+              } else {
+                navigate(targetPath);
+              }
+            }}
+          >
+            <div
+              className="playlist-cover default-cover"
+              style={artist.coverUrl
+                ? { backgroundImage: `url(${artist.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '50%' }
+                : { background: 'linear-gradient(135deg, #a03850, #f65c8b)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }
+              }
+            >
+              {!artist.coverUrl && (
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+              )}
+            </div>
+            {!isCollapsed && (
+              <div className="playlist-info">
+                <p className="playlist-title">{artist.name}</p>
+                <p className="playlist-subtitle">Artist</p>
+              </div>
+            )}
+          </div>
+        ))}
+
         {playlists.map((pl) => (
           <div
             key={pl.id}
@@ -380,5 +463,33 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         </div>
       )}
     </aside>
+
+      {/* TOAST THÔNG BÁO FOLLOW/UNFOLLOW */}
+      {libraryToast.visible && (
+        <div style={{
+          position: 'fixed',
+          bottom: '100px',
+          left: '24px',
+          backgroundColor: '#1db954',
+          color: '#000',
+          padding: '12px 20px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: 700,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          animation: 'slideUpFade 0.3s ease',
+          pointerEvents: 'none',
+        }}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+          </svg>
+          {libraryToast.message}
+        </div>
+      )}
+    </>
   );
-}
+}

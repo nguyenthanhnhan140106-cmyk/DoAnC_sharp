@@ -1,0 +1,889 @@
+/* =========================================================
+   8. CHI TIẾT RIGHT SIDEBAR COMPONENTS
+   ========================================================= */
+.spotify-right-sidebar {
+  grid-area: right-sidebar;
+  background-color: #121212;
+  margin: 0px 8px 8px 0px;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+}
+
+/* Header Right Sidebar */
+.right-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffffff;
+}
+
+.right-sidebar-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Ảnh bìa to */
+.right-sidebar-cover {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+}
+
+.right-sidebar-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+/* Tên bài và nghệ sĩ */
+.right-sidebar-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 🟢 KHI RIGHT SIDEBAR COLLAPSED: Biến thành thanh dọc tinh gọn sát lề */
+.spotify-right-sidebar.collapsed {
+  width: 24px !important;
+  min-width: 24px !important;
+  max-width: 24px !important;
+  padding: 0 !important;
+  margin: 0px 8px 8px 0px;
+  background-color: #000000;
+  /* Khối dọc màu đen ẩn mình sát rìa */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Căn giữa nút mũi tên dọc theo trục X */
+  justify-content: center;
+  /* Căn giữa nút mũi tên dọc theo trục Y */
+  cursor: pointer;
+  overflow: hidden;
+  /* Giấu sạch ruột gan cũ không cho tràn ra ngoài */
+  transition: background-color 0.2s ease;
+}
+
+/* Hiệu ứng sáng nhẹ thanh dọc khi Nam rê chuột lại gần giống Spotify */
+.spotify-right-sidebar.collapsed:hover {
+  background-color: #1a1a1a;
+}
+
+/* Nút bấm chứa mũi tên < vát dọc trải dài */
+.right-expand-btn {
+  background: transparent;
+  border: none;
+  color: #b3b3b3;
+  /* Màu xám tinh tế mặc định */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+  /* Độ cao vừa vặn cho vùng click chuột */
+  padding: 0;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+/* Khi Nam trỏ thẳng chuột vào biểu tượng mũi tên < */
+.right-expand-btn:hover {
+  color: #ffffff;
+  /* Bật sáng trắng lên rực rỡ */
+  transform: scale(1.15);
+  /* Phóng nhẹ mũi tên lên tạo cảm giác phản hồi tốt */
+}
+
+/* Triệt tiêu độ trễ chuyển động của khối thông tin khi đang ở trạng thái thu gọn */
+.spotify-right-sidebar.collapsed * {
+  transition: none !important;
+}
+
+.song-details {
+  overflow: hidden;
+  margin-right: 12px;
+}
+
+.song-details .song-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-details .song-artist {
+  margin: 4px 0 0 0;
+  color: #b3b3b3;
+  font-size: 16px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+/* Hiệu ứng khi rê chuột vào tên ca sĩ */
+.song-details .song-artist:hover {
+  color: #ffffff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Card Giới thiệu nghệ sĩ */
+.artist-card {
+  background-color: #242424;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.artist-card:hover {
+  background-color: #2a2a2a;
+  transform: translateY(-4px);
+  /* Nổi lên nhẹ khi trỏ chuột vào */
+}
+
+.artist-card-title {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.artist-card-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.artist-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.artist-details .artist-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.artist-details .artist-name:hover {
+  text-decoration: underline;
+}
+
+.artist-details .artist-listeners {
+  margin: 4px 0 0 0;
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.icon-btn:hover {
+  color: #ffffff !important;
+  transform: scale(1.05);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  width: 100%;
+  padding-left: 4px;
+}
+
+.show-all-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: #b3b3b3;
+  font-size: 13px;
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.show-all-btn:hover {
+  text-decoration: underline;
+  color: #ffffff;
+}
+
+/* Thêm vào HomePage.css */
+
+/* ── Ảnh bo góc + shadow ── */
+.song-card-img {
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.songs-grid {
+  display: flex;
+  flex-direction: row;
+  /* ← ngang, không phải dọc */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 16px;
+  padding-left: 4px;
+  padding-bottom: 12px;
+  -ms-overflow-style: none;
+  /* IE/Edge */
+  scrollbar-width: none;
+}
+
+.albums-wrap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
+  padding-left: 4px;
+  padding-bottom: 32px;
+}
+
+.albums-wrap-grid .song-card-item {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+.song-card-item {
+  min-width: calc((100% - (6 * 16px)) / 7);
+  max-width: calc((100% - (6 * 16px)) / 7);
+  flex-shrink: 0;
+  background: #181818;
+  padding: 14px;
+  border-radius: 8px;
+  /* ← bo góc card */
+  cursor: pointer;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.song-card-item:hover {
+  background: #282828;
+}
+
+/* ── Cắt gọn tên bài hát / nghệ sĩ dài thành dấu ... ── */
+.song-card-title {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-card-artist {
+  margin: 0;
+  font-size: 14px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Wrapper ảnh bo góc ── */
+.song-card-img-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  /* ← bo góc wrapper */
+  overflow: hidden;
+  /* ← cắt ảnh đúng góc bo */
+}
+
+.song-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  /* reset — dùng overflow:hidden của wrapper */
+  display: block;
+  transition: filter 0.3s ease;
+}
+
+.song-card-item:hover .song-card-img {
+  filter: brightness(0.75);
+}
+
+/* ── Thanh scrollbar dọc cho main-view ── */
+.main-view {
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.main-view::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+.main-view::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+/* Chỉ hiện khi hover vào main-view */
+.main-view:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.main-view:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ── Thanh scrollbar dọc cho spotify-right-sidebar ── */
+.spotify-right-sidebar {
+  scrollbar-width: none; /* Firefox */
+}
+
+.spotify-right-sidebar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge */
+}
+
+/* ── KHỐI ABOUT THE ARTIST ĐỨNG YÊN TRONG SIDEBAR ── */
+.spotify-about-artist-box {
+  background-color: #181818;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Ảnh Banner nằm ngang */
+.about-artist-banner {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  /* Khống chế độ cao vừa vặn cột phải */
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.about-artist-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.about-artist-banner:hover img {
+  transform: scale(1.04);
+  /* Phóng nhẹ ảnh khi di chuột */
+}
+
+/* Chữ About the artist đè lên góc trái ảnh */
+.about-artist-title-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, transparent 60%, rgba(24, 24, 24, 0.9) 100%);
+  padding: 12px;
+}
+
+.about-artist-title-overlay span {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Thân chữ phía dưới */
+.about-artist-body {
+  padding: 12px;
+}
+
+.about-artist-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.spotify-artist-panel {
+  width: 900px;
+  max-width: 90%;
+  max-height: 85vh;
+  background-color: #121212;
+  border-radius: 8px;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 24px rgba(0, 0, 0, 0.8);
+}
+
+.artist-panel-header {
+  width: 100%;
+  height: 350px;
+  position: relative;
+}
+
+.artist-panel-banner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.panel-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.panel-close-btn:hover {
+  transform: scale(1.1);
+  background: #333;
+}
+
+.artist-panel-body {
+  display: flex;
+  padding: 32px;
+  gap: 40px;
+}
+
+/* Cột trái (Thống kê) */
+.artist-panel-stats {
+  width: 250px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.stat-block h2 {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0;
+  color: #fff;
+}
+
+.stat-block p {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.social-links {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.social-item {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.social-item:hover {
+  text-decoration: underline;
+}
+
+.social-item .icon {
+  font-size: 20px;
+}
+
+/* Cột phải (Tiểu sử + Badge) */
+.artist-panel-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.artist-bio-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bio-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bio-author {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.artist-bio-text {
+  font-size: 16px;
+  color: #fff;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+}
+
+.verified-badge-card,
+.registered-artist-card {
+  background-color: #242424;
+  padding: 24px;
+  border-radius: 8px;
+}
+
+.verified-badge-card .badge-title,
+.registered-artist-card .badge-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.verified-badge-card p,
+.registered-artist-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #b3b3b3;
+  line-height: 1.5;
+}
+
+.about-monthly-listeners {
+  margin: 4px 0 0 0;
+  color: #a7a7a7;
+  font-size: 13px;
+}
+
+/* Nút Show details nhỏ xinh */
+.about-show-more-link {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.about-show-more-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* ── LAYER PHỦ MỜ KHÔNG GIAN (ĐẢM BẢO BAY RA KHỎI SIDEBAR) ── */
+.spotify-dialog-overlay {
+  position: fixed;
+  /* Ép định vị dựa trên toàn bộ khung trình duyệt */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
+  /* Lớp phủ đen tối mờ chuẩn Spotify */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999 !important;
+  /* Cho nổi lên trên cùng, chấp mọi loại layout */
+}
+
+/* ── KHUNG HỘP THOẠI DIALOG CHÍNH ── */
+.spotify-dialog-content {
+  background-color: #121212;
+  width: 90%;
+  max-width: 680px;
+  /* Độ rộng chuẩn đét của hộp thoại Spotify */
+  border-radius: 8px;
+  padding: 32px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Nút Đóng X ở góc phải */
+.dialog-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  color: #a7a7a7;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.dialog-close-btn:hover {
+  color: #fff;
+}
+
+/* ── ẢNH TÁC GIẢ VUÔNG TO CHÍNH GIỮA PHÍA TRÊN ── */
+.dialog-image-wrapper {
+  width: 240px;
+  height: 240px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.dialog-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── BỐ CỤC CHIA 2 CỘT PHẦN THÂN (BÊN TRONG DIALOG) ── */
+.dialog-body-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  /* Cột trái 200px chứa số, cột phải chứa thông tin */
+  gap: 32px;
+  width: 100%;
+  text-align: left;
+}
+
+/* Cột trái: Thống kê số liệu */
+.dialog-stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Vòng tròn xanh Rank thế giới */
+.world-rank-badge {
+  background-color: #0d47a1;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.world-rank-badge .rank-number {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.world-rank-badge .rank-text {
+  font-size: 9px;
+  color: #75a7ff;
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: bold;
+}
+
+.stat-group .stat-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.stat-group .stat-label {
+  font-size: 13px;
+  color: #a7a7a7;
+  margin: 2px 0 0 0;
+}
+
+/* Cột phải: Khối tích xanh xác minh */
+.dialog-info-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-bio-text {
+  color: #b3b3b3;
+  font-size: 15px;
+  margin: 0 0 12px 0;
+}
+
+.posted-by-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.posted-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Khung xám bao bọc thông tin Verified */
+.verified-box {
+  background-color: #1e1e1e;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.verified-header {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.verified-desc {
+  margin: 0;
+  color: #a7a7a7;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Custom lại cái nút chứa icon cuốn sách thu gọn ở đỉnh bên phải */
+.right-close-icon-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #a7a7a7 !important;
+  /* Màu xám nhạt */
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 6px !important;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+/* Hover vào thì icon đổi sang màu trắng và phóng to nhẹ cực chuyên nghiệp */
+.right-close-icon-btn:hover {
+  color: #ffffff !important;
+  background-color: #242424;
+  /* Tạo vòng tròn xám bao quanh icon y chang Spotify gốc */
+  transform: scale(1.05);
+}
+
+.right-close-icon-btn svg {
+  display: block;
+}
+
+/* Container bọc các nút tab (Tất cả, Album) */
+.filter-tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 24px;
+  padding-left: 4px;
+  /* Giúp các nút thẳng hàng với danh sách nhạc phía dưới */
+  position: relative;
+  z-index: 10;
+  /* Đảm bảo nút luôn nổi lên trên lớp nền gradient loang màu */
+}
+
+/* Style cơ bản cho từng nút bấm viên thuốc */
+.filter-tab-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  /* Nền tối mờ nhẹ */
+  color: #ffffff;
+  /* Chữ màu trắng */
+  border: none;
+  padding: 8px 16px;
+  border-radius: 500px;
+  /* Bo tròn hoàn toàn kiểu "viên thuốc" chuẩn Spotify */
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  user-select: none;
+  /* Tránh bị bôi đen chữ khi click nhanh nhiều lần */
+}
+
+/* Hiệu ứng khi di chuột qua nút (Hover) */
+.filter-tab-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  /* Nền sáng lên một chút */
+}
+
+/* Hiệu ứng nhỏ khi nhấn chuột xuống (Active bấm) */
+.filter-tab-btn:active {
+  transform: scale(0.97);
+  /* Thu nhỏ nhẹ tạo cảm giác đàn hồi chân thật */
+}
+
+/* 🟢 TRẠNG THÁI NÚT ĐANG ĐƯỢC CHỌN (Nút nào active thì sáng rực lên) */
+.filter-tab-btn.active {
+  background-color: #ffffff;
+  /* Nền chuyển hẳn sang màu trắng */
+  color: #000000;
+  /* Chữ chuyển sang màu đen để nổi bật */
+}
+
+@keyframes equalizerBar {
+  0% {
+    height: 20%;
+  }
+
+  100% {
+    height: 100%;
+  }
+}
+
+/* Equalizer bars — hiện khi bài đang phát và không hover */
+.equalizer {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  width: 16px;
+}
+
+.equalizer span {
+  display: block;
+  width: 3px;
+  background-color: #1db954;
+  border-radius: 2px;
+  height: 100%;
+  animation: equalizerBar 0.8s ease-in-out infinite alternate;
+}
+
+.equalizer span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.equalizer span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.equalizer span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+

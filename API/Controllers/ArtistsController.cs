@@ -29,5 +29,12 @@ namespace API.Controllers
             if (artist == null) return NotFound("Không tìm thấy nghệ sĩ này");
             return Ok(artist);
         }
+
+        [HttpGet("{id}/songs")]
+        public async Task<IActionResult> GetSongsByArtist(int id, [FromServices] ISongService songService)
+        {
+            var songs = await songService.GetSongsByArtistAsync(id);
+            return Ok(songs);
+        }
     }
 }
