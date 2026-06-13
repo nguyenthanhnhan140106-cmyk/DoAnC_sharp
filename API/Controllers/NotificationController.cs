@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
 using Application.DTOs;
-using Application.Services;
+using MediatR;
+using Application.Features.Notifications.Commands;
+using Application.Features.Notifications.Queries;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using API.Hubs;
@@ -11,12 +13,12 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class NotificationController : ControllerBase
     {
-        private readonly NotificationService _notificationService = null!;
+        private readonly IMediator _mediator;
         private readonly IHubContext<NotificationHub> _hubContext;
 
-        public NotificationController(NotificationService notificationService, IHubContext<NotificationHub> hubContext)
+        public NotificationController(IMediator mediator, IHubContext<NotificationHub> hubContext)
         {
-            _notificationService = notificationService;
+            _mediator = mediator;
             _hubContext = hubContext;
         }
 
@@ -36,7 +38,7 @@ namespace API.Controllers
                 request.SenderId = currentUserId;
             }
 
-            var result = await _notificationService.ShareMediaAsync(request);
+            var result = await _mediator.Send(new ShareMediaCommand(request));
             
             if (result)
             {
@@ -61,7 +63,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
                 return Unauthorized(new { Message = "Vui lòng đăng nhập." });
 
-            var notifications = await _notificationService.GetNotificationsByUserIdAsync(currentUserId);
+            var notifications = await _mediator.Send(new GetMyNotificationsQuery(currentUserId));
             return Ok(notifications);
         }
 
@@ -73,7 +75,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
                 return Unauthorized(new { Message = "Vui lòng đăng nhập." });
 
-            var success = await _notificationService.MarkAsReadAsync(id, currentUserId);
+            var success = await _mediator.Send(new MarkNotificationAsReadCommand(id, currentUserId));
             if (success) return Ok(new { Message = "Đã đánh dấu là đã đọc." });
             
             return BadRequest(new { Message = "Không thể cập nhật thông báo." });
@@ -87,7 +89,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
                 return Unauthorized(new { Message = "Vui lòng đăng nhập." });
 
-            var updatedCount = await _notificationService.MarkAllAsReadAsync(currentUserId);
+            var updatedCount = await _mediator.Send(new MarkAllNotificationsAsReadCommand(currentUserId));
             return Ok(new { Message = $"Đã đánh dấu {updatedCount} thông báo là đã đọc." });
         }
     }

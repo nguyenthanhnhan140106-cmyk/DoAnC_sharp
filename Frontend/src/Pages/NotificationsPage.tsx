@@ -111,11 +111,11 @@ export default function NotificationsPage() {
           ) : (
             <div className="notifications-list" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {notifications.map(notif => {
-                let payload: any = {};
-                try { payload = JSON.parse(notif.payload); } catch {}
+                let payload: Record<string, unknown> = {};
+                try { payload = JSON.parse(notif.payload); } catch { /* ignore error */ }
                 const isSharedSong = notif.type === 'SharedMedia';
-                const songCover = payload.SongCover || payload.songCover;
-                const message = payload.Message || payload.message || 'Có một chia sẻ âm nhạc mới';
+                const songCover = (payload.SongCover || payload.songCover) as string;
+                const message = (payload.Message || payload.message || 'Có một chia sẻ âm nhạc mới') as string;
                 const isLoading = isSharedSong && loadingSongId === (payload.SongId || payload.songId);
 
                 return (

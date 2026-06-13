@@ -78,7 +78,7 @@ const SongCard = ({ song, onHover }: { song: Song; onHover?: (url: string | null
 };
 
 const VideoCard = ({ song, onHover }: { song: Song; onHover?: (url: string | null) => void }) => {
-  const { playSong, currentSong, isPlaying, togglePlay } = useMusic();
+  const { playSong, currentSong, isPlaying } = useMusic();
   const isActive = currentSong?.id === song.id;
 
   const handleForcePlay = (e: React.MouseEvent) => {
@@ -174,13 +174,13 @@ const RecentCard = ({ item, type, onHover }: { item: any; type: "song" | "album"
 export default function MainContent({ songs }: Props) {
   const { currentSong, recentlyPlayed } = useMusic();
   const { isLoggedIn } = useAuth();
-  const songData = currentSong as any;
+  const songData = currentSong as { coverUrl?: string } | null;
   const [activeTab, setActiveTab] = useState<"all" | "album" | "video">(() => {
     return (localStorage.getItem("homeActiveTab") as "all" | "album" | "video") || "all";
   });
   const [hoveredCover, setHoveredCover] = useState<string | null>(null);
   const [albums, setAlbums] = useState<Album[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<{ id: number, name: string, slug: string }[]>([]);
   const navigate = useNavigate();
 
   // 🟢 Slider Logic
@@ -212,7 +212,7 @@ export default function MainContent({ songs }: Props) {
     setCurrentBannerIdx(prev => prev <= 0 ? promoItems.length - 3 : prev - 1);
   };
 
-  const handleBannerClick = (banner: any) => {
+  const handleBannerClick = (banner: { type: string, albumId: number }) => {
     if (banner.type === 'album') {
       navigate(`/album/${banner.albumId}`);
     }
@@ -220,16 +220,16 @@ export default function MainContent({ songs }: Props) {
 
   useEffect(() => {
     albumService.getAllAlbums()
-      .then((list: any) => {
-        if (Array.isArray(list)) setAlbums(list);
+      .then((list: unknown) => {
+        if (Array.isArray(list)) setAlbums(list as Album[]);
       })
-      .catch((err: any) => console.error("❌ Không lấy được Album:", err));
+      .catch((err: unknown) => console.error("❌ Không lấy được Album:", err));
 
     categoryService.getAllCategories()
-      .then((list: any) => {
-        if (Array.isArray(list)) setCategories(list);
+      .then((list: unknown) => {
+        if (Array.isArray(list)) setCategories(list as { id: number, name: string, slug: string }[]);
       })
-      .catch((err: any) => console.error("❌ Không lấy được Category:", err));
+      .catch((err: unknown) => console.error("❌ Không lấy được Category:", err));
   }, []);
 
   useEffect(() => {
@@ -248,6 +248,7 @@ export default function MainContent({ songs }: Props) {
   const shuffleArray = <T,>(array: T[]): T[] => {
     const newArr = [...array];
     for (let i = newArr.length - 1; i > 0; i--) {
+      // eslint-disable-next-line react-hooks/purity
       const j = Math.floor(Math.random() * (i + 1));
       [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
     }

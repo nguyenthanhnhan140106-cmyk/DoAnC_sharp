@@ -1,24 +1,33 @@
-using System;
-using System.Text.Json;
-using System.Threading.Tasks;
+using MediatR;
 using Application.DTOs;
+using Application.Features.Notifications.Commands;
+using Application.Features.Notifications.Queries;
+using Application.Interfaces;
 using Domain.Entities;
-using Application.Interfaces; // 🟢 Chỉ gọi Interface trong cùng tầng Application
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Application.Services
+namespace Application.Features.Notifications.Handlers
 {
-    public class NotificationService
+    public class NotificationHandlers : 
+        IRequestHandler<ShareMediaCommand, bool>,
+        IRequestHandler<MarkNotificationAsReadCommand, bool>,
+        IRequestHandler<MarkAllNotificationsAsReadCommand, int>,
+        IRequestHandler<GetMyNotificationsQuery, IEnumerable<Notification>>
     {
-        // 🟢 Đổi từ class NotificationRepository thành interface INotificationRepository
         private readonly INotificationRepository _notificationRepository;
 
-        public NotificationService(INotificationRepository notificationRepository)
+        public NotificationHandlers(INotificationRepository notificationRepository)
         {
             _notificationRepository = notificationRepository;
         }
 
-        public async Task<bool> ShareMediaAsync(ShareMediaRequest request)
+        public async Task<bool> Handle(ShareMediaCommand requestCmd, CancellationToken cancellationToken)
         {
+            var request = requestCmd.Request;
             var payloadData = new
             {
                 MediaType = request.MediaType,
@@ -69,19 +78,19 @@ namespace Application.Services
             return success;
         }
 
-        public async Task<System.Collections.Generic.IEnumerable<Notification>> GetNotificationsByUserIdAsync(int userId)
+        public async Task<bool> Handle(MarkNotificationAsReadCommand request, CancellationToken cancellationToken)
         {
-            return await _notificationRepository.GetNotificationsByUserIdAsync(userId);
+            return await _notificationRepository.MarkAsReadAsync(request.NotificationId, request.UserId);
         }
 
-        public async Task<bool> MarkAsReadAsync(int notificationId, int userId)
+        public async Task<int> Handle(MarkAllNotificationsAsReadCommand request, CancellationToken cancellationToken)
         {
-            return await _notificationRepository.MarkAsReadAsync(notificationId, userId);
+            return await _notificationRepository.MarkAllAsReadAsync(request.UserId);
         }
 
-        public async Task<int> MarkAllAsReadAsync(int userId)
+        public async Task<IEnumerable<Notification>> Handle(GetMyNotificationsQuery request, CancellationToken cancellationToken)
         {
-            return await _notificationRepository.MarkAllAsReadAsync(userId);
+            return await _notificationRepository.GetNotificationsByUserIdAsync(request.UserId);
         }
     }
 }

@@ -9,48 +9,47 @@ export default function AddToPlaylistModal() {
     isAddToPlaylistModalOpen, 
     closeAddToPlaylistModal, 
     selectedSongForModal,
-    likedSongs,
     toggleLikeSong,
     isSongLiked,
     modalPosition
-  } = useMusic() as any;
+  } = useMusic() as { isAddToPlaylistModalOpen: boolean, closeAddToPlaylistModal: () => void, selectedSongForModal: { id: number }, likedSongs: unknown[], toggleLikeSong: (s: unknown) => void, isSongLiked: (id: number) => boolean, modalPosition?: { x: number, y: number } };
 
-  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<{ id: number, name: string, coverUrl?: string }[]>([]);
   const [songPlaylists, setSongPlaylists] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
+    const fetchPlaylists = async () => {
+      try {
+        if (!user) return;
+        const res = await fetch(`/api/playlists/user/${user.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setPlaylists(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const fetchSongPlaylists = async () => {
+      try {
+        if (!user) return;
+        const res = await fetch(`/api/playlists/user/${user.id}/contains/${selectedSongForModal.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSongPlaylists(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     if (isAddToPlaylistModalOpen && user && selectedSongForModal) {
       fetchPlaylists();
       fetchSongPlaylists();
     }
   }, [isAddToPlaylistModalOpen, user, selectedSongForModal]);
-
-  const fetchPlaylists = async () => {
-    try {
-      if (!user) return;
-      const res = await fetch(`/api/playlists/user/${user.id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setPlaylists(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchSongPlaylists = async () => {
-    try {
-      if (!user) return;
-      const res = await fetch(`/api/playlists/user/${user.id}/contains/${selectedSongForModal.id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setSongPlaylists(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const togglePlaylist = async (playlistId: number) => {
     const isCurrentlyInPlaylist = songPlaylists.includes(playlistId);
@@ -79,7 +78,8 @@ export default function AddToPlaylistModal() {
 
   const getModalStyle = (): React.CSSProperties => {
     if (!modalPosition) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)', position: 'absolute' };
-    let { x, y } = modalPosition;
+    const y = modalPosition.y;
+    let x = modalPosition.x;
     const modalWidth = 350; // Width of modal
     
     // Nếu trượt ra ngoài màn hình bên phải

@@ -2,21 +2,12 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../Contexts/AuthContext';
 import { songService } from '../Services/songService';
 
-export interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  coverUrl?: string;
-  audioUrl?: string;
-  category?: string;
-  lyrics?: string;
-}
-
+import type { Song } from '../types';
 export type RepeatMode = 'none' | 'all' | 'one';
 
 export function useAudioPlayer() {
   const { isLoggedIn, openAuthModal } = useAuth();
-  const historyTimeoutRef = useRef<any>(null);
+  const historyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const [currentSong, setCurrentSong] = useState<Song | null>(() => {
     try {
@@ -67,7 +58,7 @@ export function useAudioPlayer() {
     }
   }, [isLoggedIn]);
 
-  const internalPlay = useCallback((song: Song, index: number) => {
+  const internalPlay = useCallback(function internalPlayFunc(song: Song, index: number) {
     currentIndexRef.current = index;
     const audio = audioRef.current;
 
@@ -123,9 +114,9 @@ export function useAudioPlayer() {
       } else {
         const nextIdx = idx + 1;
         if (nextIdx < q.length) {
-          internalPlay(q[nextIdx], nextIdx);
+          internalPlayFunc(q[nextIdx], nextIdx);
         } else if (repeat === 'all' && q.length > 0) {
-          internalPlay(q[0], 0);
+          internalPlayFunc(q[0], 0);
         } else {
           setIsPlaying(false);
         }

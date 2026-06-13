@@ -11,26 +11,6 @@ export default function TuneBot() {
   // Hook to interact with the TuneBot backend, includes setMessages for resetting chat history
   const { messages, loading, error, send, setMessages } = useTuneBot();
 
-  // Fallback inline style for the floating button (only used if CSS module fails to load)
-  // bottom: 104px = PlayerBar height (~90px) + 14px gap so it never overlaps volume controls
-  const fallbackButtonStyle = {
-    position: "fixed" as const,
-    right: "24px",
-    bottom: "104px",
-    width: "56px",
-    height: "56px",
-    borderRadius: "50%",
-    background: "linear-gradient(135deg, #ff5500, #ff7733)",
-    color: "#fff",
-    border: "none",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 9999,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-    transition: "transform 0.2s ease, box-shadow 0.2s ease",
-  };
 
   // Compute button class name; trim to avoid extra whitespace
   const buttonClass = `${styles?.fab ?? ""} ${isOpen ? styles?.open ?? "" : ""}`.trim();

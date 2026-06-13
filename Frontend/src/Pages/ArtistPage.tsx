@@ -11,17 +11,16 @@ import PlayerBar from '../Components/PlayerBar';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
 import LyricsView from '../Components/LyricsView';
-import ErrorBoundary from '../Components/ErrorBoundary';
-import TuneBot from '../Components/TuneBot/TuneBot';
-import AuthBanner from '../Components/AuthBanner';
+
+import type { Song } from '../types';
 
 export default function ArtistPage() {
   const { id } = useParams<{ id: string }>();
-  const [artist, setArtist] = useState<any>(null);
-  const [songs, setSongs] = useState<any[]>([]);
+  const [artist, setArtist] = useState<{ id: number, name: string, bannerUrl?: string, followers: number } | null>(null);
+  const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
-  const { playSong, setQueue, isLyricsViewOpen } = useMusic() as any;
+  const { playSong, setQueue, isLyricsViewOpen } = useMusic();
   const { isLoggedIn, user, openAuthModal } = useAuth();
   
   // Trạng thái thu gọn Sidebar
@@ -73,12 +72,12 @@ export default function ArtistPage() {
       if (isFollowing) {
         await API.delete(`/follow/${id}`);
         setIsFollowing(false);
-        setArtist((prev: any) => ({ ...prev, followers: Math.max(0, prev.followers - 1) }));
+        setArtist(prev => prev ? ({ ...prev, followers: Math.max(0, prev.followers - 1) }) : prev);
         window.dispatchEvent(new CustomEvent('SHOW_LIBRARY_TOAST', { detail: { message: 'Removed from your library' } }));
       } else {
         await API.post(`/follow/${id}`);
         setIsFollowing(true);
-        setArtist((prev: any) => ({ ...prev, followers: prev.followers + 1 }));
+        setArtist(prev => prev ? ({ ...prev, followers: prev.followers + 1 }) : prev);
         window.dispatchEvent(new CustomEvent('SHOW_LIBRARY_TOAST', { detail: { message: 'Added to your library' } }));
       }
       window.dispatchEvent(new Event('followUpdated'));

@@ -1,6 +1,8 @@
-using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using Application.Features.Follows.Commands;
+using Application.Features.Follows.Queries;
 using System.Security.Claims;
 
 namespace API.Controllers
@@ -10,11 +12,11 @@ namespace API.Controllers
     [Authorize]
     public class FollowController : ControllerBase
     {
-        private readonly IFollowRepository _followRepo;
+        private readonly IMediator _mediator;
 
-        public FollowController(IFollowRepository followRepo)
+        public FollowController(IMediator mediator)
         {
-            _followRepo = followRepo;
+            _mediator = mediator;
         }
 
         private int GetUserId()
@@ -29,7 +31,7 @@ namespace API.Controllers
         {
             var userId = GetUserId();
             if (userId == 0) return Unauthorized();
-            await _followRepo.FollowAsync(userId, artistId);
+            await _mediator.Send(new FollowArtistCommand(userId, artistId));
             return Ok(new { message = "Added to your library" });
         }
 
@@ -39,7 +41,7 @@ namespace API.Controllers
         {
             var userId = GetUserId();
             if (userId == 0) return Unauthorized();
-            await _followRepo.UnfollowAsync(userId, artistId);
+            await _mediator.Send(new UnfollowArtistCommand(userId, artistId));
             return Ok(new { message = "Removed from your library" });
         }
 
@@ -49,7 +51,7 @@ namespace API.Controllers
         {
             var userId = GetUserId();
             if (userId == 0) return Unauthorized();
-            var isFollowing = await _followRepo.IsFollowingAsync(userId, artistId);
+            var isFollowing = await _mediator.Send(new CheckArtistFollowQuery(userId, artistId));
             return Ok(new { isFollowing });
         }
 
@@ -60,7 +62,7 @@ namespace API.Controllers
             var userId = GetUserId();
             if (userId == 0) return Unauthorized();
 
-            var artists = await _followRepo.GetFollowedArtistsAsync(userId);
+            var artists = await _mediator.Send(new GetFollowingArtistsQuery(userId));
             return Ok(artists);
         }
 
@@ -72,7 +74,7 @@ namespace API.Controllers
             if (userId == 0) return Unauthorized();
             if (userId == targetUserId) return BadRequest("Cannot follow yourself.");
 
-            await _followRepo.FollowUserAsync(userId, targetUserId);
+            await _mediator.Send(new FollowUserCommand(userId, targetUserId));
             return Ok(new { Message = "Followed user successfully" });
         }
 
@@ -83,7 +85,7 @@ namespace API.Controllers
             var userId = GetUserId();
             if (userId == 0) return Unauthorized();
 
-            await _followRepo.UnfollowUserAsync(userId, targetUserId);
+            await _mediator.Send(new UnfollowUserCommand(userId, targetUserId));
             return Ok(new { Message = "Unfollowed user successfully" });
         }
 
@@ -94,7 +96,7 @@ namespace API.Controllers
             var userId = GetUserId();
             if (userId == 0) return Unauthorized();
 
-            var isFollowing = await _followRepo.IsFollowingUserAsync(userId, targetUserId);
+            var isFollowing = await _mediator.Send(new CheckUserFollowQuery(userId, targetUserId));
             return Ok(new { IsFollowing = isFollowing });
         }
 
@@ -105,7 +107,7 @@ namespace API.Controllers
             var userId = GetUserId();
             if (userId == 0) return Unauthorized();
 
-            var users = await _followRepo.GetFollowingUsersAsync(userId);
+            var users = await _mediator.Send(new GetFollowingUsersQuery(userId));
             return Ok(users);
         }
 
@@ -114,7 +116,7 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetUserFollowers(int targetUserId)
         {
-            var users = await _followRepo.GetFollowersAsync(targetUserId);
+            var users = await _mediator.Send(new GetUserFollowersQuery(targetUserId));
             return Ok(users);
         }
 
@@ -123,7 +125,7 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetUserFollowing(int targetUserId)
         {
-            var users = await _followRepo.GetFollowingUsersAsync(targetUserId);
+            var users = await _mediator.Send(new GetFollowingUsersQuery(targetUserId));
             return Ok(users);
         }
 
@@ -132,7 +134,7 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetUserFollowingArtists(int targetUserId)
         {
-            var artists = await _followRepo.GetFollowedArtistsAsync(targetUserId);
+            var artists = await _mediator.Send(new GetFollowingArtistsQuery(targetUserId));
             return Ok(artists);
         }
     }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Application.Interfaces;
+using MediatR;
+using Application.Features.Users.Queries;
 
 namespace API.Controllers
 {
@@ -7,12 +8,11 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IMediator _mediator;
 
-        // Inject IUserService vào để xử lý logic tài khoản hằng ngày
-        public UsersController(IUserService userService)
+        public UsersController(IMediator mediator)
         {
-            _userService = userService;
+            _mediator = mediator;
         }
 
         // API: GET http://localhost:5104/api/Users
@@ -21,9 +21,8 @@ namespace API.Controllers
         {
             try
             {
-                // Giả định trong IUserService của nhóm đã có hàm GetAllUsersAsync
-                var users = await _userService.GetAllUsersAsync();
-                return Ok(users); // Trả về danh sách tài khoản dạng JSON
+                var users = await _mediator.Send(new GetAllUsersQuery());
+                return Ok(users); 
             }
             catch (System.Exception ex)
             {
@@ -37,7 +36,7 @@ namespace API.Controllers
         {
             try
             {
-                var user = await _userService.GetUserByIdAsync(id);
+                var user = await _mediator.Send(new GetProfileQuery(id));
                 if (user == null) return NotFound("User not found.");
                 return Ok(user);
             }

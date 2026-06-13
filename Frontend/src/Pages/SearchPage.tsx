@@ -11,15 +11,7 @@ import { songService } from '../Services/songService';
 import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
 
-interface Song {
-    id: number;
-    title: string;
-    artist: string;
-    coverUrl?: string;
-    audioUrl?: string;
-    category?: string;
-}
-
+import type { Song } from '../types';
 const CATEGORIES = [
     { value: '', label: 'Tất cả' },
     { value: 'vsound', label: 'V-Sound' },
@@ -53,13 +45,14 @@ export default function SearchPage() {
 
     useEffect(() => {
         if (!q) return;
+        // eslint-disable-next-line
         setLoading(true);
         songService.searchSongs(q)
-            .then((list: any) => {
-                let songList: Song[] = Array.isArray(list) ? list : [];
+            .then((list: unknown) => {
+                const songList: Song[] = Array.isArray(list) ? list : [];
                 setResults(songList);
             })
-            .catch((err: any) => console.error("Lỗi search:", err))
+            .catch((err: unknown) => console.error("Lỗi search:", err))
             .finally(() => setLoading(false));
     }, [q]);
 

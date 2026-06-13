@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
-import { useAudioPlayer, type Song, type RepeatMode } from '../hooks/useAudioPlayer';
+import { useAudioPlayer, type RepeatMode } from '../hooks/useAudioPlayer';
+import type { Song } from '../types';
 
 interface MusicContextType {
   currentSong: Song | null;
@@ -51,7 +52,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [selectedSongForModal, setSelectedSongForModal] = useState<Song | null>(null);
   const [toast, setToast] = useState<{ message: string; coverUrl?: string; visible: boolean } | null>(null);
-  const [toastTimeout, setToastTimeout] = useState<any>(null);
+  const [toastTimeout, setToastTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = (message: string, coverUrl?: string) => {
     if (toastTimeout) clearTimeout(toastTimeout);
@@ -137,6 +138,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useMusic = () => {
   const ctx = useContext(MusicContext);
   if (!ctx) throw new Error('useMusic phải dùng trong MusicProvider');

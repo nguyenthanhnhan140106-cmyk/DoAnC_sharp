@@ -13,20 +13,11 @@ import { useMusic } from '../Contexts/MusicContext';
 import { songService } from '../Services/songService';
 import '../Components/Styles/ProfilePage.css';
 import '../Components/Styles/HomePage.css';
-
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  coverUrl?: string;
-  audioUrl?: string;
-  category?: string;
-}
-
+import type { Song, UserProfile } from '../types';
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { isLoggedIn, user } = useAuth() as any;
-  const { playSong, currentSong, isPlaying, setQueue, likedSongs } = useMusic() as any;
+  const { isLoggedIn, user } = useAuth();
+  const { playSong, currentSong, isPlaying, setQueue, likedSongs } = useMusic();
   const [songs, setSongs] = useState<Song[]>([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
@@ -34,9 +25,7 @@ export default function ProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [followingArtists, setFollowingArtists] = useState<{ artistId: number; name: string; coverUrl?: string }[]>([]);
-
-  const [fullProfile, setFullProfile] = useState<any>(null);
-
+  const [fullProfile, setFullProfile] = useState<UserProfile | null>(null);
   const [isFollowModalOpen, setIsFollowModalOpen] = useState(false);
   const [followModalTab, setFollowModalTab] = useState<'followers' | 'following'>('followers');
 
@@ -58,11 +47,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     songService.getAllSongs()
-      .then((list: any) => {
+      .then((list: unknown) => {
         //chỗ này vẫn là random để lấy top nhạc
         if (Array.isArray(list)) setSongs(list.slice(0, 4));
       })
-      .catch((err: any) => console.error('❌ Lỗi:', err));
+      .catch((err: unknown) => console.error('❌ Lỗi:', err));
 
     if (isLoggedIn) {
       API.get('/history/recent', { params: { limit: 50 } })
@@ -76,6 +65,7 @@ export default function ProfilePage() {
       if (user?.id) {
         API.get(`/Users/${user.id}`).then(res => setFullProfile(res.data)).catch(console.error);
       }
+      // eslint-disable-next-line
       fetchFollowing();
     }
 
@@ -151,7 +141,7 @@ export default function ProfilePage() {
                     onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
                     onClick={() => { setFollowModalTab('followers'); setIsFollowModalOpen(true); }}
                   >
-                    {fullProfile?.followersCount || 0} Followers
+                    {fullProfile?.totalFollowers || 0} Followers
                   </span>
                   <span>•</span>
                   <span 
@@ -160,7 +150,7 @@ export default function ProfilePage() {
                     onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
                     onClick={() => { setFollowModalTab('following'); setIsFollowModalOpen(true); }}
                   >
-                    {fullProfile?.followingCount || 0} Following
+                    {fullProfile?.totalFollowing || 0} Following
                   </span>
                 </div>
               </div>

@@ -14,35 +14,17 @@ import ShareModal from '../Components/ShareModal';
 import '../Components/Styles/HomePage.css';
 import '../Components/Styles/PlaylistPage.css';
 
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  coverUrl?: string;
-  audioUrl?: string;
-  videoUrl?: string;
-  artistBanner?: string;
-  artistId?: number;
-}
-
-interface Album {
-  id: number;
-  title: string;
-  coverUrl: string;
-  artistName: string;
-  songs: Song[];
-}
-
+import type { Song, Album, Playlist } from '../types';
 export default function AlbumPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { playSong, currentSong, isPlaying, togglePlay, setQueue, addToQueue, toggleLikeSong, isSongLiked, openAddToPlaylistModal, showToast } = useMusic() as any;
-  const { isLoggedIn, user } = useAuth() as any;
+  const { playSong, currentSong, isPlaying, togglePlay, setQueue, addToQueue, toggleLikeSong, isSongLiked, openAddToPlaylistModal, showToast } = useMusic();
+  const { isLoggedIn, user } = useAuth();
   const [album, setAlbum] = useState<Album | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSongMenu, setActiveSongMenu] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [submenuSearchQuery, setSubmenuSearchQuery] = useState('');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareData, setShareData] = useState<{type: string, id: number, title: string, cover: string} | null>(null);
@@ -232,8 +214,8 @@ export default function AlbumPage() {
   useEffect(() => {
     if (id) {
       albumService.getAlbumById(id)
-        .then((res: any) => setAlbum(res))
-        .catch((err: any) => console.error(err));
+        .then((res: Album) => setAlbum(res))
+        .catch((err: unknown) => console.error(err));
       // Kiểm tra trạng thái đã lưu vào thư viện chưa
       if (isLoggedIn) {
         libraryService.getAlbumStatus(Number(id))
@@ -245,8 +227,8 @@ export default function AlbumPage() {
 
   // Xáo trộn và phát album
   const handleShufflePlay = () => {
-    if (!album || album.songs.length === 0) return;
-    const shuffled = [...album.songs].sort(() => Math.random() - 0.5);
+    if (!album || (album.songs || []).length === 0) return;
+    const shuffled = [...(album.songs || [])].sort(() => Math.random() - 0.5);
     setQueue(shuffled, 0);
     playSong(shuffled[0]);
   };
@@ -284,9 +266,9 @@ export default function AlbumPage() {
 
   // Tải xuống tất cả bài hát
   const handleDownloadAll = async () => {
-    if (!album || album.songs.length === 0) return;
+    if (!album || (album.songs || []).length === 0) return;
     setIsDownloading(true);
-    const songsWithAudio = album.songs.filter(s => s.audioUrl);
+    const songsWithAudio = (album.songs || []).filter(s => s.audioUrl);
     if (songsWithAudio.length === 0) {
       showToast?.('Không có bài hát nào có link nhạc để tải.');
       setIsDownloading(false);
@@ -333,7 +315,7 @@ export default function AlbumPage() {
       togglePlay();
     } else {
       if (album) {
-        setQueue(album.songs, index);
+        setQueue((album.songs || []), index);
       }
       playSong(song);
     }
@@ -377,7 +359,7 @@ export default function AlbumPage() {
                   <div>
                     <p style={{ color: '#b3b3b3', fontSize: 12, margin: '0 0 8px' }}>ALBUM</p>
                     <h1 style={{ margin: '0 0 8px', fontSize: 32, fontWeight: 700 }}>{album.title}</h1>
-                    <p style={{ color: '#b3b3b3', margin: 0 }}>{album.artistName} • {album.songs.length} bài hát</p>
+                    <p style={{ color: '#b3b3b3', margin: 0 }}>{album.artistName} • {(album.songs || []).length} bài hát</p>
                   </div>
                 </div>
 
@@ -387,9 +369,9 @@ export default function AlbumPage() {
                     className="album-play-btn"
                     title="Phát Album"
                     onClick={() => {
-                      if (album.songs.length > 0) {
-                        setQueue(album.songs, 0);
-                        playSong(album.songs[0]);
+                      if ((album.songs || []).length > 0) {
+                        setQueue((album.songs || []), 0);
+                        playSong((album.songs || [])[0]);
                       }
                     }}
                   >
@@ -473,9 +455,9 @@ export default function AlbumPage() {
                         </li>
                         <li
                           onClick={() => {
-                            if (album.songs.length > 0) {
-                              addToQueue(album.songs);
-                              showToast?.(`Đã thêm ${album.songs.length} bài vào hàng chờ`);
+                            if ((album.songs || []).length > 0) {
+                              addToQueue((album.songs || []));
+                              showToast?.(`Đã thêm ${(album.songs || []).length} bài vào hàng chờ`);
                               setIsMenuOpen(false);
                             }
                           }}
@@ -499,7 +481,7 @@ export default function AlbumPage() {
                                   onChange={(e) => setSubmenuSearchQuery(e.target.value)}
                                 />
                               </div>
-                              <div className="submenu-item" onClick={(e) => { e.stopPropagation(); handleCreatePlaylistAndAddSongs(album.songs); }}>
+                              <div className="submenu-item" onClick={(e) => { e.stopPropagation(); handleCreatePlaylistAndAddSongs((album.songs || [])); }}>
                                 <svg viewBox="0 0 16 16"><path d="M14 7v1.5h-4.5V13h-1.5V8.5H3.5V7h4.5V2.5h1.5V7H14z" /></svg>
                                 New playlist
                               </div>
@@ -511,7 +493,7 @@ export default function AlbumPage() {
                                     <div 
                                       key={pl.id} 
                                       className="submenu-item" 
-                                      onClick={(e) => { e.stopPropagation(); handleAddAllSongsToPlaylist(album.songs, pl.id); }}
+                                      onClick={(e) => { e.stopPropagation(); handleAddAllSongsToPlaylist((album.songs || []), pl.id); }}
                                       style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', fontSize: 13 }}
                                     >
                                       <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pl.name}</span>
@@ -552,7 +534,7 @@ export default function AlbumPage() {
                 </div>
 
                 {/* Danh sách bài hát */}
-                {album.songs.map((song, index) => {
+                {(album.songs || []).map((song, index) => {
                   const isActive = currentSong?.id === song.id;
                   const isHovered = hoveredIndex === index;
                   return (

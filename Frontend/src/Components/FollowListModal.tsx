@@ -21,51 +21,51 @@ export default function FollowListModal({ isOpen, onClose, userId, initialTab }:
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        if (initialTab === 'followers') {
+          const res = await API.get(`/follow/user/${userId}/followers`);
+          const formatted = (res.data || []).map((u: { userId: number, username: string, avatarUrl: string }) => ({
+            id: u.userId,
+            name: u.username,
+            avatarUrl: u.avatarUrl,
+            type: 'user' as const
+          }));
+          setDataList(formatted);
+        } else {
+          const [usersRes, artistsRes] = await Promise.all([
+            API.get(`/follow/user/${userId}/following`),
+            API.get(`/follow/user/${userId}/following-artists`)
+          ]);
+          
+          const formattedUsers = (usersRes.data || []).map((u: { userId: number, username: string, avatarUrl: string }) => ({
+            id: u.userId,
+            name: u.username,
+            avatarUrl: u.avatarUrl,
+            type: 'user' as const
+          }));
+          
+          const formattedArtists = (artistsRes.data || []).map((a: { artistId?: number, id?: number, name: string, coverUrl: string }) => ({
+            id: a.artistId || a.id,
+            name: a.name,
+            avatarUrl: a.coverUrl,
+            type: 'artist' as const
+          }));
+          
+          setDataList([...formattedUsers, ...formattedArtists]);
+        }
+      } catch (err) {
+        console.error("Lỗi lấy danh sách follow:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (isOpen) {
       fetchData();
     }
   }, [isOpen, initialTab, userId]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      if (initialTab === 'followers') {
-        const res = await API.get(`/follow/user/${userId}/followers`);
-        const formatted = (res.data || []).map((u: any) => ({
-          id: u.userId,
-          name: u.username,
-          avatarUrl: u.avatarUrl,
-          type: 'user' as const
-        }));
-        setDataList(formatted);
-      } else {
-        const [usersRes, artistsRes] = await Promise.all([
-          API.get(`/follow/user/${userId}/following`),
-          API.get(`/follow/user/${userId}/following-artists`)
-        ]);
-        
-        const formattedUsers = (usersRes.data || []).map((u: any) => ({
-          id: u.userId,
-          name: u.username,
-          avatarUrl: u.avatarUrl,
-          type: 'user' as const
-        }));
-        
-        const formattedArtists = (artistsRes.data || []).map((a: any) => ({
-          id: a.artistId || a.id,
-          name: a.name,
-          avatarUrl: a.coverUrl,
-          type: 'artist' as const
-        }));
-        
-        setDataList([...formattedUsers, ...formattedArtists]);
-      }
-    } catch (err) {
-      console.error("Lỗi lấy danh sách follow:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (!isOpen) return null;
 

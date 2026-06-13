@@ -98,14 +98,30 @@ Luồng hoạt động và giao tiếp giữa các Layer trong hệ thống đư
 
 ---
 
-## 📦 Cài đặt
+## 📦 Cài đặt & Hướng dẫn chạy Local
 Yêu cầu: **Node.js 18+**, **.NET 8 SDK**, **Docker Desktop**, **DBeaver**.
 
-Cài đặt nhanh:
-1. Clone dự án về máy.
-2. Bật Docker Desktop.
-3. Chạy lệnh: `docker compose up --build -d` để khởi động Backend và Database.
-4. Mở thư mục `Frontend`, chạy `npm install` và `npm run dev` để bật web.
+### 1. Chuỗi kết nối Database (Connection String)
+Nếu bạn mở file Solution `.sln` và chạy Backend trực tiếp trên máy (Local) qua Visual Studio/Rider, hãy đảm bảo MySQL đang mở Port `3307` và sử dụng thông số sau (đã có trong `appsettings.json`):
+```text
+Server=localhost;Port=3307;Database=DoAnNhom_Db;User=root;Password=Aa123456;
+```
+*(Lưu ý: Nếu dùng lệnh `docker compose` thì dự án sẽ tự dùng chuỗi kết nối nội bộ `tunevault-db:3306` của Docker, bạn không cần quan tâm)*
+
+### 2. Tài khoản chấm điểm (Seed Accounts)
+Để thuận tiện cho giảng viên chấm bài, hệ thống đã được nạp sẵn (Seed Data) các tài khoản sau trong Database để test tính năng Đăng nhập / Quản lý:
+- **Tài khoản 1:** `testuser` / `test@example.com` — Mật khẩu: `Aa123456`
+- **Tài khoản 2:** `johndoe` / `john@example.com` — Mật khẩu: `Aa123456`
+- **Tài khoản 3:** `janedoe` / `jane@example.com` — Mật khẩu: `Aa123456`
+
+### 3. Các bước khởi chạy dự án nhanh
+1. Clone dự án về máy và mở Terminal ở thư mục gốc.
+2. Bật **Docker Desktop**.
+3. Chạy lệnh: `docker compose up --build -d` để khởi động trọn bộ Backend API (chạy ở cổng `5000`) và Database MySQL (cổng `3307`).
+4. Mở thêm 1 Terminal mới, trỏ vào thư mục `Frontend`, chạy `npm install` và `npm run dev` để bật giao diện web (cổng `5173`).
+5. Để test API tự động bằng **Postman**:
+   - Import file `Swagger_API_Collection.json` (nằm ở thư mục gốc) vào phần mềm Postman.
+   - Do file sử dụng biến môi trường, vui lòng cài đặt biến `baseUrl` thành `http://localhost:5000` trong Postman Environment (hoặc thay trực tiếp chữ `{{baseUrl}}` trong link) trước khi test. Mọi cấu trúc API (Method, Body, Parameters) đã được thiết lập sẵn.
 
 👉 **Vui lòng đọc file `SETUP_GUIDE.md` để xem hướng dẫn cài đặt từng bước và cách xử lý lỗi chi tiết!**
 
@@ -156,10 +172,20 @@ Cài đặt nhanh:
 
 ---
 
-## 📚 Tài liệu tham khảo
-- [Microsoft .NET 8 Docs](https://learn.microsoft.com/en-us/dotnet/)
-- [Dapper ORM Documentation](https://github.com/DapperLib/Dapper)
-- [React & Vite Setup](https://vitejs.dev/guide/)
+## 📚 Tài liệu tham khảo & Trích dẫn Nguồn mở (References)
+Đồ án có tham khảo mã nguồn, tài liệu và sử dụng các thư viện mã nguồn mở sau đây:
+
+[1] **ASP.NET Core:** Nền tảng cốt lõi xây dựng Web API. Available: https://learn.microsoft.com/aspnet/core
+[2] **Entity Framework Core:** Công cụ ORM cơ sở. Available: https://learn.microsoft.com/ef/core
+[3] **Dapper:** Micro-ORM để tối ưu tốc độ truy vấn SQL. Available: https://github.com/DapperLib/Dapper
+[4] **MediatR (Pipeline Pattern):** Quản lý CQRS. Available: https://github.com/jbogard/MediatR
+[5] **FluentValidation:** Thư viện Validate dữ liệu. Available: https://docs.fluentvalidation.net
+[6] **Clean Architecture (Jason Taylor template):** Khuôn mẫu kiến trúc dự án Backend. Available: https://github.com/jasontaylordev/CleanArchitecture
+[7] **SignalR:** Triển khai WebSocket để đẩy thông báo thời gian thực. Available: https://learn.microsoft.com/aspnet/core/signalr
+[8] **Anthropic API (Claude) / Google Gemini API:** Tích hợp tính năng AI Chatbot thông minh. Available: https://docs.anthropic.com/en/api/getting-started
+[9] **React:** Thư viện giao diện Frontend. Available: https://react.dev
+[10] **Vite:** Công cụ Build Tool cực nhanh cho SPA. Available: https://vitejs.dev
+[11] **Rubric B1 ("Clean Architecture & Cấu trúc solution"):** Áp dụng chi tiết các tiêu chí chấm điểm cho mục B1 để xác định 4 project cốt lõi, Dependency Rule, kỹ thuật Dependency Injection (DI) và việc bóc tách triệt để logic nghiệp vụ.
 
 ---
 *Cập nhật lần cuối: Tháng 6, 2026* | *Trạng thái: 🟢 Hoàn thiện đồ án*

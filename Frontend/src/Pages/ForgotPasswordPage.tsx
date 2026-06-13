@@ -22,8 +22,9 @@ export default function ForgotPasswordPage() {
     try {
       await API.post('/auth/forgot-password', { email });
       setStep(2);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Không thể gửi mã OTP, vui lòng kiểm tra lại email.");
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      setError(errorResponse.response?.data?.message || "Không thể gửi mã OTP, vui lòng kiểm tra lại email.");
     } finally {
       setLoading(false);
     }
@@ -45,8 +46,9 @@ export default function ForgotPasswordPage() {
       });
       alert("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
       navigate('/login');
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Mã OTP không đúng hoặc có lỗi xảy ra.");
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      setError(errorResponse.response?.data?.message || "Mã OTP không đúng hoặc có lỗi xảy ra.");
     } finally {
       setLoading(false);
     }

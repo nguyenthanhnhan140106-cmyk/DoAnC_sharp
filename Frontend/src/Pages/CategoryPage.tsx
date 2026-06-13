@@ -12,15 +12,7 @@ import { categoryService } from '../Services/categoryService';
 import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
 
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  coverUrl?: string;
-  audioUrl?: string;
-  category?: string;
-}
-
+import type { Song } from '../types';
 const getCover = (song: Song) =>
   song.coverUrl || `https://loremflickr.com/160/160/music?lock=${song.id}`;
 
@@ -32,7 +24,7 @@ const CategoryPage = () => {
   const { isLoggedIn } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
-  const [categoryInfo, setCategoryInfo] = useState<any>(null);
+  const [categoryInfo, setCategoryInfo] = useState<{ name: string; coverUrl?: string } | null>(null);
 
   useEffect(() => {
     // 1. Lấy thông tin Category
@@ -48,7 +40,7 @@ const CategoryPage = () => {
       : songService.getSongsByCategory(catId);
 
     fetchSongs
-      .then((list: any) => {
+      .then((list: unknown) => {
         if (Array.isArray(list)) {
           setSongs(list);
         }
@@ -57,11 +49,9 @@ const CategoryPage = () => {
   }, [catId]);
 
   let title = "Tất cả bài hát";
-  let coverUrl = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1000&h=400&fit=crop";
 
   if (catId !== 'all' && categoryInfo) {
     title = categoryInfo.name;
-    if (categoryInfo.coverUrl) coverUrl = categoryInfo.coverUrl;
   }
 
   const handleForcePlay = (e: React.MouseEvent, song: Song) => {

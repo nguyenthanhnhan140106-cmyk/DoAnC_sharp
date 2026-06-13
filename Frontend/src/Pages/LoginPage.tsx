@@ -8,12 +8,14 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       const response = await API.post('/auth/login', {
         username,
@@ -23,8 +25,16 @@ export default function LoginPage() {
       if (!token) throw new Error("Không nhận được token từ hệ thống.");
       login(token, username);
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.response?.data?.Message || "Đăng nhập thất bại, kiểm tra lại nhé!");
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string, errors?: { error: string }[] } } };
+      if (errorResponse.response?.data?.errors && Array.isArray(errorResponse.response.data.errors)) {
+        const errorMsgs = errorResponse.response.data.errors.map(e => e.error).join(" | ");
+        setError(`Lỗi: ${errorMsgs}`);
+      } else {
+        setError(errorResponse.response?.data?.message || 'Tên đăng nhập hoặc mật khẩu không đúng');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,7 +79,9 @@ export default function LoginPage() {
             </a>
           </div>
 
-          <button type="submit" className="auth-submit-btn">Continue</button>
+          <button type="submit" className="auth-submit-btn" disabled={loading}>
+            {loading ? 'Đang đăng nhập...' : 'Continue'}
+          </button>
         </form>
 
         <p className="auth-redirect" style={{ marginTop: '32px' }}>

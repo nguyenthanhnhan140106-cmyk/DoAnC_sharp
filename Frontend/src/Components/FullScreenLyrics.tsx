@@ -7,7 +7,7 @@ interface LyricLine {
 }
 
 interface FullScreenLyricsProps {
-  currentSong: any;         // Bài hát đang phát
+  currentSong: { title: string; artist: string; coverUrl?: string; lyricsUrl?: string; } | null; // Bài hát đang phát
   currentTime: number;      // Thời gian hiện tại từ thẻ <audio>
   isOpen: boolean;          // Trạng thái đóng/mở màn hình lyric
   onClose: () => void;      // Hàm đóng màn hình lyric
@@ -25,34 +25,6 @@ export const FullScreenLyrics: React.FC<FullScreenLyricsProps> = ({
 }) => {
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // 1. Tải và đọc dữ liệu từ file tĩnh .lrc nội bộ (Thư mục public/lyrics/)
-  useEffect(() => {
-    if (currentSong?.lyricsUrl && isOpen) {
-      // Ép gọi về chính port của Frontend nếu đường dẫn bắt đầu bằng '/'
-      let finalUrl = currentSong.lyricsUrl;
-      if (finalUrl.startsWith('/')) {
-        finalUrl = `${window.location.origin}${finalUrl}`;
-      }
-
-      fetch(finalUrl)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Không thể tải file lyric: ${response.statusText}`);
-          }
-          return response.text();
-        })
-        .then(data => {
-          parseLrcText(data);
-        })
-        .catch(error => {
-          console.error("Lỗi khi tải file LRC cục bộ từ hệ thống:", error);
-          setLyrics([]);
-        });
-    } else if (!currentSong?.lyricsUrl) {
-      setLyrics([]);
-    }
-  }, [currentSong, isOpen]);
 
   // 🌟 Hàm chuyển đổi cấu trúc file .lrc nâng cao
   const parseLrcText = (text: string) => {
@@ -86,6 +58,36 @@ export const FullScreenLyrics: React.FC<FullScreenLyricsProps> = ({
     tempLyrics.sort((a, b) => a.time - b.time);
     setLyrics(tempLyrics);
   };
+
+
+  // 1. Tải và đọc dữ liệu từ file tĩnh .lrc nội bộ (Thư mục public/lyrics/)
+  useEffect(() => {
+    if (currentSong?.lyricsUrl && isOpen) {
+      // Ép gọi về chính port của Frontend nếu đường dẫn bắt đầu bằng '/'
+      let finalUrl = currentSong.lyricsUrl;
+      if (finalUrl.startsWith('/')) {
+        finalUrl = `${window.location.origin}${finalUrl}`;
+      }
+
+      fetch(finalUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Không thể tải file lyric: ${response.statusText}`);
+          }
+          return response.text();
+        })
+        .then(data => {
+          parseLrcText(data);
+        })
+        .catch(error => {
+          console.error("Lỗi khi tải file LRC cục bộ từ hệ thống:", error);
+          setLyrics([]);
+        });
+    } else if (!currentSong?.lyricsUrl) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLyrics([]);
+    }
+  }, [currentSong, isOpen]);
 
   // 2. Tìm câu chữ đang hát khớp với thời gian thực tế tốt nhất
   const activeIndex = lyrics.findIndex((line, index) => {

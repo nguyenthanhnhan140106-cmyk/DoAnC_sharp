@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useMusic } from '../Contexts/MusicContext';
-import LyricsView from './LyricsView';
-import type { Song } from '../hooks/useAudioPlayer';
+import type { Song } from '../types';
 import '../Components/Styles/HomePage.css';
 import { useAuth } from '../Contexts/AuthContext';
 import ShareModal from './ShareModal';
@@ -18,7 +17,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const isProfilePage = location.pathname.startsWith('/user/');
 
   // Lấy chính xác các thuộc tính điều khiển từ MusicContext
-  const musicContext = useMusic() as any;
+  const musicContext = useMusic();
   const currentSong = musicContext?.currentSong;
   const isPlaying = musicContext?.isPlaying;
   const togglePlay = musicContext?.togglePlay;
@@ -27,7 +26,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const isQueueViewOpen = musicContext?.isQueueViewOpen || false;
   const toggleQueueView = musicContext?.toggleQueueView;
   const isLyricsViewOpen = musicContext?.isLyricsViewOpen || false;
-  const toggleLyricsView = musicContext?.toggleLyricsView;
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
@@ -36,7 +34,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const [isFollowing, setIsFollowing] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
 
-  const { isLoggedIn, user, openAuthModal } = useAuth() as any;
+  const { isLoggedIn, user, openAuthModal } = useAuth();
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
   // Close more menu when clicking outside
@@ -52,23 +50,21 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     };
   }, []);
 
-  // 🟢 Kiểm tra trạng thái follow khi bài hát thay đổi
-  const checkFollowStatus = useCallback(async () => {
-    if (!isLoggedIn || !currentSong?.artistId) {
-      setIsFollowing(false);
-      return;
-    }
-    try {
-      const res = await API.get(`/follow/check/${currentSong.artistId}`);
-      setIsFollowing(res.data?.isFollowing ?? false);
-    } catch {
-      setIsFollowing(false);
-    }
-  }, [currentSong?.artistId, isLoggedIn]);
-
   useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!isLoggedIn || !currentSong?.artistId) {
+        setIsFollowing(false);
+        return;
+      }
+      try {
+        const res = await API.get(`/follow/check/${currentSong.artistId}`);
+        setIsFollowing(res.data?.isFollowing ?? false);
+      } catch {
+        setIsFollowing(false);
+      }
+    };
     checkFollowStatus();
-  }, [checkFollowStatus]);
+  }, [currentSong?.artistId, isLoggedIn]);
 
   // 🟢 Xử lý Follow/Unfollow
   const handleFollow = async (e: React.MouseEvent) => {
@@ -120,8 +116,8 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
 
 
 
-  const [friends, setFriends] = useState<any[]>([]);
-  const [suggestedUsers, setSuggestedUsers] = useState<any[]>([]);
+  const [friends, setFriends] = useState<{ userId: number, username: string, avatarUrl: string }[]>([]);
+  const [suggestedUsers, setSuggestedUsers] = useState<{ id: number, username: string, avatarUrl: string }[]>([]);
 
   const isFriendActivityViewOpen = musicContext?.isFriendActivityViewOpen || false;
 
@@ -137,7 +133,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
             const allUsers = usersRes.data || [];
             // Lọc bỏ user hiện tại, đảo ngược để lấy người dùng mới nhất, và lấy 5 người đầu tiên
             const suggestions = allUsers
-              .filter((u: any) => u.id !== user.id)
+              .filter((u: { id: number }) => u.id !== user.id)
               .reverse()
               .slice(0, 5);
             setSuggestedUsers(suggestions);
@@ -155,7 +151,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     const handleFollowUpdated = () => fetchFriendsAndSuggestions();
     window.addEventListener('followUpdated', handleFollowUpdated);
     return () => window.removeEventListener('followUpdated', handleFollowUpdated);
-  }, [isLoggedIn]);
+  }, [isLoggedIn, user?.id]);
 
   if (!currentSong || isProfilePage || isFriendActivityViewOpen) {
     return (
@@ -169,7 +165,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
             {isLoggedIn ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {friends.length > 0 ? (
-                  friends.map((f: any) => (
+                  friends.map((f: { userId: number, username: string, avatarUrl: string }) => (
                     <div key={f.userId} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => window.location.href = `/user/${f.userId}`}>
                       <div style={{
                         width: "48px", height: "48px", borderRadius: "50%",
@@ -193,7 +189,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
                   <div>
                     <p style={{ fontSize: '14px', color: '#b3b3b3', margin: '0 0 16px 0' }}>Bạn chưa follow ai. Gợi ý cho bạn:</p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {suggestedUsers.map((su: any) => (
+                      {suggestedUsers.map((su: { id: number, username: string, avatarUrl: string }) => (
                         <div key={`suggest-${su.id}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '4px 0' }} onClick={() => window.location.href = `/user/${su.id}`}>
                           <div style={{
                             width: "40px", height: "40px", borderRadius: "50%",
@@ -224,7 +220,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
               <div style={{ textAlign: 'center', color: '#b3b3b3', marginTop: '20px' }}>
                 <p style={{ fontSize: '14px', margin: '0 0 16px 0' }}>Log in to see what your friends are playing.</p>
                 <button 
-                  onClick={openAuthModal}
+                  onClick={() => openAuthModal()}
                   style={{
                     background: "white", color: "black", border: "none", borderRadius: "32px",
                     padding: "8px 24px", fontSize: "14px", fontWeight: 700, cursor: "pointer"
@@ -249,7 +245,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   }
 
   if (isQueueViewOpen || isLyricsViewOpen) {
-    const currentIndex = queue.findIndex((s: any) => s?.id === currentSong?.id);
+    const currentIndex = queue.findIndex((s: Song) => s?.id === currentSong?.id);
     const nextUpQueue = currentIndex !== -1 ? queue.slice(currentIndex + 1) : queue;
 
     return (
@@ -281,7 +277,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
         <div>
           <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 700, color: '#fff' }}>Next up</h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {nextUpQueue?.map((song: any, idx: number) => {
+            {nextUpQueue?.map((song: Song, idx: number) => {
               if (!song) return null;
               return (
                 <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '4px 0' }} onClick={() => musicContext?.playSong(song)}>
@@ -313,7 +309,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     );
   }
 
-  const songData = currentSong as any;
+  const songData = currentSong;
   const activeCover = songData.coverUrl || `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop`;
   const artistBanner = songData.artistBanner || `https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop`;
 
@@ -542,7 +538,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
           {(() => {
             let nextSong = null;
             if (queue.length > 0 && currentSong) {
-              const currentIndex = queue.findIndex((s: any) => s.id === currentSong.id);
+              const currentIndex = queue.findIndex((s: Song) => s.id === currentSong.id);
               if (currentIndex !== -1 && currentIndex < queue.length - 1) {
                 nextSong = queue[currentIndex + 1];
               }

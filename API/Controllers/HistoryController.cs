@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Application.Interfaces;
+using MediatR;
+using Application.Features.History.Commands;
+using Application.Features.History.Queries;
 
 namespace API.Controllers
 {
@@ -9,11 +11,11 @@ namespace API.Controllers
     [Authorize] // Yêu cầu phải đăng nhập
     public class HistoryController : ControllerBase
     {
-        private readonly IHistoryService _historyService;
+        private readonly IMediator _mediator;
 
-        public HistoryController(IHistoryService historyService)
+        public HistoryController(IMediator mediator)
         {
-            _historyService = historyService;
+            _mediator = mediator;
         }
 
         private int UserId
@@ -33,7 +35,7 @@ namespace API.Controllers
         [HttpPost("played/{songId}")]
         public async Task<IActionResult> AddToHistory(int songId)
         {
-            await _historyService.AddToHistoryAsync(UserId, songId);
+            await _mediator.Send(new AddToHistoryCommand(UserId, songId));
             return Ok(new { message = "Đã thêm vào lịch sử nghe", songId });
         }
 
@@ -41,7 +43,7 @@ namespace API.Controllers
         [HttpGet("recent")]
         public async Task<IActionResult> GetRecent([FromQuery] int limit = 10)
         {
-            var songs = await _historyService.GetRecentAsync(UserId, limit);
+            var songs = await _mediator.Send(new GetRecentHistoryQuery(UserId, limit));
             return Ok(songs);
         }
     }

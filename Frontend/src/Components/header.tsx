@@ -5,15 +5,15 @@ import { songService } from '../Services/songService';
 import { useNotification } from '../Contexts/NotificationContext';
 import { useAuth } from '../Contexts/AuthContext';
 import { useMusic } from '../Contexts/MusicContext';
-import type { Song } from '../hooks/useAudioPlayer';
+import type { Song } from '../types';
 
 export default function Header() {
   const { isLoggedIn, logout } = useAuth();
-  const music = useMusic() as any;
+  const music = useMusic();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
   // Giả sử bạn có các state này cho logic search
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<Song[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const { unreadCount } = useNotification();
 
@@ -37,13 +37,14 @@ export default function Header() {
   // Logic Search (Debounce)
   useEffect(() => {
     if (!query.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions([]);
       return;
     }
     const timer = setTimeout(() => {
       const q = query.trim();
       songService.searchSongs(q)
-        .then((list: any) => {
+        .then((list: unknown) => {
           const filtered: Song[] = Array.isArray(list) ? list.slice(0, 6) : [];
           setSuggestions(filtered);
           setShowDropdown(filtered.length > 0);

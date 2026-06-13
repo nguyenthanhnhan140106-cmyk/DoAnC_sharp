@@ -1,10 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import '../Components/Styles/AuthModal.css';
 
-interface User {
-  id: number;
-  username: string;
-}
+import type { User } from '../types';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -17,7 +14,7 @@ interface AuthContextType {
 }
 
 // Hàm giải mã JWT để lấy payload (id, username...)
-function parseJwt(token: string): any {
+function parseJwt(token: string): Record<string, string | number> | null {
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -40,11 +37,11 @@ function getUserFromToken(token: string | null): User | null {
   const payload = parseJwt(token);
   if (!payload) return null;
   // JWT claims: "id" và ClaimTypes.Name (http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name)
-  const id = payload['id'] ? parseInt(payload['id']) : 0;
-  const username = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] 
+  const id = payload['id'] ? parseInt(String(payload['id'])) : 0;
+  const username = String(payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] 
     || payload['unique_name'] 
     || payload['name'] 
-    || '';
+    || '');
   if (!id) return null;
   return { id, username };
 }
@@ -141,6 +138,7 @@ function AuthModal({ data, onClose }: { data: { title: string, coverUrl: string 
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

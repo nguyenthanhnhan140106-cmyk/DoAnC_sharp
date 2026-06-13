@@ -9,18 +9,19 @@ import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
 import LyricsView from '../Components/LyricsView';
 import FollowListModal from '../Components/FollowListModal';
-import AuthBanner from '../Components/AuthBanner';
+
 import { useMusic } from "../Contexts/MusicContext";
 import "../Components/Styles/HomePage.css";
 import "../Components/Styles/ProfilePage.css";
+import type { UserProfile } from '../types';
 
 export default function UserProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const [profileUser, setProfileUser] = useState<any>(null);
+  const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const { isLoggedIn, user, openAuthModal } = useAuth();
-  const { isLyricsViewOpen } = useMusic() as any;
+  const { isLyricsViewOpen } = useMusic();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
@@ -60,10 +61,12 @@ export default function UserProfilePage() {
       if (isFollowing) {
         await API.delete(`/follow/user/${id}`);
         setIsFollowing(false);
+        setProfileUser(prev => prev ? { ...prev, followersCount: Math.max(0, prev.followersCount - 1) } : prev);
         window.dispatchEvent(new CustomEvent('SHOW_LIBRARY_TOAST', { detail: { message: 'Unfollowed user' } }));
       } else {
         await API.post(`/follow/user/${id}`);
         setIsFollowing(true);
+        setProfileUser(prev => prev ? { ...prev, followersCount: prev.followersCount + 1 } : prev);
         window.dispatchEvent(new CustomEvent('SHOW_LIBRARY_TOAST', { detail: { message: 'Followed user' } }));
       }
       window.dispatchEvent(new Event('followUpdated'));
