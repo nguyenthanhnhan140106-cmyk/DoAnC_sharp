@@ -313,9 +313,10 @@ export default function PlayerBar() {
         <ShareModal 
           isOpen={isShareModalOpen} 
           onClose={() => setIsShareModalOpen(false)} 
-          songId={currentSong.id} 
-          songTitle={currentSong.title} 
-          songCover={currentSong.coverUrl || ''} 
+          mediaType="song"
+          mediaId={currentSong.id} 
+          mediaTitle={currentSong.title} 
+          mediaCover={currentSong.coverUrl || ''} 
         />
       )}
     </footer>

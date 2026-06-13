@@ -69,9 +69,10 @@ namespace Application.Services
             if (playlist == null) return null;
 
             var songs = await conn.QueryAsync<SongDTO>(@"
-                SELECT s.Id, s.Title, s.Artist, s.CoverUrl, s.AudioUrl, s.VideoUrl, s.Category, s.ArtistBanner, s.ArtistId, ps.AddedAt
+                SELECT s.Id, s.Title, s.Artist, s.CoverUrl, s.AudioUrl, s.VideoUrl, s.CategoryId, c.Name as CategoryName, s.ArtistBanner, s.ArtistId, ps.AddedAt
                 FROM songs s
                 JOIN playlist_songs ps ON s.Id = ps.SongId
+                LEFT JOIN categories c ON s.CategoryId = c.Id
                 WHERE ps.PlaylistId = @PlaylistId
                 ORDER BY ps.AddedAt ASC", new { PlaylistId = id });
 

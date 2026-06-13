@@ -77,11 +77,8 @@ export default function Header() {
     if (music && music.isPlaying && music.togglePlay) {
       music.togglePlay();
     }
-    navigate('/');
-    window.dispatchEvent(new CustomEvent('RESET_HOME_TAB'));
-    setTimeout(() => {
-      logout();
-    }, 50);
+    logout();
+    window.location.href = '/';
   };
 
   return (

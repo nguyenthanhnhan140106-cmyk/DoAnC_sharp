@@ -1,22 +1,27 @@
+# .NET
 bin/
 obj/
+.vs/
+*.user
+*.log
+*.swp
 
 # File nhạc & ảnh — giữ local, không push Git
 API/wwwroot/audio/
 API/wwwroot/images/
 
-# .NET
-.vs/
-*.user
-*.log
-
 # Frontend
 Frontend/node_modules/
 Frontend/dist/
+Frontend/dist-ssr/
+Frontend/.env*
+Frontend/npm-debug.log*
+Frontend/yarn-debug.log*
+Frontend/yarn-error.log*
+Frontend/pnpm-debug.log*
+Frontend/lerna-debug.log*
+Frontend/*.local
 
 # OS
 .DS_Store
 Thumbs.db
-
-#Docker
-docker-compose.yml

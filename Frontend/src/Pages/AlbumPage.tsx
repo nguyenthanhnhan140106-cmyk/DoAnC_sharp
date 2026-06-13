@@ -10,6 +10,7 @@ import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
 import { useAuth } from '../Contexts/AuthContext';
 import AuthBanner from '../Components/AuthBanner';
+import ShareModal from '../Components/ShareModal';
 import '../Components/Styles/HomePage.css';
 import '../Components/Styles/PlaylistPage.css';
 
@@ -43,6 +44,8 @@ export default function AlbumPage() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [submenuSearchQuery, setSubmenuSearchQuery] = useState('');
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareData, setShareData] = useState<{type: string, id: number, title: string, cover: string} | null>(null);
   const [isInLibrary, setIsInLibrary] = useState(false);
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -520,7 +523,21 @@ export default function AlbumPage() {
                           </div>
                         </li>
                         <li className="album-dropdown-divider"></li>
-                        <li onClick={() => { alert('Chức năng Share đang được phát triển!'); setIsMenuOpen(false); }}>
+                        <li onClick={(e) => { 
+                          e.stopPropagation(); 
+                          if (!isLoggedIn) {
+                            showToast?.('Vui lòng đăng nhập để chia sẻ!');
+                          } else {
+                            setShareData({
+                              type: 'album',
+                              id: album.id,
+                              title: album.title,
+                              cover: album.coverUrl
+                            });
+                            setIsShareModalOpen(true);
+                          }
+                          setIsMenuOpen(false); 
+                        }}>
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16 }}>
                             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
                             <polyline points="16 6 12 2 8 6"></polyline>
@@ -652,7 +669,21 @@ export default function AlbumPage() {
                                     </div>
                                   </li>
                                   <li className="album-dropdown-divider"></li>
-                                  <li onClick={(e) => { e.stopPropagation(); alert('Chức năng Share đang được phát triển!'); setActiveSongMenu(null); }}>
+                                  <li onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    if (!isLoggedIn) {
+                                      showToast?.('Vui lòng đăng nhập để chia sẻ bài hát!');
+                                    } else {
+                                      setShareData({
+                                        type: 'song',
+                                        id: song.id,
+                                        title: song.title,
+                                        cover: song.coverUrl || ''
+                                      });
+                                      setIsShareModalOpen(true);
+                                    }
+                                    setActiveSongMenu(null); 
+                                  }}>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16 }}>
                                       <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
                                       <polyline points="16 6 12 2 8 6"></polyline>
@@ -676,6 +707,20 @@ export default function AlbumPage() {
       </div>
       {isLoggedIn && <RightSidebar isCollapsed={false} setIsCollapsed={() => { }} />}
       {isLoggedIn ? <PlayerBar /> : <AuthBanner />}
+
+      {shareData && (
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => {
+            setIsShareModalOpen(false);
+            setShareData(null);
+          }}
+          mediaType={shareData.type}
+          mediaId={shareData.id}
+          mediaTitle={shareData.title}
+          mediaCover={shareData.cover}
+        />
+      )}
     </div>
   );
 }

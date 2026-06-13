@@ -9,6 +9,7 @@ import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
 import LyricsView from '../Components/LyricsView';
 import FollowListModal from '../Components/FollowListModal';
+import AuthBanner from '../Components/AuthBanner';
 import { useMusic } from "../Contexts/MusicContext";
 import "../Components/Styles/HomePage.css";
 import "../Components/Styles/ProfilePage.css";
