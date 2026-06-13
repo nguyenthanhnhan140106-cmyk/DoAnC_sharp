@@ -1,65 +1,165 @@
-🎵 TuneVault - Online Music & Management Streaming Platform
+# 🎵 TuneVault - Nền tảng Nghe Nhạc Trực Tuyến
+[![.NET Version](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/)
+[![React Version](https://img.shields.io/badge/React-18-61dafb.svg)](https://reactjs.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
+[![Status](https://img.shields.io/badge/Status-Hoàn%20thiện-success.svg)]()
 
-TuneVault là một ứng dụng web nghe nhạc trực tuyến và hệ thống quản lý thư viện âm thanh cao cấp. Dự án được xây dựng dựa trên sự kết hợp giữa Clean Architecture (.NET 8) ở phía Backend và giao diện React TypeScript (Vite) ở phía Frontend, mang lại trải nghiệm mượt mà, sắc nét như Spotify và SoundCloud.
+## 📋 Mục lục
+- [Giới thiệu](#-giới-thiệu)
+- [Tính năng chính](#-tính-năng-chính)
+- [Công nghệ sử dụng](#-công-nghệ-sử-dụng)
+- [Cấu trúc thư mục](#-cấu-trúc-dự-án)
+- [Kiến trúc & Pipeline](#-kiến-trúc-hệ-thống-clean-architecture)
+- [Cài đặt & Triển khai](#-cài-đặt)
+- [Lộ trình phát triển](#️-lộ-trình-phát-triển)
+- [Đóng góp](#-hướng-dẫn-đóng-góp)
+- [Tài liệu tham khảo](#-tài-liệu-tham-khảo)
 
-📂 Cấu Trúc Hệ Thống (Project Structure)
-Dự án áp dụng mô hình phân tách hoàn toàn (Decoupled Architecture) giúp team Frontend và Backend làm việc độc lập:
+---
 
-DoAnC_sharp/
-├── TuneVault.sln               # File Solution tổng quản lý toàn bộ Backend
-├── Domain/                     # [Tầng Lõi] Chứa các Entity bài hát, người dùng, playlist (C#)
-├── Application/                # [Tầng Nghiệp Vụ] Xử lý logic, Queries/Commands, Interfaces (C#)
-├── Infrastructure/             # [Tầng Hạ Tầng] Cấu hình Entity Framework, kết nối MySQL (C#)
-├── API/                        # [Tầng Giao Tiếp] Các Controller mở cổng Endpoint cung cấp JSON (C#)
-│   └── appsettings.json        # Tệp cấu hình chuỗi kết nối Database
-└── Frontend/                   # [Tầng Giao Diện] Dự án mã nguồn mở React (TypeScript + Vite)
-    ├── src/
-    │   ├── assets/             # Chứa tài nguyên tĩnh (Logo, file search.svg...)
-    │   ├── Components/         # Các linh kiện giao diện (Header, Sidebar, RightSidebar, PlayerBar)
-    │   │   └── Styles/         # File cấu hình CSS giao diện hệ thống (HomePage.css)
-    │   ├── Pages/              # Các trang chính của ứng dụng (HomePage.tsx)
-    │   └── Services/           # Trục kết nối gọi API sang Backend (api.ts)
-    └── package.json            # Quản lý các thư viện Frontend
+## 📝 Giới thiệu
+**TuneVault** là một ứng dụng nghe nhạc trực tuyến (lấy cảm hứng từ Spotify), cung cấp nền tảng phát nhạc mượt mà với giao diện người dùng hiện đại và tối màu (Dark Theme). Dự án được thiết kế chặt chẽ theo mô hình **Clean Architecture**, tối ưu hóa tốc độ truy vấn bằng **Dapper** và hỗ trợ tính năng thông báo theo thời gian thực (Real-time).
 
-📋 Tính Năng Nổi Bật Đang Phát Triển
-Giao diện 3 cột chuẩn Spotify: * Cột trái: Quản lý Thư viện, danh sách Playlist của tôi, bộ lọc nhanh (Playlists, Nghệ sĩ).
+---
 
-Cột giữa: Khu vực hiển thị dòng chảy bài hát, album xu hướng, các card bài hát nẩy mượt mà.
+## 🚀 Tính năng chính
+- **Xác thực an toàn (Auth):** Đăng nhập, Đăng ký bằng JWT Token (Lưu trữ an toàn, phân quyền người dùng).
+- **Phát nhạc đa phương tiện:** Trình phát nhạc chuyên nghiệp (Audio Player) với các tính năng Play, Pause, Next, Prev, Tua nhạc, và Điều chỉnh âm lượng.
+- **Quản lý Thư viện:**
+  - Tạo, sửa, xóa Playlist cá nhân.
+  - Thêm bài hát vào danh sách Yêu thích (Favorites).
+  - Lịch sử nghe nhạc (Recently Played).
+- **Tương tác xã hội:** 
+  - Follow/Unfollow Nghệ sĩ và người dùng khác.
+  - Nhận thông báo Real-time khi nghệ sĩ ra bài mới hoặc có người follow (SignalR).
+- **Giao diện hiện đại:** CSS thuần kết hợp CSS Grid/Flexbox, thiết kế responsive và các hiệu ứng micro-animations mượt mà.
 
-Cột phải: Khối "Đang phát" (Right Sidebar) hiển thị ảnh bìa lớn, thông tin chi tiết và số lượng người nghe của nghệ sĩ theo thời gian thực.
+---
 
-Hệ thống điều khiển nhạc thông minh (PlayerBar): Cung cấp đầy đủ các nút chức năng vật lý: Trộn bài, bài trước, Play/Pause, bài tiếp, lặp lại và thanh điều chỉnh âm lượng chuẩn chỉnh.
+## 🛠️ Công nghệ sử dụng
 
-Tính năng Click Outside: Menu Avatar tự động thu lại thông minh khi người dùng nhấp chuột ra bất kỳ vị trí nào bên ngoài.
+| Lớp/Layer | Công nghệ / Thư viện | Mục đích |
+|-----------|-----------------------|-----------|
+| **Frontend** | React (Vite), TypeScript | Xây dựng giao diện Single Page Application (SPA) |
+| **Backend** | C# .NET 8 Web API | Xử lý logic nghiệp vụ, RESTful API |
+| **Database** | MySQL (Chạy qua Docker) | Lưu trữ dữ liệu quan hệ (Users, Songs, Playlists) |
+| **ORM** | Dapper | Micro-ORM tối ưu hóa tốc độ truy vấn SQL |
+| **Real-time**| SignalR | Đẩy thông báo thời gian thực từ Server xuống Client |
+| **Bảo mật** | JWT, BCrypt.Net | Mã hóa mật khẩu và xác thực người dùng |
 
-Code First Database: Hệ thống tự động quét các thực thể C# để tự sinh bảng và tạo cấu trúc dữ liệu hoàn chỉnh dưới MySQL mà không cần can thiệp thủ công.
+---
 
-🛠️ Công Nghệ Sử Dụng (Tech Stack)
-Thành Phần	                Công Nghệ	
-🌐 Frontend Framework	   React JS (TypeScript)	
-⚡ Frontend Bundler	      Vite	
-🎨 Styling	               CSS Grid & Flexbox, SVG	
-⚙️ Backend Framework	   .NET 8.0 Web API	 
-🏛️ Kiến Trúc Backend	    Clean Architecture	 
-🗄️ Database	            MySQL (XAMPP)	
-🔗 ORM	                   Entity Framework Core (Pomelo)
+## 📁 Cấu trúc dự án
+```text
+C_Sharp/
+├── API/                    # Web API: Controllers, Middleware, SignalR Hubs
+├── Application/            # Logic nghiệp vụ: Services, DTOs, Interfaces
+├── Domain/                 # Core: Entities (User, Song, Playlist)
+├── Infrastructure/         # Kết nối DB: Dapper Repositories
+├── Frontend/               # Mã nguồn giao diện React (src/Components, src/Pages)
+├── init.sql                # Script khởi tạo Database & Seed Data
+├── SETUP_GUIDE.md          # Hướng dẫn cài đặt chi tiết
+├── Git_workFlow.md         # Quy trình làm việc nhóm với Git
+├── docker-compose.yml      # Cấu hình Docker chạy Backend & DB
+└── TuneVault.sln           # File Solution của dự án .NET
+```
 
-🚀 Hướng Dẫn Kích Hoạt Dự Án Cho Thành Viên
-1️⃣ Khởi động Database (MySQL)
-Mở XAMPP Control Panel và nhấn Start dịch vụ Apache và MySQL.
-Đảm bảo chuỗi kết nối trong API/appsettings.json trỏ đúng về localhost của bạn.
+---
 
-2️⃣ Khởi động Động cơ Backend (C#)
-Mở một cửa sổ Terminal trên VS Code và gõ:
-cd API
-dotnet run
-Backend sẽ kích hoạt và lắng nghe các yêu cầu tại cổng cổng mạng mặc định (Ví dụ: http://localhost:5000).
+## 🔧 Kiến trúc hệ thống (Clean Architecture)
 
-3️⃣ Khởi động Mặt tiền Frontend (React)
-Mở một Tab Terminal hoàn toàn mới (không dùng chung với tab Backend) và gõ:
-cd Frontend
-npm run dev
+Luồng hoạt động và giao tiếp giữa các Layer trong hệ thống được quy định nghiêm ngặt để đảm bảo code không bị phụ thuộc chéo (Coupling):
 
-ở frontend nó hiện ra cái bảng để mình lựa chọn chức năng chạy trên web
-h + Enter để hiện ra
-sau đó o + Enter là mở ra cái web ta đang làm
+```text
+    ┌──────────────────────────────────┐
+    │       React SPA (Frontend)       │
+    │  Hiển thị UI & Gọi HTTP Request  │
+    └────────────┬─────────────────────┘
+                 │
+                 ▼
+    ┌──────────────────────────────────┐
+    │       Web API (Controllers)      │
+    │  Xử lý Request, Trả về JSON      │
+    └────────────┬─────────────────────┘
+                 │
+                 ▼
+    ┌──────────────────────────────────┐
+    │      Application (Services)      │
+    │  Logic nghiệp vụ, Mapping DTOs   │
+    └────────────┬─────────────────────┘
+                 │
+          ┌──────┴──────┐
+          ▼             ▼
+    ┌──────────┐  ┌──────────────────┐
+    │  Domain  │  │  Infrastructure  │
+    │ Entities │  │ Dapper / MySQL   │
+    └──────────┘  └──────────────────┘
+```
+
+---
+
+## 📦 Cài đặt
+Yêu cầu: **Node.js 18+**, **.NET 8 SDK**, **Docker Desktop**, **DBeaver**.
+
+Cài đặt nhanh:
+1. Clone dự án về máy.
+2. Bật Docker Desktop.
+3. Chạy lệnh: `docker compose up --build -d` để khởi động Backend và Database.
+4. Mở thư mục `Frontend`, chạy `npm install` và `npm run dev` để bật web.
+
+👉 **Vui lòng đọc file `SETUP_GUIDE.md` để xem hướng dẫn cài đặt từng bước và cách xử lý lỗi chi tiết!**
+
+---
+
+## 🗺️ Lộ trình phát triển
+
+- [x] **Phase 1: Chuẩn bị & Khởi tạo (Tuần 3)**
+  - Cài đặt môi trường phát triển (Node.js, .NET 8, Docker, DBeaver).
+  - Phân công nhiệm vụ nhóm và thống nhất quy trình sử dụng Git.
+  - Tìm hiểu mô hình Clean Architecture & React SPA.
+
+- [x] **Phase 2: Thiết kế Hệ thống & Database (Tuần 4)**
+  - Phân tích yêu cầu, vẽ sơ đồ ERD cho cơ sở dữ liệu.
+  - Viết script khởi tạo dữ liệu `init.sql`.
+  - Khởi tạo khung dự án Backend (.NET) và Frontend (Vite/React).
+  - Cấu hình Docker Compose để chạy MySQL.
+
+- [x] **Phase 3: Cốt lõi Backend & Logic Nghiệp vụ (Tuần 5)**
+  - Cài đặt hệ thống bảo mật Authentication (JWT, BCrypt).
+  - Xây dựng các lớp Dapper Repositories (User, Song, Artist).
+  - Hoàn thiện các API cốt lõi (CRUD) và cấu hình Swagger.
+
+- [x] **Phase 4: Ghép nối Frontend, Trình phát nhạc & Deploy Cloud (Tuần 6-7)**
+  - Dựng Layout giao diện chính bằng CSS Grid/Flexbox.
+  - Xây dựng Trình phát nhạc (Audio Player) kết hợp Context API.
+  - Kết nối Axios gọi API để lấy dữ liệu bài hát và playlist thực tế.
+  - Huấn luyện mô hình AI (Gợi ý bài hát thông minh) và tích hợp vào hệ thống.
+  - Nghiên cứu và triển khai (Deploy) Backend, Frontend, Database lên Cloud để ứng dụng chạy online 24/7 với tên miền public (truy cập được trên cả Mobile và PC).
+
+- [x] **Phase 5: Real-time & Đóng gói dự án (Tuần 8)**
+  - Tích hợp SignalR cho tính năng thông báo theo thời gian thực.
+  - Tối ưu hóa UI/UX, dọn dẹp code rác và sửa các lỗi hiển thị nhỏ.
+  - Hoàn thiện bộ tài liệu (`README.md`, `SETUP_GUIDE.md`) để báo cáo.
+
+---
+
+## 👥 Hướng dẫn đóng góp
+Để đảm bảo code của nhóm luôn sạch sẽ và không bị Conflict, vui lòng tuân thủ quy tắc chia nhánh (Branching). 
+👉 **Mọi chi tiết xin xem file `Git_workFlow.md`.**
+
+---
+
+## 🐛 Xử lý sự cố
+- **Lỗi không kết nối được Database:** Chắc chắn bạn đã tắt XAMPP/WAMP (port 3306) và chạy lệnh Docker Compose.
+- **Lỗi CORS khi gọi API:** Đảm bảo Backend đã chạy và URL Frontend đang là `http://localhost:5173`.
+- Gặp lỗi khác? Hãy xem phần xử lý sự cố trong `SETUP_GUIDE.md`.
+
+---
+
+## 📚 Tài liệu tham khảo
+- [Microsoft .NET 8 Docs](https://learn.microsoft.com/en-us/dotnet/)
+- [Dapper ORM Documentation](https://github.com/DapperLib/Dapper)
+- [React & Vite Setup](https://vitejs.dev/guide/)
+
+---
+*Cập nhật lần cuối: Tháng 6, 2026* | *Trạng thái: 🟢 Hoàn thiện đồ án*
