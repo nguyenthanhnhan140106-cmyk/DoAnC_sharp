@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Infrastructure.Services; // Thêm dòng này để tìm thấy EmailService
 using API.Hubs; // SignalR Hub
+using Application; // BỔ SUNG: Thêm thư viện Application
+using FluentValidation; // BỔ SUNG: Bắt lỗi Validation
 var builder = WebApplication.CreateBuilder(args);
 
 // Lấy connection string
@@ -30,8 +32,6 @@ builder.Services.AddSingleton<Microsoft.AspNetCore.SignalR.IUserIdProvider, Cust
 builder.Services.AddScoped<IOtpRepository>(_ => new OtpRepository(connectionString));
 builder.Services.AddScoped<ISongRepository, SongRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ISongService, SongService>();
-builder.Services.AddScoped<IUserService>(_ => new UserService(connectionString));
 builder.Services.AddScoped<IArtistService>(_ => new ArtistService(connectionString));
 builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connectionString));
 builder.Services.AddScoped<AlbumService>(_ => new AlbumService(connectionString));
@@ -48,19 +48,18 @@ builder.Services.AddScoped<IAuthService>(provider =>
     
     return new AuthService(connectionString, config, otpService, emailService);
 });builder.Services.AddScoped<IHistoryRepository>(_ => new HistoryRepository(connectionString));
-builder.Services.AddScoped<IHistoryService, HistoryService>();
-
 // 🟢 BỔ SUNG: Đăng ký Notification Repository và Service
 builder.Services.AddScoped<Application.Interfaces.INotificationRepository, Infrastructure.Repositories.NotificationRepository>(provider => 
     new Infrastructure.Repositories.NotificationRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
-
-builder.Services.AddScoped<Application.Services.NotificationService>();
 
 // 🟢 BỔ SUNG: Đăng ký Library Repository (lưu album vào thư viện)
 builder.Services.AddScoped<Application.Interfaces.ILibraryRepository>(_ => new Infrastructure.Repositories.LibraryRepository(connectionString));
 
 // 🟢 BỔ SUNG: Đăng ký Follow Repository (theo dõi nghệ sĩ)
 builder.Services.AddScoped<Application.Interfaces.IFollowRepository, Infrastructure.Repositories.FollowRepository>();
+
+// 🟢 BỔ SUNG: Đăng ký MediatR và FluentValidation (CQRS Pipeline)
+builder.Services.AddApplication();
 
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -93,6 +92,43 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
+
+// 🟢 BỔ SUNG: Middleware bắt lỗi Validation (từ MediatR Pipeline) và trả về HTTP 400
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (ValidationException ex)
+    {
+        context.Response.StatusCode = 400;
+        context.Response.ContentType = "application/json";
+        
+        var errors = ex.Errors.Select(e => new { 
+            Field = e.PropertyName, 
+            Error = e.ErrorMessage 
+        });
+        
+        await context.Response.WriteAsJsonAsync(new { 
+            Success = false, 
+            Message = "Dữ liệu không hợp lệ", 
+            Errors = errors 
+        });
+    }
+    catch (Exception ex)
+    {
+        // Ghi log lỗi tại đây nếu có ILogger
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        
+        await context.Response.WriteAsJsonAsync(new { 
+            Success = false, 
+            Message = "Đã xảy ra lỗi hệ thống cục bộ. Vui lòng thử lại sau.", 
+            Detailed = ex.Message // Xóa dòng này ở Production để giấu mã lỗi
+        });
+    }
+});
 
 // --- AUTO SEED DATABASE (Đặt ở đây là chuẩn nhất) ---
 var logger = app.Logger;

@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
 using Application.DTOs;
-using System.Text.Json.Serialization;
+using MediatR;
+using Application.Features.Auth.Commands;
 
 namespace API.Controllers
 {
@@ -9,30 +10,32 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly IMediator _mediator;
+        private readonly IAuthService _authService; // Giữ lại tạm thời cho các API OTP
         private readonly IOtpService _otpService;
         private readonly IEmailService _emailService;
 
-        public AuthController(IAuthService authService, IOtpService otpService, IEmailService emailService)
+        public AuthController(IMediator mediator, IAuthService authService, IOtpService otpService, IEmailService emailService)
         {
+            _mediator = mediator;
             _authService = authService;
             _otpService = otpService;
             _emailService = emailService;
         }
 
-        // --- CÁC API ĐÃ CÓ ---
+        // --- CÁC API ĐÃ CÓ (Refactored to CQRS MediatR) ---
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDTO request)
+        public async Task<IActionResult> Register([FromBody] RegisterCommand request)
         {
-            var result = await _authService.RegisterAsync(request);
+            var result = await _mediator.Send(request);
             if (!result.Success) return BadRequest(new { Message = result.Message }); 
             return Ok(new { Message = result.Message });
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
+        public async Task<IActionResult> Login([FromBody] LoginCommand request)
         {
-            var token = await _authService.LoginAsync(request);
+            var token = await _mediator.Send(request);
             if (token == null) return Unauthorized(new { Message = "Tên đăng nhập hoặc mật khẩu không đúng." });
             return Ok(new { Token = token });
         }

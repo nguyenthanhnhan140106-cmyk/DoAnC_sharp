@@ -12,41 +12,22 @@ import ShareModal from '../Components/ShareModal';
 import '../Components/Styles/HomePage.css';
 import '../Components/Styles/PlaylistPage.css';
 
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  coverUrl?: string;
-  audioUrl?: string;
-  addedAt?: string;
-  videoUrl?: string;
-  artistBanner?: string;
-  artistId?: number;
-}
-
-interface Playlist {
-  id: number;
-  name: string;
-  description?: string;
-  coverUrl?: string;
-  creatorName: string;
-  songs: Song[];
-}
+import type { Song, Playlist } from '../types';
 
 export default function PlaylistPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { playSong, currentSong, isPlaying, togglePlay, setQueue, addToQueue, toggleLikeSong, isSongLiked, likedSongs, openAddToPlaylistModal, showToast } = useMusic() as any;
-  const { isLoggedIn, user } = useAuth() as any;
+  const { playSong, currentSong, isPlaying, togglePlay, setQueue, addToQueue, toggleLikeSong, isSongLiked, likedSongs, openAddToPlaylistModal, showToast } = useMusic();
+  const { isLoggedIn, user } = useAuth();
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [searchResults, setSearchResults] = useState<Song[]>([]);
-  const [searchTimeout, setSearchTimeout] = useState<any>(null);
+  const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSongMenu, setActiveSongMenu] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [submenuSearchQuery, setSubmenuSearchQuery] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -154,85 +135,14 @@ export default function PlaylistPage() {
     }
   };
 
-  const handleAddAllSongsToPlaylist = async (songs: Song[], playlistId: number) => {
-    try {
-      const targetPlaylist = playlists.find(p => p.id === playlistId);
-      const playlistName = targetPlaylist ? targetPlaylist.name : "Playlist";
-      
-      const results = await Promise.all(
-        songs.map(song =>
-          fetch(`/api/playlists/${playlistId}/songs/${song.id}`, { method: 'POST' })
-        )
-      );
-      
-      const successCount = results.filter(res => res.ok).length;
-      if (successCount > 0) {
-        showToast(`Added to ${playlistName}`, songs[0]?.coverUrl);
-        window.dispatchEvent(new Event('playlistUpdated'));
-        setIsMenuOpen(false);
-      } else {
-        showToast("Không thể thêm bài hát vào Playlist (các bài hát có thể đã tồn tại).");
-      }
-    } catch (err) {
-      console.error(err);
-      showToast("Có lỗi xảy ra khi thêm bài hát.");
-    }
-  };
-
-  const handleCreatePlaylistAndAddSongs = async (songs: Song[]) => {
-    if (!user) return;
-    let maxNumber = 0;
-    playlists.forEach(p => {
-      const match = p.name.match(/#(\d+)$/);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        if (num > maxNumber) maxNumber = num;
-      }
-    });
-    const nextNumber = maxNumber + 1;
-    const newName = `Playlist #${nextNumber}`;
-
-    try {
-      const res = await fetch(`/api/playlists/user/${user.id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newName,
-          description: '',
-          coverUrl: ''
-        })
-      });
-
-      if (res.ok) {
-        const newPlaylist = await res.json();
-        const results = await Promise.all(
-          songs.map(song =>
-            fetch(`/api/playlists/${newPlaylist.id}/songs/${song.id}`, { method: 'POST' })
-          )
-        );
-        
-        const successCount = results.filter(r => r.ok).length;
-        if (successCount > 0) {
-          showToast(`Added to ${newPlaylist.name}`, songs[0]?.coverUrl);
-          setPlaylists(prev => [...prev, newPlaylist]);
-          window.dispatchEvent(new Event('playlistUpdated'));
-          setIsMenuOpen(false);
-        } else {
-          showToast("Đã tạo danh sách phát mới nhưng không thể thêm bài hát.");
-        }
-      } else {
-        showToast("Không thể tạo danh sách phát mới.");
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   useEffect(() => {
     if (id === 'liked') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPlaylist({
-        id: 'liked' as any,
+        id: 'liked' as unknown as number,
         name: 'Liked Songs',
+        userId: user?.id || 0,
         coverUrl: 'none',
         creatorName: user?.username || 'Bạn',
         songs: likedSongs || [],
@@ -276,7 +186,7 @@ export default function PlaylistPage() {
   const handleAddSong = async (song: Song) => {
     if (!playlist) return;
 
-    if (playlist.songs.some(s => s.id === song.id)) {
+    if ((playlist.songs || []).some(s => s.id === song.id)) {
       showToast?.("Bài hát này đã có trong danh sách phát.");
       return;
     }
@@ -290,7 +200,7 @@ export default function PlaylistPage() {
         setPlaylist({
           ...playlist,
           coverUrl: song.coverUrl, // Cập nhật hình ảnh của Playlist thành hình bài hát vừa thêm
-          songs: [...playlist.songs, song]
+          songs: [...(playlist.songs || []), song]
         });
         window.dispatchEvent(new Event('playlistUpdated'));
       } else {
@@ -307,23 +217,23 @@ export default function PlaylistPage() {
       togglePlay();
     } else {
       if (playlist) {
-        setQueue(playlist.songs, index);
+        setQueue((playlist.songs || []), index);
       }
       playSong(song);
     }
   };
 
   const handlePlayAll = () => {
-    if (playlist && playlist.songs.length > 0) {
-      setQueue(playlist.songs, 0);
-      playSong(playlist.songs[0]);
+    if (playlist && (playlist.songs || []).length > 0) {
+      setQueue((playlist.songs || []), 0);
+      playSong((playlist.songs || [])[0]);
     }
   };
 
   // Xáo trộn và phát playlist
   const handleShufflePlay = () => {
-    if (!playlist || playlist.songs.length === 0) return;
-    const shuffled = [...playlist.songs].sort(() => Math.random() - 0.5);
+    if (!playlist || (playlist.songs || []).length === 0) return;
+    const shuffled = [...(playlist.songs || [])].sort(() => Math.random() - 0.5);
     setQueue(shuffled, 0);
     playSong(shuffled[0]);
   };
@@ -338,9 +248,9 @@ export default function PlaylistPage() {
 
   // Tải xuống tất cả bài hát
   const handleDownloadAll = async () => {
-    if (!playlist || playlist.songs.length === 0) return;
+    if (!playlist || (playlist.songs || []).length === 0) return;
     setIsDownloading(true);
-    const songsWithAudio = playlist.songs.filter(s => s.audioUrl);
+    const songsWithAudio = (playlist.songs || []).filter(s => s.audioUrl);
     if (songsWithAudio.length === 0) {
       showToast?.('Không có bài hát nào có link nhạc để tải.');
       setIsDownloading(false);
@@ -413,7 +323,7 @@ export default function PlaylistPage() {
                     <p className="playlist-meta-info">
                       <a href="/profile" className="playlist-creator-link">
                         {playlist.creatorName}
-                      </a> • {playlist.songs.length} bài hát
+                      </a> • {(playlist.songs || []).length} bài hát
                     </p>
                     {playlist.description && (
                        <p className="playlist-description">{playlist.description}</p>
@@ -427,8 +337,8 @@ export default function PlaylistPage() {
                     onClick={handlePlayAll}
                     className="playlist-play-btn"
                     style={{
-                      opacity: playlist.songs.length > 0 ? 1 : 0.5,
-                      pointerEvents: playlist.songs.length > 0 ? 'auto' : 'none'
+                      opacity: (playlist.songs || []).length > 0 ? 1 : 0.5,
+                      pointerEvents: (playlist.songs || []).length > 0 ? 'auto' : 'none'
                     }}
                   >
                     <svg viewBox="0 0 24 24" width="28" height="28" fill="#000"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z" /></svg>
@@ -476,9 +386,9 @@ export default function PlaylistPage() {
                           <ul className="album-dropdown-menu">
                         <li
                           onClick={() => {
-                            if (playlist.songs.length > 0) {
-                              addToQueue(playlist.songs);
-                              showToast?.(`Đã thêm ${playlist.songs.length} bài vào hàng chờ`);
+                            if ((playlist.songs || []).length > 0) {
+                              addToQueue((playlist.songs || []));
+                              showToast?.(`Đã thêm ${(playlist.songs || []).length} bài vào hàng chờ`);
                               setIsMenuOpen(false);
                             }
                           }}
@@ -519,13 +429,13 @@ export default function PlaylistPage() {
                 <div style={{ padding: '0 32px' }}>
                   {/* Danh sách bài hát */}
                   <div style={{ marginTop: 16 }}>
-                    {playlist.songs.length === 0 && (
+                    {(playlist.songs || []).length === 0 && (
                       <div style={{ textAlign: 'center', padding: '40px 0 20px', color: '#b3b3b3' }}>
                       </div>
                     )}
                     
                     {/* Header Bảng */}
-                    {playlist.songs.length > 0 && (
+                    {(playlist.songs || []).length > 0 && (
                       <div style={{
                         display: 'grid', gridTemplateColumns: '50px 2fr 1.5fr 1fr 100px',
                         padding: '8px 16px', color: '#b3b3b3', fontSize: 14, fontWeight: 500,
@@ -541,7 +451,7 @@ export default function PlaylistPage() {
                       </div>
                     )}
 
-                    {playlist.songs.map((song, idx) => {
+                    {(playlist.songs || []).map((song, idx) => {
                       const isCurrent = currentSong?.id === song.id;
                       
                       // Tính toán khoảng thời gian đã thêm
@@ -753,7 +663,7 @@ export default function PlaylistPage() {
                                   <span style={{ color: '#b3b3b3', fontSize: 14 }}>{song.artist}</span>
                                 </div>
                               </div>
-                              {playlist.songs.some(s => s.id === song.id) ? (
+                              {(playlist.songs || []).some(s => s.id === song.id) ? (
                                 <button
                                   disabled
                                   style={{

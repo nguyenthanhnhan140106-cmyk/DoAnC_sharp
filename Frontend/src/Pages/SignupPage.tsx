@@ -20,8 +20,9 @@ export default function SignupPage() {
       // Gửi email để lấy OTP
       await API.post('/auth/send-otp', { email });
       setStep(2);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Không thể gửi mã OTP, kiểm tra lại email.");
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      setError(errorResponse.response?.data?.message || "Không thể gửi mã OTP, kiểm tra lại email.");
     } finally {
       setLoading(false);
     }
@@ -40,8 +41,15 @@ export default function SignupPage() {
       
       alert("Đăng ký thành công!");
       navigate('/login');
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Mã OTP không đúng hoặc đăng ký thất bại.");
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string, errors?: { error: string }[] } } };
+      if (errorResponse.response?.data?.errors && Array.isArray(errorResponse.response.data.errors)) {
+        // Gộp tất cả các lỗi Validation từ FluentValidation lại
+        const errorMsgs = errorResponse.response.data.errors.map(e => e.error).join(" | ");
+        setError(`Lỗi: ${errorMsgs}`);
+      } else {
+        setError(errorResponse.response?.data?.message || "Mã OTP không đúng hoặc đăng ký thất bại.");
+      }
     } finally {
       setLoading(false);
     }

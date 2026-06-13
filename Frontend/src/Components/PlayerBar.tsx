@@ -16,7 +16,7 @@ export default function PlayerBar() {
     isFriendActivityViewOpen, toggleFriendActivityView,
     isSongLiked, toggleLikeSong,
     openAddToPlaylistModal
-  } = useMusic() as any;
+  } = useMusic();
 
   const formatTime = (s: number) => {
     if (!s || isNaN(s)) return '0:00';

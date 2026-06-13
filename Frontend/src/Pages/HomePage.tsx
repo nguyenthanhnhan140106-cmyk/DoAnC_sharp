@@ -14,15 +14,7 @@ import TuneBot from '../Components/TuneBot/TuneBot';
 import AuthBanner from '../Components/AuthBanner';
 import { useAuth } from '../Contexts/AuthContext';
 
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  coverUrl?: string;
-  audioUrl?: string;
-  category?: string;
-}
-
+import type { Song } from '../types';
 export default function HomePage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const { isLyricsViewOpen } = useMusic();
@@ -36,10 +28,10 @@ export default function HomePage() {
 
   useEffect(() => {
     songService.getAllSongs()
-      .then((list: any) => {
+      .then((list: unknown) => {
         if (Array.isArray(list)) setSongs(list);
       })
-      .catch((err: any) => console.error('❌ Lỗi:', err));
+      .catch((err: unknown) => console.error('❌ Lỗi:', err));
   }, []);
 
   return (

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Contexts/AuthContext";
 import { useMusic } from "../Contexts/MusicContext";
 import API from "../Services/api";
 import { libraryService } from "../Services/libraryService";
 import type { SavedAlbum } from "../Services/libraryService";
+import type { Playlist, FollowedArtist } from "../types";
 import "./Styles/HomePage.css";
 
 interface SidebarProps {
@@ -14,23 +15,21 @@ interface SidebarProps {
 
 export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const { isLoggedIn, user } = useAuth();
-  const { likedSongs, setQueue, playSong } = useMusic() as any;
+  const { likedSongs, setQueue, playSong } = useMusic();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [playlists, setPlaylists] = useState<any[]>(() => {
+  const [playlists, setPlaylists] = useState<Playlist[]>(() => {
     if (user && user.id) {
       const cached = localStorage.getItem(`sidebar_playlists_${user.id}`);
       if (cached) {
         try {
           return JSON.parse(cached);
-        } catch (e) {}
+        } catch { /* ignore error */ }
       }
     }
     return [];
   });
   const [savedAlbums, setSavedAlbums] = useState<SavedAlbum[]>([]);
-  const [followedArtists, setFollowedArtists] = useState<any[]>([]);
-  const [followedUsers, setFollowedUsers] = useState<any[]>([]);
+  const [followedArtists, setFollowedArtists] = useState<FollowedArtist[]>([]);
   const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -39,8 +38,42 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const [libraryToast, setLibraryToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const fetchPlaylists = async () => {
+    try {
+      const res = await API.get(`/playlists/user/${user?.id}`);
+      const data = res.data;
+      setPlaylists(data);
+      localStorage.setItem(`sidebar_playlists_${user?.id}`, JSON.stringify(data));
+    } catch {
+      // ignore
+    } finally {
+      setIsLoadingPlaylists(false);
+    }
+  };
+
+  const fetchSavedAlbums = async () => {
+    try {
+      const albums = await libraryService.getSavedAlbums();
+      setSavedAlbums(albums);
+    } catch (err) {
+      console.error("Lỗi lấy danh sách album đã lưu:", err);
+    }
+  };
+
+  const fetchFollowedArtists = async () => {
+    try {
+      const res = await API.get(`/follow/following?t=${new Date().getTime()}`);
+      if (Array.isArray(res.data)) {
+        setFollowedArtists(res.data);
+      }
+    } catch (err) {
+      console.error("Lỗi lấy danh sách nghệ sĩ follow:", err);
+    }
+  };
+
   useEffect(() => {
     if (isLoggedIn && user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchPlaylists();
       fetchSavedAlbums();
       fetchFollowedArtists();
@@ -81,49 +114,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       window.removeEventListener('followUpdated', handleFollowUpdate);
       window.removeEventListener('SHOW_LIBRARY_TOAST', handleLibraryToast);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, user]);
-
-  const fetchPlaylists = async () => {
-    try {
-      const res = await API.get(`/playlists/user/${user?.id}`);
-      const data = res.data;
-      setPlaylists(data);
-      localStorage.setItem(`sidebar_playlists_${user?.id}`, JSON.stringify(data));
-    } catch (err) {
-      console.error("Lỗi lấy danh sách playlist:", err);
-    } finally {
-      setIsLoadingPlaylists(false);
-    }
-  };
-
-  const fetchSavedAlbums = async () => {
-    try {
-      const albums = await libraryService.getSavedAlbums();
-      setSavedAlbums(albums);
-    } catch (err) {
-      console.error("Lỗi lấy danh sách album đã lưu:", err);
-    }
-  };
-
-  const fetchFollowedArtists = async () => {
-    try {
-      const res = await API.get(`/follow/following?t=${new Date().getTime()}`);
-      if (Array.isArray(res.data)) {
-        setFollowedArtists(res.data);
-      }
-    } catch (err) {
-      console.error("Lỗi lấy danh sách nghệ sĩ follow:", err);
-    }
-  };
-
-  const fetchFollowedUsers = async () => {
-    try {
-      const res = await API.get('/follow/user/following');
-      setFollowedUsers(res.data);
-    } catch (err) {
-      console.error("Lỗi lấy danh sách user đang theo dõi:", err);
-    }
-  };
 
   const handleCreatePlaylist = async () => {
     if (!isLoggedIn || !user) {
@@ -363,14 +355,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           </div>
         ))}
 
-        {/* Section Followed Artists */}
         {isLoggedIn && followedArtists.length > 0 && followedArtists.map((artist) => (
           <div
-            key={`artist-${artist.artistId || artist.id}`}
+            key={`artist-${artist.artistId}`}
             className="playlist-item"
-            title={artist.name}
+            title={artist.artistName}
             onClick={() => {
-              const targetPath = `/artist/${artist.artistId || artist.id}`;
+              const targetPath = `/artist/${artist.artistId}`;
               if (location.pathname === targetPath) {
                 navigate("/");
               } else {
@@ -380,12 +371,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           >
             <div
               className="playlist-cover default-cover"
-              style={artist.coverUrl
-                ? { backgroundImage: `url(${artist.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '50%' }
+              style={artist.imageUrl
+                ? { backgroundImage: `url(${artist.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '50%' }
                 : { background: 'linear-gradient(135deg, #a03850, #f65c8b)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }
               }
             >
-              {!artist.coverUrl && (
+              {!artist.imageUrl && (
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
@@ -393,7 +384,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
             </div>
             {!isCollapsed && (
               <div className="playlist-info">
-                <p className="playlist-title">{artist.name}</p>
+                <p className="playlist-title">{artist.artistName}</p>
                 <p className="playlist-subtitle">Artist</p>
               </div>
             )}

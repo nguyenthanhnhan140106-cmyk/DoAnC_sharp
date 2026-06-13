@@ -25,6 +25,28 @@ interface ListeningHistorySong {
   videoUrl?: string;
 }
 
+interface HistoryItem {
+  id?: number | string;
+  title?: string;
+  name?: string;
+  artist?: string;
+  artistName?: string;
+  albumName?: string;
+  category?: string;
+  album?: string;
+  albumId?: string | number;
+  playlistId?: string | number;
+  playlistName?: string;
+  duration?: number;
+  length?: number;
+  playedAt?: string;
+  playedAtUtc?: string;
+  coverUrl?: string;
+  imageUrl?: string;
+  audioUrl?: string;
+  videoUrl?: string;
+}
+
 type SortField = 'title' | 'playedAt' | 'album';
 type SortDirection = 'asc' | 'desc';
 type TabType = 'Songs' | 'Playlists' | 'Albums' | 'Artists' | 'Videos';
@@ -32,14 +54,14 @@ type TabType = 'Songs' | 'Playlists' | 'Albums' | 'Artists' | 'Videos';
 export default function ListeningHistoryPage() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
-  const musicContext = useMusic() as any;
+  const musicContext = useMusic();
   const { playSong, currentSong, togglePlay, setQueue } = musicContext;
   const [songs, setSongs] = useState<ListeningHistorySong[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterTerm, setFilterTerm] = useState('');
-  const [sortField, setSortField] = useState<SortField>('playedAt');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [filterTerm] = useState('');
+  const [sortField] = useState<SortField>('playedAt');
+  const [sortDirection] = useState<SortDirection>('desc');
   const [activeTab, setActiveTab] = useState<TabType>('Songs');
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -77,7 +99,7 @@ export default function ListeningHistoryPage() {
             ? response.data.songs
             : [];
 
-        const parsed = payload.map((item: any) => ({
+        const parsed = payload.map((item: HistoryItem) => ({
           id: Number(item?.id) || 0,
           title: item?.title ?? item?.name ?? 'Unknown title',
           artist: item?.artist ?? item?.artistName ?? 'Unknown artist',
@@ -93,8 +115,9 @@ export default function ListeningHistoryPage() {
         }));
 
         setSongs(parsed);
-      } catch (err: any) {
-        if (err?.name === 'CanceledError' || err?.name === 'AbortError') {
+      } catch (err: unknown) {
+        const error = err as Error;
+        if (error?.name === 'CanceledError' || error?.name === 'AbortError') {
           return;
         }
 
@@ -176,16 +199,6 @@ export default function ListeningHistoryPage() {
     });
     return Array.from(artistsMap.values());
   }, [songs]);
-
-  const handleSort = (field: SortField) => {
-    if (field === sortField) {
-      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
-      return;
-    }
-    setSortField(field);
-    setSortDirection(field === 'playedAt' ? 'desc' : 'asc');
-  };
-
   const formatPlayedAt = (value?: string) => {
     if (!value) return '--';
     const dateStr = value.endsWith('Z') ? value : value + 'Z';
@@ -200,10 +213,6 @@ export default function ListeningHistoryPage() {
     });
   };
 
-  const getSortLabel = (field: SortField) => {
-    if (sortField !== field) return '';
-    return sortDirection === 'asc' ? '↑' : '↓';
-  };
 
   return (
     <div className={`spotify-layout ${isSidebarCollapsed ? 'sidebar-hidden' : ''} ${isRightCollapsed || !isLoggedIn ? 'right-hidden' : ''}`}>

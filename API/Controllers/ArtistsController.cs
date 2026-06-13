@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
 using Application.DTOs;
+using MediatR;
+using Application.Features.Songs.Queries;
 
 namespace API.Controllers
 {
@@ -31,9 +33,9 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}/songs")]
-        public async Task<IActionResult> GetSongsByArtist(int id, [FromServices] ISongService songService)
+        public async Task<IActionResult> GetSongsByArtist(int id, [FromServices] IMediator mediator)
         {
-            var songs = await songService.GetSongsByArtistAsync(id);
+            var songs = await mediator.Send(new GetSongsByArtistQuery(id));
             return Ok(songs);
         }
     }

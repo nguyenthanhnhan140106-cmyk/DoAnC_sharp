@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useMusic } from '../Contexts/MusicContext';
 import './Styles/LyricsView.css';
 
@@ -13,14 +13,14 @@ export default function LyricsView() {
 
   // Parse lyrics từ JSON string của bài hát hiện tại, hoặc hiển thị dạng text
   const parsedLyrics = useMemo<LyricLine[]>(() => {
-    const rawLyrics = currentSong?.lyrics || (currentSong as any)?.Lyrics;
+    const rawLyrics = currentSong?.lyrics || (currentSong as { Lyrics?: string })?.Lyrics;
     if (!rawLyrics) return [];
     
     try {
       const parsed = JSON.parse(rawLyrics);
       if (Array.isArray(parsed)) return parsed as LyricLine[];
       return [];
-    } catch (e) {
+    } catch {
       // Nếu không phải JSON, tách thành các dòng text bình thường
       console.warn("Lyrics is not JSON, treating as plain text.");
       const lines = rawLyrics.split('\n');

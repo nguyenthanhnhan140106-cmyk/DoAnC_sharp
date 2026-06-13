@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Application.Interfaces;
+using MediatR;
 using Application.DTOs;
+using Application.Features.Playlists.Commands;
+using Application.Features.Playlists.Queries;
 
 namespace API.Controllers
 {
@@ -8,31 +10,31 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class PlaylistsController : ControllerBase
     {
-        private readonly IPlaylistService _playlistService;
+        private readonly IMediator _mediator;
 
-        public PlaylistsController(IPlaylistService playlistService)
+        public PlaylistsController(IMediator mediator)
         {
-            _playlistService = playlistService;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetPlaylists()
         {
-            var playlists = await _playlistService.GetAllPlaylistsAsync();
+            var playlists = await _mediator.Send(new GetAllPlaylistsQuery());
             return Ok(playlists);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPlaylistById(int id)
         {
-            var playlist = await _playlistService.GetPlaylistByIdAsync(id);
+            var playlist = await _mediator.Send(new GetPlaylistByIdQuery(id));
             return playlist == null ? NotFound() : Ok(playlist);
         }
 
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserPlaylists(int userId)
         {
-            var playlists = await _playlistService.GetPlaylistsByUserIdAsync(userId);
+            var playlists = await _mediator.Send(new GetUserPlaylistsQuery(userId));
             return Ok(playlists);
         }
 
@@ -41,7 +43,7 @@ namespace API.Controllers
         {
             try
             {
-                var playlist = await _playlistService.CreatePlaylistAsync(userId, dto);
+                var playlist = await _mediator.Send(new CreatePlaylistCommand(userId, dto));
                 return CreatedAtAction(nameof(GetPlaylistById), new { id = playlist.Id }, playlist);
             }
             catch (Exception ex)
@@ -53,7 +55,7 @@ namespace API.Controllers
         [HttpPost("{id}/songs/{songId}")]
         public async Task<IActionResult> AddSongToPlaylist(int id, int songId)
         {
-            var success = await _playlistService.AddSongToPlaylistAsync(id, songId);
+            var success = await _mediator.Send(new AddSongToPlaylistCommand(id, songId));
             if (!success) return BadRequest("Không thể thêm bài hát vào Playlist (có thể bài hát đã tồn tại hoặc Playlist không đúng)");
             return Ok(new { message = "Thêm bài hát thành công" });
         }
@@ -61,7 +63,7 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePlaylist(int id)
         {
-            var success = await _playlistService.DeletePlaylistAsync(id);
+            var success = await _mediator.Send(new DeletePlaylistCommand(id));
             if (!success) return NotFound("Không tìm thấy Playlist để xóa hoặc có lỗi xảy ra");
             return Ok(new { message = "Xóa Playlist thành công" });
         }
@@ -69,7 +71,7 @@ namespace API.Controllers
         [HttpDelete("{id}/songs/{songId}")]
         public async Task<IActionResult> RemoveSongFromPlaylist(int id, int songId)
         {
-            var success = await _playlistService.RemoveSongFromPlaylistAsync(id, songId);
+            var success = await _mediator.Send(new RemoveSongFromPlaylistCommand(id, songId));
             if (!success) return BadRequest("Không thể xóa bài hát khỏi Playlist");
             return Ok(new { message = "Xóa bài hát thành công" });
         }
@@ -77,7 +79,7 @@ namespace API.Controllers
         [HttpGet("user/{userId}/contains/{songId}")]
         public async Task<IActionResult> GetPlaylistsContainingSong(int userId, int songId)
         {
-            var playlistIds = await _playlistService.GetPlaylistsContainingSongAsync(userId, songId);
+            var playlistIds = await _mediator.Send(new GetPlaylistsContainingSongQuery(userId, songId));
             return Ok(playlistIds);
         }
     }

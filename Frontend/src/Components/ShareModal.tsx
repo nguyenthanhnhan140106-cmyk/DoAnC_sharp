@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import { searchUsers, shareMedia, type UserSearch } from '../Services/notificationService';
 import { useAuth } from '../Contexts/AuthContext';
@@ -63,8 +64,9 @@ export default function ShareModal({ isOpen, onClose, mediaType, mediaId, mediaT
       setTimeout(() => {
         onClose();
       }, 1500);
-    } catch (err: any) {
-      setStatus({ type: 'error', text: err.response?.data?.Message || 'Có lỗi xảy ra.' });
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { Message?: string } } };
+      setStatus({ type: 'error', text: error.response?.data?.Message || 'Có lỗi xảy ra.' });
     } finally {
       setLoading(false);
     }

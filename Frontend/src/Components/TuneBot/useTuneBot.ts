@@ -70,7 +70,7 @@ export default function useTuneBot() {
       const reply = res.data.reply || "Xin lỗi, tôi chưa hiểu câu hỏi.";
       const botMsg: Message = { role: "bot", text: reply, time: now };
       setMessages((prev) => [...prev, botMsg]);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Backend lỗi, chuyển sang fallback:", e);
       // Fallback khi gọi API thất bại
       const mockReply = getClientFallback(text);

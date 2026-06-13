@@ -21,7 +21,7 @@ interface Props {
 }
 
 export default function ChartsSection({ songs }: Props) {
-    const { playSong, currentSong, isPlaying } = useMusic();
+    const { playSong, currentSong } = useMusic();
 
     // Chia songs thành các cột chart
     const charts: ChartColumn[] = [
