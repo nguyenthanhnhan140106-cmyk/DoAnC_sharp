@@ -141,7 +141,7 @@ export default function ProfilePage() {
                     onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
                     onClick={() => { setFollowModalTab('followers'); setIsFollowModalOpen(true); }}
                   >
-                    {fullProfile?.totalFollowers || 0} Followers
+                    {fullProfile?.followersCount || 0} Followers
                   </span>
                   <span>•</span>
                   <span 
@@ -150,7 +150,7 @@ export default function ProfilePage() {
                     onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
                     onClick={() => { setFollowModalTab('following'); setIsFollowModalOpen(true); }}
                   >
-                    {fullProfile?.totalFollowing || 0} Following
+                    {fullProfile?.followingCount || 0} Following
                   </span>
                 </div>
               </div>
