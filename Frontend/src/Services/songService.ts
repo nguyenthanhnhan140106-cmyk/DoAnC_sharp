@@ -6,6 +6,11 @@ export const songService = {
     return response.data;
   },
 
+  getSongsByCategory: async (category: string) => {
+    const response = await API.get(`/songs/category/${category}`);
+    return response.data;
+  },
+
   getSongById: async (id: number) => {
     const response = await API.get(`/songs/${id}`);
     return response.data;

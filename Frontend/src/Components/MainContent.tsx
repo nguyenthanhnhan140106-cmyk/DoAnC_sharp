@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useMusic } from "../Contexts/MusicContext";
 import { useAuth } from "../Contexts/AuthContext";
 import { albumService } from "../Services/albumService";
+import { categoryService } from "../Services/categoryService";
 import ChartsSection from './ChartsSection';
 import "./Styles/HomePage.css";
 
@@ -13,7 +14,8 @@ interface Song {
   coverUrl?: string;
   audioUrl?: string;
   videoUrl?: string;
-  category?: string;
+  categoryId?: number;
+  categoryName?: string;
 }
 
 interface Album {
@@ -178,6 +180,7 @@ export default function MainContent({ songs }: Props) {
   });
   const [hoveredCover, setHoveredCover] = useState<string | null>(null);
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const navigate = useNavigate();
 
   // 🟢 Slider Logic
@@ -221,6 +224,12 @@ export default function MainContent({ songs }: Props) {
         if (Array.isArray(list)) setAlbums(list);
       })
       .catch((err: any) => console.error("❌ Không lấy được Album:", err));
+
+    categoryService.getAllCategories()
+      .then((list: any) => {
+        if (Array.isArray(list)) setCategories(list);
+      })
+      .catch((err: any) => console.error("❌ Không lấy được Category:", err));
   }, []);
 
   useEffect(() => {
@@ -256,10 +265,6 @@ export default function MainContent({ songs }: Props) {
 
   const activeCover = songData?.coverUrl || "";
   const displayCover = hoveredCover || activeCover;
-  const fridaySongs = shuffledSongs.filter((s) => s.category?.toLowerCase() === "friday");
-  const vSoundSongs = shuffledSongs.filter((s) => s.category?.toLowerCase() === "vsound");
-  const rapSongs = shuffledSongs.filter((s) => s.category?.toLowerCase() === "rap");
-  const hasCategory = fridaySongs.length > 0 || vSoundSongs.length > 0 || rapSongs.length > 0;
 
   // 🟢 Đã gọt xuống ĐÚNG 5 NGHỆ SĨ để vừa vặn 1 hàng ngang
   const popularArtists = [
@@ -406,7 +411,7 @@ export default function MainContent({ songs }: Props) {
 
             <ChartsSection songs={songs} />
 
-            {!hasCategory && songs.length > 0 && (
+            {!categories.length && songs.length > 0 && (
               <div className="playlist-section">
                 <div className="section-header">
                   <h2 className="section-title">Đề Xuất Cho Bạn</h2>
@@ -420,47 +425,24 @@ export default function MainContent({ songs }: Props) {
               </div>
             )}
 
-            {fridaySongs.length > 0 && (
-              <div className="playlist-section">
-                <div className="section-header">
-                  <h2 className="section-title">Góc Nhạc Chill</h2>
-                  <button className="show-all-btn" onClick={() => navigate('/category/friday')}>
-                    Show all
-                  </button>
+            {categories.map((cat) => {
+              const catSongs = shuffledSongs.filter(s => s.categoryId === cat.id);
+              if (catSongs.length === 0) return null;
+              
+              return (
+                <div className="playlist-section" key={cat.id}>
+                  <div className="section-header">
+                    <h2 className="section-title">{cat.name}</h2>
+                    <button className="show-all-btn" onClick={() => navigate(`/category/${cat.slug}`)}>
+                      Show all
+                    </button>
+                  </div>
+                  <div className="songs-grid">
+                    {catSongs.slice(0, 20).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
+                  </div>
                 </div>
-                <div className="songs-grid">
-                  {fridaySongs.slice(0, 20).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
-                </div>
-              </div>
-            )}
-
-            {vSoundSongs.length > 0 && (
-              <div className="playlist-section">
-                <div className="section-header">
-                  <h2 className="section-title">Nhạc V-Pop Nổi Bật</h2>
-                  <button className="show-all-btn" onClick={() => navigate('/category/vsound')}>
-                    Show all
-                  </button>
-                </div>
-                <div className="songs-grid">
-                  {vSoundSongs.slice(0, 20).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
-                </div>
-              </div>
-            )}
-
-            {rapSongs.length > 0 && (
-              <div className="playlist-section">
-                <div className="section-header">
-                  <h2 className="section-title">Thế Giới Rap / Hiphop</h2>
-                  <button className="show-all-btn" onClick={() => navigate('/category/rap')}>
-                    Show all
-                  </button>
-                </div>
-                <div className="songs-grid">
-                  {rapSongs.slice(0, 20).map((song) => <SongCard key={song.id} song={song} onHover={setHoveredCover} />)}
-                </div>
-              </div>
-            )}
+              );
+            })}
 
             {/* 🟢 KHỐI NGHỆ SĨ THỊNH HÀNH - ĐÃ XÓA KHỐI SỐ 2 VÀ TĂNG paddingBottom */}
             <div className="playlist-section" style={{ marginTop: "40px", paddingBottom: "60px" }}>

@@ -34,17 +34,19 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
               {/* Protected routes - cần đăng nhập */}
-              <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-              <Route path="/album/:id" element={<ProtectedRoute><AlbumPage /></ProtectedRoute>} />
-              <Route path="/playlist/:id" element={<ProtectedRoute><PlaylistPage /></ProtectedRoute>} />
-              <Route path="/category/:catId" element={<ProtectedRoute><CategoryPage /></ProtectedRoute>} />
-              <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/album/:id" element={<AlbumPage />} />
+              <Route path="/playlist/:id" element={<PlaylistPage />} />
+              <Route path="/category/:catId" element={<CategoryPage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/artist/:id" element={<ArtistPage />} />
+              <Route path="/user/:id" element={<UserProfilePage />} />
+
+              {/* Các trang bắt buộc đăng nhập */}
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="/history" element={<ProtectedRoute><ListeningHistoryPage /></ProtectedRoute>} />
               <Route path="/upload" element={<ProtectedRoute><UploadPage /></ProtectedRoute>} />
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-              <Route path="/artist/:id" element={<ProtectedRoute><ArtistPage /></ProtectedRoute>} />
-              <Route path="/user/:id" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
             </Routes>
             <AddToPlaylistModal />
             <Toast />

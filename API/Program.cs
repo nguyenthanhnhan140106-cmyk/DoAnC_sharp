@@ -29,6 +29,7 @@ builder.Services.AddSingleton<Microsoft.AspNetCore.SignalR.IUserIdProvider, Cust
 // Đăng ký các Service
 builder.Services.AddScoped<IOtpRepository>(_ => new OtpRepository(connectionString));
 builder.Services.AddScoped<ISongRepository, SongRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ISongService, SongService>();
 builder.Services.AddScoped<IUserService>(_ => new UserService(connectionString));
 builder.Services.AddScoped<IArtistService>(_ => new ArtistService(connectionString));

@@ -11,6 +11,9 @@ import PlayerBar from '../Components/PlayerBar';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
 import LyricsView from '../Components/LyricsView';
+import ErrorBoundary from '../Components/ErrorBoundary';
+import TuneBot from '../Components/TuneBot/TuneBot';
+import AuthBanner from '../Components/AuthBanner';
 
 export default function ArtistPage() {
   const { id } = useParams<{ id: string }>();

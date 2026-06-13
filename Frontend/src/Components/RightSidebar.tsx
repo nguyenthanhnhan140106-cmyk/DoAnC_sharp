@@ -303,9 +303,10 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
           <ShareModal 
             isOpen={isShareModalOpen} 
             onClose={() => setIsShareModalOpen(false)} 
-            songId={currentSong.id} 
-            songTitle={currentSong.title} 
-            songCover={currentSong.coverUrl || ''} 
+            mediaType="song"
+            mediaId={currentSong.id} 
+            mediaTitle={currentSong.title} 
+            mediaCover={currentSong.coverUrl || ''} 
           />
         )}
       </aside>

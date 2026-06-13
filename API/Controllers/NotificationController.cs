@@ -20,12 +20,12 @@ namespace API.Controllers
             _hubContext = hubContext;
         }
 
-        // 🟢 Endpoint đón nhận yêu cầu share nhạc: POST /api/notification/share-song
+        // 🟢 Endpoint đón nhận yêu cầu share nhạc/album/playlist: POST /api/notification/share-media
         [Microsoft.AspNetCore.Authorization.Authorize]
-        [HttpPost("share-song")]
-        public async Task<IActionResult> ShareSong([FromBody] ShareSongRequest request)
+        [HttpPost("share-media")]
+        public async Task<IActionResult> ShareMedia([FromBody] ShareMediaRequest request)
         {
-            if (request == null || request.ReceiverId <= 0 || request.SongId <= 0)
+            if (request == null || request.ReceiverId <= 0 || request.MediaId <= 0 || string.IsNullOrEmpty(request.MediaType))
             {
                 return BadRequest(new { Message = "Dữ liệu truyền lên không hợp lệ nhen!" });
             }
@@ -36,7 +36,7 @@ namespace API.Controllers
                 request.SenderId = currentUserId;
             }
 
-            var result = await _notificationService.ShareSongAsync(request);
+            var result = await _notificationService.ShareMediaAsync(request);
             
             if (result)
             {
@@ -47,7 +47,7 @@ namespace API.Controllers
                     await _hubContext.Clients.User(request.SenderId.ToString()).SendAsync("ReceiveNotification");
                 }
 
-                return Ok(new { Message = "Đã chia sẻ bài hát thành công rực rỡ!" });
+                return Ok(new { Message = "Đã chia sẻ thành công rực rỡ!" });
             }
 
             return StatusCode(500, new { Message = "Có lỗi xảy ra khi lưu thông báo vào database." });

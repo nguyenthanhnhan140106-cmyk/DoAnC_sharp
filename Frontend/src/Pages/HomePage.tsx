@@ -11,6 +11,8 @@ import { songService } from '../Services/songService';
 import '../Components/Styles/HomePage.css';
 import ErrorBoundary from '../Components/ErrorBoundary';
 import TuneBot from '../Components/TuneBot/TuneBot';
+import AuthBanner from '../Components/AuthBanner';
+import { useAuth } from '../Contexts/AuthContext';
 
 interface Song {
   id: number;
@@ -24,6 +26,7 @@ interface Song {
 export default function HomePage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const { isLyricsViewOpen } = useMusic();
+  const { isLoggedIn } = useAuth();
 
   // Trạng thái thu gọn Left Sidebar
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -64,7 +67,7 @@ export default function HomePage() {
         <TuneBot />
       </ErrorBoundary>
 
-      <PlayerBar />
+      {isLoggedIn ? <PlayerBar /> : <AuthBanner />}
     </div>
   );
 }

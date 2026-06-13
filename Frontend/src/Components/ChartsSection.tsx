@@ -6,7 +6,8 @@ interface Song {
     artist: string;
     coverUrl?: string;
     audioUrl?: string;
-    category?: string;
+    categoryId?: number;
+    categoryName?: string;
 }
 
 interface ChartColumn {
@@ -27,17 +28,17 @@ export default function ChartsSection({ songs }: Props) {
         {
             title: 'Top 50 Trending',
             color: '#8B1A1A',
-            songs: songs.filter(s => s.category === 'vsound').slice(0, 5),
+            songs: songs.filter(s => s.categoryId === 2 || s.categoryName === 'vsound').slice(0, 5),
         },
         {
             title: 'Top 50 V-Pop',
             color: '#1A4A2E',
-            songs: songs.filter(s => s.category === 'friday').slice(0, 5),
+            songs: songs.filter(s => s.categoryId === 1 || s.categoryName === 'friday').slice(0, 5),
         },
         {
             title: 'Top 50 Rap',
             color: '#2E1A4A',
-            songs: songs.filter(s => s.category === 'rap').slice(0, 5),
+            songs: songs.filter(s => s.categoryId === 3 || s.categoryName === 'rap').slice(0, 5),
         },
         {
             title: 'Top 50 Lofi',

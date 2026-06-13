@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { searchUsers, shareSong, type UserSearch } from '../Services/notificationService';
+import { searchUsers, shareMedia, type UserSearch } from '../Services/notificationService';
 import { useAuth } from '../Contexts/AuthContext';
 import './Styles/ShareModal.css';
 
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
-  songId: number;
-  songTitle: string;
-  songCover: string;
+  mediaType: string;
+  mediaId: number;
+  mediaTitle: string;
+  mediaCover: string;
 }
 
-export default function ShareModal({ isOpen, onClose, songId, songTitle, songCover }: ShareModalProps) {
+export default function ShareModal({ isOpen, onClose, mediaType, mediaId, mediaTitle, mediaCover }: ShareModalProps) {
   const { user } = useAuth();
   const [keyword, setKeyword] = useState('');
   const [users, setUsers] = useState<UserSearch[]>([]);
@@ -57,8 +58,8 @@ export default function ShareModal({ isOpen, onClose, songId, songTitle, songCov
     setStatus(null);
     try {
       const senderName = user?.username || 'Một người bạn';
-      await shareSong(selectedUserId, songId, songTitle, songCover, senderName, selectedUserName, message);
-      setStatus({ type: 'success', text: `Đã chia sẻ '${songTitle}' cho ${selectedUserName}!` });
+      await shareMedia(selectedUserId, mediaType, mediaId, mediaTitle, mediaCover, senderName, selectedUserName, message);
+      setStatus({ type: 'success', text: `Đã chia sẻ '${mediaTitle}' cho ${selectedUserName}!` });
       setTimeout(() => {
         onClose();
       }, 1500);
@@ -73,15 +74,15 @@ export default function ShareModal({ isOpen, onClose, songId, songTitle, songCov
     <div className="share-modal-overlay">
       <div className="share-modal">
         <div className="share-modal-header">
-          <h2>Chia sẻ bài hát</h2>
+          <h2>Chia sẻ {mediaType === 'song' ? 'bài hát' : mediaType === 'album' ? 'album' : 'danh sách phát'}</h2>
           <button className="close-btn" onClick={onClose}>&times;</button>
         </div>
         
         <div className="share-modal-content">
           <div className="song-preview">
-            <img src={songCover} alt={songTitle} />
+            <img src={mediaCover} alt={mediaTitle} />
             <div className="song-preview-info">
-              <span className="song-preview-title">{songTitle}</span>
+              <span className="song-preview-title">{mediaTitle}</span>
             </div>
           </div>
 

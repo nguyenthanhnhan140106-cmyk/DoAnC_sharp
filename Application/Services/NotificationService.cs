@@ -17,16 +17,17 @@ namespace Application.Services
             _notificationRepository = notificationRepository;
         }
 
-        public async Task<bool> ShareSongAsync(ShareSongRequest request)
+        public async Task<bool> ShareMediaAsync(ShareMediaRequest request)
         {
             var payloadData = new
             {
-                SongId = request.SongId,
-                SongTitle = request.SongTitle,
-                SongCover = request.SongCover,
+                MediaType = request.MediaType,
+                MediaId = request.MediaId,
+                MediaTitle = request.MediaTitle,
+                MediaCover = request.MediaCover,
                 SenderName = request.SenderName,
                 Message = string.IsNullOrWhiteSpace(request.Message) 
-                    ? $"{request.SenderName} đã chia sẻ bài hát '{request.SongTitle}' cho bạn." 
+                    ? $"{request.SenderName} đã chia sẻ {(request.MediaType == "song" ? "bài hát" : request.MediaType == "album" ? "album" : "playlist")} '{request.MediaTitle}' cho bạn." 
                     : $"{request.SenderName}: {request.Message}",
                 CreatedAt = DateTime.UtcNow
             };
@@ -47,9 +48,9 @@ namespace Application.Services
             {
                 var senderPayload = new
                 {
-                    Message = $"Bạn đã chia sẻ bài hát '{request.SongTitle}' cho {request.ReceiverName}.",
-                    SongTitle = request.SongTitle,
-                    SongCover = request.SongCover,
+                    Message = $"Bạn đã chia sẻ {(request.MediaType == "song" ? "bài hát" : request.MediaType == "album" ? "album" : "playlist")} '{request.MediaTitle}' cho {request.ReceiverName}.",
+                    MediaTitle = request.MediaTitle,
+                    MediaCover = request.MediaCover,
                     ReceiverName = request.ReceiverName,
                     CreatedAt = DateTime.UtcNow
                 };

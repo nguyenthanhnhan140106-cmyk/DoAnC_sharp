@@ -25,13 +25,15 @@ namespace Infrastructure.Repositories
             // Sử dụng s.* đã tự động bốc được VideoUrl từ database lên Entity
             const string query = @"
                 SELECT s.*, 
+                       c.Name as CategoryName,
                        COALESCE(a.WorldRank, 0) as WorldRank, 
                        COALESCE(a.Followers, 0) as Followers, 
                        COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
                        a.Bio, 
                        COALESCE(a.IsVerified, 1) as IsVerified
                 FROM songs s
-                LEFT JOIN artists a ON s.ArtistId = a.Id";
+                LEFT JOIN artists a ON s.ArtistId = a.Id
+                LEFT JOIN categories c ON s.CategoryId = c.Id";
 
             using var connection = CreateConnection();
             return await connection.QueryAsync<Song>(query);
@@ -41,6 +43,7 @@ namespace Infrastructure.Repositories
         {
             const string query = @"
                 SELECT s.*, 
+                       c.Name as CategoryName,
                        COALESCE(a.WorldRank, 0) as WorldRank, 
                        COALESCE(a.Followers, 0) as Followers, 
                        COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
@@ -48,6 +51,7 @@ namespace Infrastructure.Repositories
                        COALESCE(a.IsVerified, 1) as IsVerified
                 FROM songs s
                 LEFT JOIN artists a ON s.ArtistId = a.Id
+                LEFT JOIN categories c ON s.CategoryId = c.Id
                 WHERE s.Title LIKE CONCAT('%', @Keyword, '%') OR s.Artist LIKE CONCAT('%', @Keyword, '%')";
 
             using var connection = CreateConnection();
@@ -58,6 +62,7 @@ namespace Infrastructure.Repositories
         {
             const string query = @"
                 SELECT s.*, 
+                       c.Name as CategoryName,
                        COALESCE(a.WorldRank, 0) as WorldRank, 
                        COALESCE(a.Followers, 0) as Followers, 
                        COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
@@ -65,7 +70,8 @@ namespace Infrastructure.Repositories
                        COALESCE(a.IsVerified, 1) as IsVerified
                 FROM songs s
                 LEFT JOIN artists a ON s.ArtistId = a.Id
-                WHERE s.Category = @Category";
+                LEFT JOIN categories c ON s.CategoryId = c.Id
+                WHERE c.Slug = @Category OR c.Name = @Category";
 
             using var connection = CreateConnection();
             return await connection.QueryAsync<Song>(query, new { Category = category });
@@ -75,6 +81,7 @@ namespace Infrastructure.Repositories
         {
             const string query = @"
                 SELECT s.*, 
+                       c.Name as CategoryName,
                        COALESCE(a.WorldRank, 0) as WorldRank, 
                        COALESCE(a.Followers, 0) as Followers, 
                        COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
@@ -82,6 +89,7 @@ namespace Infrastructure.Repositories
                        COALESCE(a.IsVerified, 1) as IsVerified
                 FROM songs s
                 LEFT JOIN artists a ON s.ArtistId = a.Id
+                LEFT JOIN categories c ON s.CategoryId = c.Id
                 WHERE s.Id = @Id";
 
             using var connection = CreateConnection();
@@ -92,6 +100,7 @@ namespace Infrastructure.Repositories
         {
             const string query = @"
                 SELECT s.*, 
+                       c.Name as CategoryName,
                        COALESCE(a.WorldRank, 0) as WorldRank, 
                        COALESCE(a.Followers, 0) as Followers, 
                        COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
@@ -99,6 +108,7 @@ namespace Infrastructure.Repositories
                        COALESCE(a.IsVerified, 1) as IsVerified
                 FROM songs s
                 LEFT JOIN artists a ON s.ArtistId = a.Id
+                LEFT JOIN categories c ON s.CategoryId = c.Id
                 WHERE s.ArtistId = @ArtistId";
 
             using var connection = CreateConnection();
@@ -108,8 +118,8 @@ namespace Infrastructure.Repositories
         public async Task<int> CreateAsync(Song song)
         {
                         const string query = @"
-                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, VideoUrl, Category, LyricsUrl, ArtistBanner, ArtistId, CreatedAt) 
-                VALUES (@Title, @Artist, @CoverUrl, @AudioUrl, @VideoUrl, @Category, @LyricsUrl, @ArtistBanner, @ArtistId, @CreatedAt);
+                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, VideoUrl, CategoryId, LyricsUrl, ArtistBanner, ArtistId, CreatedAt) 
+                VALUES (@Title, @Artist, @CoverUrl, @AudioUrl, @VideoUrl, @CategoryId, @LyricsUrl, @ArtistBanner, @ArtistId, @CreatedAt);
                 SELECT LAST_INSERT_ID();";
 
 
@@ -127,7 +137,7 @@ namespace Infrastructure.Repositories
                     CoverUrl = @CoverUrl, 
                     AudioUrl = @AudioUrl, 
                     VideoUrl = @VideoUrl,
-                    Category = @Category,
+                    CategoryId = @CategoryId,
                     LyricsUrl = @LyricsUrl,
                     ArtistBanner = @ArtistBanner,
                     ArtistId = @ArtistId

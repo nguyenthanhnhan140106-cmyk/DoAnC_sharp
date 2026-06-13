@@ -8,6 +8,7 @@ import Footer from '../Components/Footer';
 import { useMusic } from '../Contexts/MusicContext';
 import { useAuth } from '../Contexts/AuthContext';
 import { songService } from '../Services/songService';
+import { categoryService } from '../Services/categoryService';
 import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
 
@@ -31,32 +32,37 @@ const CategoryPage = () => {
   const { isLoggedIn } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
+  const [categoryInfo, setCategoryInfo] = useState<any>(null);
 
   useEffect(() => {
-    songService.getAllSongs()
+    // 1. Lấy thông tin Category
+    if (catId && catId !== 'all') {
+      categoryService.getCategoryBySlug(catId).then((data) => {
+        if (data) setCategoryInfo(data);
+      });
+    }
+
+    // 2. Lấy danh sách bài hát
+    const fetchSongs = catId === 'all' || !catId 
+      ? songService.getAllSongs() 
+      : songService.getSongsByCategory(catId);
+
+    fetchSongs
       .then((list: any) => {
-        let songList: Song[] = list || [];
-        if (!Array.isArray(songList)) return;
-
-        // Lọc danh sách theo catId
-        if (catId === 'friday') {
-          songList = songList.filter(s => s.category?.toLowerCase() === 'friday');
-        } else if (catId === 'vsound') {
-          songList = songList.filter(s => s.category?.toLowerCase() === 'vsound');
-        } else if (catId === 'rap') {
-          songList = songList.filter(s => s.category?.toLowerCase() === 'rap');
+        if (Array.isArray(list)) {
+          setSongs(list);
         }
-        // Nếu catId là 'all' thì hiển thị toàn bộ
-
-        setSongs(songList);
       })
       .catch((err) => console.error('❌ Lỗi:', err));
   }, [catId]);
 
   let title = "Tất cả bài hát";
-  if (catId === 'friday') title = "It's New Music Friday!";
-  if (catId === 'vsound') title = "V-Sound";
-  if (catId === 'rap') title = "Thế Giới Rap";
+  let coverUrl = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1000&h=400&fit=crop";
+
+  if (catId !== 'all' && categoryInfo) {
+    title = categoryInfo.name;
+    if (categoryInfo.coverUrl) coverUrl = categoryInfo.coverUrl;
+  }
 
   const handleForcePlay = (e: React.MouseEvent, song: Song) => {
     e.stopPropagation();

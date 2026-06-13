@@ -33,12 +33,13 @@ export const markAllAsRead = async () => {
     await API.put('/notification/read-all');
 };
 
-export const shareSong = async (receiverId: number, songId: number, songTitle: string, songCover: string, senderName: string, receiverName: string, message?: string) => {
-    await API.post('/notification/share-song', {
+export const shareMedia = async (receiverId: number, mediaType: string, mediaId: number, mediaTitle: string, mediaCover: string, senderName: string, receiverName: string, message?: string) => {
+    await API.post('/notification/share-media', {
         receiverId,
-        songId,
-        songTitle,
-        songCover,
+        mediaType,
+        mediaId,
+        mediaTitle,
+        mediaCover,
         senderName,
         receiverName,
         message

@@ -1,0 +1,29 @@
+# .NET
+**/bin/
+**/obj/
+**/*.user
+**/*.log
+**/.vs/
+
+# Frontend
+**/node_modules/
+**/dist/
+**/.env*
+
+# Git & OS
+.git/
+.gitignore
+.DS_Store
+Thumbs.db
+
+# Docker files
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Files local lớn không cần build
+API/wwwroot/audio/
+API/wwwroot/images/
+README.md
+*.pdf
+*.md
