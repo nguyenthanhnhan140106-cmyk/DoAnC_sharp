@@ -13,6 +13,7 @@ export default function PlayerBar() {
     playNext, playPrev,
     isQueueViewOpen, toggleQueueView,
     isLyricsViewOpen, toggleLyricsView, // Biến check trạng thái đóng/mở lời bài hát từ Context
+    isFriendActivityViewOpen, toggleFriendActivityView,
     isSongLiked, toggleLikeSong,
     openAddToPlaylistModal
   } = useMusic() as any;
@@ -252,6 +253,21 @@ export default function PlayerBar() {
             <path d="M15 15H1v-1.5h14V15zm0-4.5H1V9h14v1.5zm-8-6A4.5 4.5 0 0 1 2.5 0v1.5a3 3 0 1 0 0 6V9a4.5 4.5 0 0 1 4.5-4.5z"/>
           </svg>
           {isQueueViewOpen && <div className="active-dot" style={{ position: 'absolute', bottom: '-4px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', backgroundColor: '#1db954', borderRadius: '50%' }}></div>}
+        </button>
+
+        {/* Nút bật/tắt Friend Activity */}
+        <button 
+          className="control-btn" 
+          title="Hoạt động bạn bè" 
+          onClick={() => {
+            if (toggleFriendActivityView) toggleFriendActivityView();
+          }}
+          style={{ position: 'relative', color: isFriendActivityViewOpen ? '#1db954' : 'currentColor' }}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+          {isFriendActivityViewOpen && <div className="active-dot" style={{ position: 'absolute', bottom: '-4px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', backgroundColor: '#1db954', borderRadius: '50%' }}></div>}
         </button>
 
         <button 

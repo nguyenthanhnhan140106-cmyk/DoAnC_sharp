@@ -1,0 +1,165 @@
+/* =========================================================
+   7. CHI TIẾT PLAYER COMPONENTS
+   ========================================================= */
+/* 🟢 SỬA KHỐI LEFT: Thêm position và z-index để đẩy ngược lên trên lớp màu nền */
+.player-left {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  /* 🟢 Gài thêm */
+  z-index: 9999 !important;
+  /* 🟢 Ép nổi hẳn lên trên cùng */
+}
+
+/* 🟢 SỬA KHỐI RIGHT: Thêm định vị tương tự */
+.player-right {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  position: relative;
+  /* 🟢 Gài thêm */
+  z-index: 9999 !important;
+  /* 🟢 Ép nổi hẳn lên trên cùng */
+}
+
+/* 🟢 SỬA KHỐI CENTER: Khối điều khiển chính chứa nút Play/Pause */
+.player-center {
+  flex: 0 1 722px;
+  max-width: 722px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  /* 🟢 Gài thêm */
+  z-index: 9999 !important;
+  /* 🟢 Ép nổi hẳn lên trên cùng */
+}
+
+/* ── MẸO TUYỆT CHIÊU: Tìm bất kỳ thẻ cha nào chứa .player-center và ép nó nổi lên ── */
+*:has(> .player-center) {
+  position: relative !important;
+  z-index: 9995 !important;
+  background-color: #121212;
+  /* Đảm bảo thanh player giữ màu nền đen đặc trưng không bị loang màu chính tràn vào */
+}
+
+/* ── GIỮ NGUYÊN TOÀN BỘ ĐỐNG CSS CÒN LẠI PHÍA DƯỚI CỦA NAM VÌ ĐÃ QUÁ CHUẨN ĐÉT ── */
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.control-btn {
+  background: transparent;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.control-btn:hover {
+  color: #ffffff;
+}
+
+.play-pause-btn {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.play-pause-btn:hover {
+  transform: scale(1.05);
+}
+
+.play-pause-btn:active {
+  transform: scale(0.95);
+}
+
+.player-playback {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
+.time-text {
+  font-size: 11px;
+  min-width: 40px;
+  text-align: center;
+}
+
+.progress-bar-container {
+  flex-grow: 1;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.volume-bar-container {
+  width: 93px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.progress-bg {
+  width: 100%;
+  height: 4px;
+  background-color: #4d4d4d;
+  border-radius: 2px;
+  transition: background-color 0.2s;
+}
+
+.progress-bar-container:hover .progress-bg,
+.volume-bar-container:hover .progress-bg {
+  background-color: #1db954;
+}
+
+.progress-slider,
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.progress-slider::-webkit-slider-thumb,
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.progress-bar-container .progress-bg div,
+.volume-bar-container .progress-bg div {
+  display: block !important;
+  flex: none !important;
+}
+

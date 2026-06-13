@@ -25,6 +25,8 @@ interface MusicContextType {
   toggleQueueView: () => void;
   isLyricsViewOpen: boolean;
   toggleLyricsView: () => void;
+  isFriendActivityViewOpen: boolean;
+  toggleFriendActivityView: () => void;
   recentlyPlayed: Song[];
   likedSongs: Song[];
   toggleLikeSong: (song: Song) => void;
@@ -44,6 +46,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
   const audioState = useAudioPlayer();
   const [isQueueViewOpen, setIsQueueViewOpen] = useState(false);
   const [isLyricsViewOpen, setIsLyricsViewOpen] = useState(false);
+  const [isFriendActivityViewOpen, setIsFriendActivityViewOpen] = useState(false);
   const [likedSongs, setLikedSongs] = useState<Song[]>([]);
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [selectedSongForModal, setSelectedSongForModal] = useState<Song | null>(null);
@@ -89,13 +92,29 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
 
   const toggleQueueView = () => {
     setIsQueueViewOpen(prev => {
-      if (!prev) setIsLyricsViewOpen(false);
+      if (!prev) {
+        setIsLyricsViewOpen(false);
+        setIsFriendActivityViewOpen(false);
+      }
       return !prev;
     });
   };
 
   const toggleLyricsView = () => {
-    setIsLyricsViewOpen(prev => !prev);
+    setIsLyricsViewOpen(prev => {
+      if (!prev) setIsFriendActivityViewOpen(false);
+      return !prev;
+    });
+  };
+
+  const toggleFriendActivityView = () => {
+    setIsFriendActivityViewOpen(prev => {
+      if (!prev) {
+        setIsQueueViewOpen(false);
+        setIsLyricsViewOpen(false);
+      }
+      return !prev;
+    });
   };
 
   return (
@@ -104,6 +123,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
       pauseSong: audioState.pauseSong,
       isQueueViewOpen, toggleQueueView,
       isLyricsViewOpen, toggleLyricsView,
+      isFriendActivityViewOpen, toggleFriendActivityView,
       isAddToPlaylistModalOpen, openAddToPlaylistModal, closeAddToPlaylistModal, selectedSongForModal, modalPosition,
       recentlyPlayed: audioState.recentlyPlayed,
       likedSongs,

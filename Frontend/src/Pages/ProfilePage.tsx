@@ -7,6 +7,7 @@ import PlayerBar from '../Components/PlayerBar';
 import RightSidebar from '../Components/RightSidebar';
 import Footer from '../Components/Footer';
 import AuthBanner from '../Components/AuthBanner';
+import FollowListModal from '../Components/FollowListModal';
 import { useAuth } from '../Contexts/AuthContext';
 import { useMusic } from '../Contexts/MusicContext';
 import { songService } from '../Services/songService';
@@ -28,8 +29,32 @@ export default function ProfilePage() {
   const { playSong, currentSong, isPlaying, setQueue, likedSongs } = useMusic() as any;
   const [songs, setSongs] = useState<Song[]>([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isRightCollapsed, setIsRightCollapsed] = useState(true);
+  const [isRightCollapsed, setIsRightCollapsed] = useState(false);
   const [recentlyPlayedCount, setRecentlyPlayedCount] = useState(0);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [followingArtists, setFollowingArtists] = useState<{ artistId: number; name: string; coverUrl?: string }[]>([]);
+
+  const [fullProfile, setFullProfile] = useState<any>(null);
+
+  const [isFollowModalOpen, setIsFollowModalOpen] = useState(false);
+  const [followModalTab, setFollowModalTab] = useState<'followers' | 'following'>('followers');
+
+  const fetchFollowing = React.useCallback(async () => {
+    if (!isLoggedIn) return;
+    try {
+      const res = await API.get('/follow/following');
+      if (Array.isArray(res.data)) setFollowingArtists(res.data);
+    } catch { /* no-op */ }
+  }, [isLoggedIn]);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setAvatarPreview(url);
+    }
+  };
 
   useEffect(() => {
     songService.getAllSongs()
@@ -47,8 +72,23 @@ export default function ProfilePage() {
           }
         })
         .catch(err => console.error('Lỗi lấy lịch sử:', err));
+
+      if (user?.id) {
+        API.get(`/Users/${user.id}`).then(res => setFullProfile(res.data)).catch(console.error);
+      }
+      fetchFollowing();
     }
-  }, [isLoggedIn]);
+
+    // Refresh danh sách following khi có sự kiện followUpdated
+    const handleFollowUpdate = () => {
+      fetchFollowing();
+      if (user?.id) {
+        API.get(`/Users/${user.id}`).then(res => setFullProfile(res.data)).catch(console.error);
+      }
+    };
+    window.addEventListener('followUpdated', handleFollowUpdate);
+    return () => window.removeEventListener('followUpdated', handleFollowUpdate);
+  }, [isLoggedIn, fetchFollowing, user?.id]);
 
   const handleForcePlay = (e: React.MouseEvent, song: Song, index: number) => {
     e.stopPropagation();
@@ -78,10 +118,14 @@ export default function ProfilePage() {
           <div className="profile-header-container">
             <div className="profile-header-bg"></div>
             <div className="profile-header-content">
-              <div className="profile-avatar">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
+              <div className="profile-avatar" onClick={() => fileInputRef.current?.click()} style={{ cursor: 'pointer' }}>
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt="User Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                  </svg>
+                )}
                 <div className="profile-avatar-overlay">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 48, height: 48, marginBottom: 8 }}>
                     <path d="M12 20h9"></path>
@@ -89,10 +133,36 @@ export default function ProfilePage() {
                   </svg>
                   <span>Choose photo</span>
                 </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  style={{ display: 'none' }} 
+                  accept="image/*" 
+                  onChange={handleAvatarChange} 
+                />
               </div>
               <div className="profile-info">
                 <span className="profile-badge">Profile</span>
                 <h1 className="profile-name">{user?.username || 'User'}</h1>
+                <div style={{ display: 'flex', gap: '8px', color: '#fff', fontSize: '14px', fontWeight: 500, marginTop: '8px' }}>
+                  <span 
+                    style={{ cursor: 'pointer', transition: 'text-decoration 0.2s' }}
+                    onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                    onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                    onClick={() => { setFollowModalTab('followers'); setIsFollowModalOpen(true); }}
+                  >
+                    {fullProfile?.followersCount || 0} Followers
+                  </span>
+                  <span>•</span>
+                  <span 
+                    style={{ cursor: 'pointer', transition: 'text-decoration 0.2s' }}
+                    onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                    onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                    onClick={() => { setFollowModalTab('following'); setIsFollowModalOpen(true); }}
+                  >
+                    {fullProfile?.followingCount || 0} Following
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -197,6 +267,36 @@ export default function ProfilePage() {
               </div>
             </div>
 
+            {/* SECTION FOLLOWING ARTISTS */}
+            {followingArtists.length > 0 && (
+              <div className="profile-section">
+                <div className="profile-section-header">
+                  <h2 className="profile-section-title">Following</h2>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', paddingTop: '8px' }}>
+                  {followingArtists.map((artist) => (
+                    <div key={artist.artistId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', cursor: 'pointer', width: '150px' }}>
+                      <div style={{ width: '150px', height: '150px', borderRadius: '50%', overflow: 'hidden', background: '#282828' }}>
+                        {artist.coverUrl ? (
+                          <img src={artist.coverUrl} alt={artist.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #535353, #282828)' }}>
+                            <svg viewBox="0 0 24 24" width="60" height="60" fill="#b3b3b3">
+                              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{artist.name}</p>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#b3b3b3' }}>Artist</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <Footer />
           </div>
         </div>
@@ -204,6 +304,15 @@ export default function ProfilePage() {
 
       {isLoggedIn && <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />}
       {isLoggedIn ? <PlayerBar /> : <AuthBanner />}
+
+      {user?.id && (
+        <FollowListModal
+          isOpen={isFollowModalOpen}
+          onClose={() => setIsFollowModalOpen(false)}
+          userId={user.id}
+          initialTab={followModalTab}
+        />
+      )}
     </div>
   );
 }

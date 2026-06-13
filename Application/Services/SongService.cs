@@ -43,6 +43,12 @@ namespace Application.Services
             return ToDTO(song);
         }
 
+        public async Task<IEnumerable<SongDTO>> GetSongsByArtistAsync(int artistId)
+        {
+            var songs = await _songRepository.GetByArtistIdAsync(artistId);
+            return songs.Select(s => ToDTO(s));
+        }
+
         public async Task<SongDTO> CreateAsync(CreateSongDTO dto)
         {
             var song = new Song
@@ -99,7 +105,7 @@ namespace Application.Services
             Artist           = s.Artist,
             CoverUrl         = s.CoverUrl,
             AudioUrl         = s.AudioUrl,
-            VideoUrl         = s.VideoUrl, // <--- THÊM DÒNG NÀY ĐỂ FRONTEND NHẬN ĐƯỢC VIDEO
+            VideoUrl         = s.VideoUrl ?? string.Empty, // <--- THÊM DÒNG NÀY ĐỂ FRONTEND NHẬN ĐƯỢC VIDEO
             Category         = s.Category,
             LyricsUrl           = s.LyricsUrl,
             CreatedAt        = s.CreatedAt,

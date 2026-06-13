@@ -30,5 +30,21 @@ namespace API.Controllers
                 return StatusCode(500, $"Lỗi hệ thống Backend: {ex.Message}");
             }
         }
+
+        // API: GET http://localhost:5104/api/Users/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(id);
+                if (user == null) return NotFound("User not found.");
+                return Ok(user);
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, $"Lỗi hệ thống Backend: {ex.Message}");
+            }
+        }
     }
 }
