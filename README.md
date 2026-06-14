@@ -1,7 +1,7 @@
 # 🎵 TuneVault - Nền tảng Nghe Nhạc Trực Tuyến
 [![.NET Version](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/)
 [![React Version](https://img.shields.io/badge/React-18-61dafb.svg)](https://reactjs.org/)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
+[![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC292B.svg)](https://www.microsoft.com/en-us/sql-server)
 [![Status](https://img.shields.io/badge/Status-Hoàn%20thiện-success.svg)]()
 
 ## 📋 Mục lục
@@ -92,17 +92,17 @@ Luồng hoạt động và giao tiếp giữa các Layer trong hệ thống đư
           ▼             ▼
     ┌──────────┐  ┌──────────────────┐
     │  Domain  │  │  Infrastructure  │
-    │ Entities │  │ Dapper / MySQL   │
+    │ Entities    │ Dapper / SQL Server│
     └──────────┘  └──────────────────┘
 ```
 
 ---
 
 ## 📦 Cài đặt & Hướng dẫn chạy Local
-Yêu cầu: **Node.js 18+**, **.NET 8 SDK**, **Docker Desktop**, **DBeaver**.
+Yêu cầu: **Node.js 18+**, **.NET 8 SDK**, **Docker Desktop**.
 
 ### 1. Chuỗi kết nối Database (Connection String)
-Nếu bạn mở file Solution `.sln` và chạy Backend trực tiếp trên máy (Local) qua Visual Studio/Rider, hãy đảm bảo MySQL đang mở Port `3307` và sử dụng thông số sau (đã có trong `appsettings.json`):
+Nếu bạn mở file Solution `.sln` và chạy Backend trực tiếp trên máy (Local) qua Visual Studio/Rider, hãy đảm bảo SQL Server trong Docker đang mở Port `1433` và sử dụng thông số sau (đã có trong `appsettings.json`):
 ```text
 Server=localhost,1433;Database=master;User Id=sa;Password=Aa123456;TrustServerCertificate=True;
 ```
@@ -138,7 +138,7 @@ Server=localhost,1433;Database=master;User Id=sa;Password=Aa123456;TrustServerCe
   - Phân tích yêu cầu, vẽ sơ đồ ERD cho cơ sở dữ liệu.
   - Viết script khởi tạo dữ liệu `init.sql`.
   - Khởi tạo khung dự án Backend (.NET) và Frontend (Vite/React).
-  - Cấu hình Docker Compose để chạy MySQL.
+  - Cấu hình Docker Compose để chạy SQL Server.
 
 - [x] **Phase 3: Cốt lõi Backend & Logic Nghiệp vụ (Tuần 5)**
   - Cài đặt hệ thống bảo mật Authentication (JWT, BCrypt).
@@ -166,7 +166,7 @@ Server=localhost,1433;Database=master;User Id=sa;Password=Aa123456;TrustServerCe
 ---
 
 ## 🐛 Xử lý sự cố
-- **Lỗi không kết nối được Database:** Chắc chắn bạn đã tắt XAMPP/WAMP (port 3306) và chạy lệnh Docker Compose.
+- **Lỗi không kết nối được Database:** Chắc chắn bạn đã tắt SQL Server nội bộ (port 1433) nếu có và chạy lệnh Docker Compose.
 - **Lỗi CORS khi gọi API:** Đảm bảo Backend đã chạy và URL Frontend đang là `http://localhost:5173`.
 - Gặp lỗi khác? Hãy xem phần xử lý sự cố trong `SETUP_GUIDE.md`.
 
