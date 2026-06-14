@@ -90,7 +90,7 @@ const VideoCard = ({ song, onHover }: { song: Song; onHover?: (url: string | nul
 
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('OPEN_VIDEO_MODAL'));
-    }, 50);
+    }, 150);
   };
 
   return (

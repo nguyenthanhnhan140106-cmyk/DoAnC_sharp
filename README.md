@@ -42,7 +42,7 @@
 |-----------|-----------------------|-----------|
 | **Frontend** | React (Vite), TypeScript | Xây dựng giao diện Single Page Application (SPA) |
 | **Backend** | C# .NET 8 Web API | Xử lý logic nghiệp vụ, RESTful API |
-| **Database** | MySQL (Chạy qua Docker) | Lưu trữ dữ liệu quan hệ (Users, Songs, Playlists) |
+| **Database** | SQL Server (Chạy qua Docker) | Lưu trữ dữ liệu quan hệ (Users, Songs, Playlists) |
 | **ORM** | Dapper | Micro-ORM tối ưu hóa tốc độ truy vấn SQL |
 | **Real-time**| SignalR | Đẩy thông báo thời gian thực từ Server xuống Client |
 | **Bảo mật** | JWT, BCrypt.Net | Mã hóa mật khẩu và xác thực người dùng |
@@ -104,9 +104,9 @@ Yêu cầu: **Node.js 18+**, **.NET 8 SDK**, **Docker Desktop**, **DBeaver**.
 ### 1. Chuỗi kết nối Database (Connection String)
 Nếu bạn mở file Solution `.sln` và chạy Backend trực tiếp trên máy (Local) qua Visual Studio/Rider, hãy đảm bảo MySQL đang mở Port `3307` và sử dụng thông số sau (đã có trong `appsettings.json`):
 ```text
-Server=localhost;Port=3307;Database=DoAnNhom_Db;User=root;Password=Aa123456;
+Server=localhost,1433;Database=master;User Id=sa;Password=Aa123456;TrustServerCertificate=True;
 ```
-*(Lưu ý: Nếu dùng lệnh `docker compose` thì dự án sẽ tự dùng chuỗi kết nối nội bộ `tunevault-db:3306` của Docker, bạn không cần quan tâm)*
+*(Lưu ý: Nếu dùng lệnh `docker compose` thì dự án sẽ tự dùng chuỗi kết nối nội bộ `tunevault-db:1433` của Docker, bạn không cần quan tâm)*
 
 ### 2. Tài khoản chấm điểm (Seed Accounts)
 Để thuận tiện cho giảng viên chấm bài, hệ thống đã được nạp sẵn (Seed Data) các tài khoản sau trong Database để test tính năng Đăng nhập / Quản lý:
@@ -117,7 +117,7 @@ Server=localhost;Port=3307;Database=DoAnNhom_Db;User=root;Password=Aa123456;
 ### 3. Các bước khởi chạy dự án nhanh
 1. Clone dự án về máy và mở Terminal ở thư mục gốc.
 2. Bật **Docker Desktop**.
-3. Chạy lệnh: `docker compose up --build -d` để khởi động trọn bộ Backend API (chạy ở cổng `5000`) và Database MySQL (cổng `3307`).
+3. Chạy lệnh: `docker compose up --build -d` để khởi động trọn bộ Backend API (chạy ở cổng `5000`) và Database SQL Server (cổng `1433`).
 4. Mở thêm 1 Terminal mới, trỏ vào thư mục `Frontend`, chạy `npm install` và `npm run dev` để bật giao diện web (cổng `5173`).
 5. Để test API tự động bằng **Postman**:
    - Import file `Swagger_API_Collection.json` (nằm ở thư mục gốc) vào phần mềm Postman.

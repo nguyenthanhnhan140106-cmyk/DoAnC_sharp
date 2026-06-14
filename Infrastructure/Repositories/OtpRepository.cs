@@ -1,6 +1,6 @@
 using Application.Interfaces;
 using Domain.Entities;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 using Dapper;
 using System.Data;
 
@@ -15,7 +15,7 @@ namespace Infrastructure.Repositories
             _connectionString = connectionString;
         }
 
-        private IDbConnection Connection => new MySqlConnection(_connectionString);
+        private IDbConnection Connection => new SqlConnection(_connectionString);
 
         public async Task DeleteExistingOtps(string email)
         {
@@ -35,7 +35,7 @@ namespace Infrastructure.Repositories
         {
             using var conn = Connection;
             return await conn.QueryFirstOrDefaultAsync<UserOtp>(
-                "SELECT * FROM user_otps WHERE Email = @Email AND IsUsed = 0 AND ExpiryTime > UTC_TIMESTAMP ORDER BY ExpiryTime DESC LIMIT 1", 
+                "SELECT TOP 1 * FROM user_otps WHERE Email = @Email AND IsUsed = 0 AND ExpiryTime > GETUTCDATE() ORDER BY ExpiryTime DESC", 
                 new { Email = email });
         }
 
@@ -46,3 +46,4 @@ namespace Infrastructure.Repositories
         }
     }
 }
+

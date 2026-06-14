@@ -1,7 +1,7 @@
 using Application.Interfaces;
 using Application.Services;
 using Infrastructure.Repositories;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -138,169 +138,33 @@ for (int retry = 1; retry <= maxRetries; retry++)
 {
     try
     {
-        using var conn = new MySqlConnection(connectionString);
+        using var conn = new SqlConnection(connectionString);
         conn.Open();
 
-        // 0. Tự động thêm cột BannerUrl cho bảng artists (tránh lỗi 500 do thiếu schema)
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = "ALTER TABLE artists ADD COLUMN BannerUrl VARCHAR(500) NULL;";
-            try { cmd.ExecuteNonQuery(); } catch { /* Bỏ qua nếu cột đã tồn tại */ }
-        }
+        
 
-        // 1. Tạo bảng songs
-        using (var cmd = conn.CreateCommand())
-        {
-                    cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS songs (
-                    Id INT AUTO_INCREMENT PRIMARY KEY,
-                    Title VARCHAR(255) NOT NULL,
-                    Artist VARCHAR(255) NOT NULL,
-                    CoverUrl TEXT,
-                    AudioUrl TEXT,
-                    VideoUrl TEXT,
-                    LyricsUrl VARCHAR(500) NULL, 
-                    ArtistId INT NULL,
-                    WorldRank INT DEFAULT 0,
-                    Followers INT DEFAULT 0,
-                    MonthlyListeners INT DEFAULT 0,
-                    Bio TEXT,
-                    ArtistBanner TEXT,
-                    IsVerified TINYINT(1) DEFAULT 1,
-                    Category VARCHAR(100),
-                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
-                );";
-            cmd.ExecuteNonQuery();
-        }
-
-        // 2. Tạo bảng users
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS users (
-                    Id INT AUTO_INCREMENT PRIMARY KEY,
-                    Username VARCHAR(50) NOT NULL UNIQUE,
-                    Email VARCHAR(100) NOT NULL UNIQUE,
-                    PasswordHash VARCHAR(255) NOT NULL,
-                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
-                );";
-            cmd.ExecuteNonQuery();
-        }
+        
 
         // Seed user mặc định nếu chưa có
         using (var cmd = conn.CreateCommand())
         {
             cmd.CommandText = @"
-                INSERT IGNORE INTO users (Id, Username, Email, PasswordHash)
-                VALUES (1, 'admin', 'admin@example.com', '');";
+                IF NOT EXISTS(SELECT 1 FROM users WHERE Id=1) BEGIN SET IDENTITY_INSERT users ON; INSERT INTO users (Id, Username, Email, PasswordHash) VALUES (1, 'admin', 'admin@example.com', ''); SET IDENTITY_INSERT users OFF; END";
             cmd.ExecuteNonQuery();
         }
 
-        // 3. Tạo bảng user_history
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS user_history (
-                    Id INT AUTO_INCREMENT PRIMARY KEY,
-                    UserId INT NOT NULL,
-                    SongId INT NOT NULL,
-                    PlayedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (UserId) REFERENCES users(Id),
-                    FOREIGN KEY (SongId) REFERENCES songs(Id)
-                );";
-            cmd.ExecuteNonQuery();
-        }
+        
 
-        // 4. Tạo bảng playlists
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS playlists (
-                    Id INT AUTO_INCREMENT PRIMARY KEY,
-                    Name VARCHAR(255) NOT NULL,
-                    Description TEXT NULL,
-                    CoverUrl TEXT NULL,
-                    UserId INT NOT NULL,
-                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (UserId) REFERENCES users(Id)
-                );";
-            cmd.ExecuteNonQuery();
-        }
+        
 
-        // 5. Tạo bảng playlist_songs
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS playlist_songs (
-                    PlaylistId INT NOT NULL,
-                    SongId INT NOT NULL,
-                    AddedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (PlaylistId, SongId),
-                    FOREIGN KEY (PlaylistId) REFERENCES playlists(Id) ON DELETE CASCADE,
-                    FOREIGN KEY (SongId) REFERENCES songs(Id)
-                );";
-            cmd.ExecuteNonQuery();
-        }
-        // Create user_otps TABLE
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS user_otps (
-                        Id INT AUTO_INCREMENT PRIMARY KEY,
-                        EMail VARCHAR(100) NOT NULL,
-                        OtpCode VARCHAR(255) NOT NULL,
-                        ExpiryTime DATETIME NOT NULL,
-                        IsUsed TINYINT(1) DEFAULT 0,
-                        CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
-                        );";
-            cmd.ExecuteNonQuery();
-        }
+        
+        
 
-        // 🟢 6. BỔ SUNG: Tạo bảng Notification để lưu trữ thông báo và chuỗi JSON chia sẻ nhạc
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS notifications (
-                    Id INT AUTO_INCREMENT PRIMARY KEY,
-                    UserId INT NOT NULL,
-                    Type VARCHAR(50) NOT NULL,
-                    Payload TEXT NOT NULL,
-                    IsRead BOOLEAN DEFAULT FALSE,
-                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
-                );";
-            cmd.ExecuteNonQuery();
-        }
+        
 
-        // 🟢 6.1 BỔ SUNG: Tạo bảng user_follows để lưu trữ bạn bè (Follow user khác)
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS user_follows (
-                    FollowerId INT NOT NULL,
-                    FollowedUserId INT NOT NULL,
-                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (FollowerId, FollowedUserId),
-                    FOREIGN KEY (FollowerId) REFERENCES users(Id) ON DELETE CASCADE,
-                    FOREIGN KEY (FollowedUserId) REFERENCES users(Id) ON DELETE CASCADE
-                );";
-            cmd.ExecuteNonQuery();
-        }
+        
 
-        // 🟢 7. BỔ SUNG: Tạo bảng user_saved_albums để lưu album vào thư viện
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS user_saved_albums (
-                    Id INT AUTO_INCREMENT PRIMARY KEY,
-                    UserId INT NOT NULL,
-                    AlbumId INT NOT NULL,
-                    SavedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE KEY uniq_user_album (UserId, AlbumId),
-                    FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
-                );";
-            cmd.ExecuteNonQuery();
-        }
+        
 
         logger.LogInformation("[TuneVault DB] 🟢 Kết nối và khởi tạo bảng thành công!");
         break;
@@ -331,3 +195,11 @@ public class CustomUserIdProvider : Microsoft.AspNetCore.SignalR.IUserIdProvider
         return connection.User?.FindFirst("id")?.Value;
     }
 }
+
+
+
+
+
+
+
+

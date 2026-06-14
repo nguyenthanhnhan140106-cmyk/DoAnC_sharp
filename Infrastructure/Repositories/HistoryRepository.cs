@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
 using Dapper;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 
 namespace Infrastructure.Repositories
 {
@@ -18,7 +18,7 @@ namespace Infrastructure.Repositories
             _connectionString = connectionString;
         }
 
-        private IDbConnection CreateConnection() => new MySqlConnection(_connectionString);
+        private IDbConnection CreateConnection() => new SqlConnection(_connectionString);
 
         public async Task AddToHistoryAsync(int userId, int songId)
         {
@@ -26,8 +26,8 @@ namespace Infrastructure.Repositories
             {
                 using var connection = CreateConnection();
                 const string query = @"
-                    INSERT INTO user_history (UserId, SongId, PlayedAt)
-                    VALUES (@UserId, @SongId, UTC_TIMESTAMP())";
+                    INSERT INTO play_histories (UserId, SongId, PlayedAt)
+                    VALUES (@UserId, @SongId, GETUTCDATE())";
                 await connection.ExecuteAsync(query, new { UserId = userId, SongId = songId });
             }
             catch (Exception ex)
@@ -43,7 +43,7 @@ namespace Infrastructure.Repositories
             {
                 using var connection = CreateConnection();
                 const string query = @"
-                    SELECT s.*, 
+                    SELECT TOP (@Limit) s.*, 
                            COALESCE(a.WorldRank, 0) as WorldRank, 
                            COALESCE(a.Followers, 0) as Followers, 
                            COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
@@ -54,7 +54,7 @@ namespace Infrastructure.Repositories
                            al.Title as AlbumName
                     FROM (
                         SELECT SongId, MAX(PlayedAt) as LastPlayed
-                        FROM user_history
+                        FROM play_histories
                         WHERE UserId = @UserId
                         GROUP BY SongId
                     ) uh
@@ -67,7 +67,7 @@ namespace Infrastructure.Repositories
                     ) als ON s.Id = als.SongId
                     LEFT JOIN albums al ON als.MinAlbumId = al.Id
                     ORDER BY uh.LastPlayed DESC
-                    LIMIT @Limit";
+                    ";
                     
                 return await connection.QueryAsync<SongDTO>(query, new { UserId = userId, Limit = limit });
             }
@@ -79,3 +79,5 @@ namespace Infrastructure.Repositories
         }
     }
 }
+
+

@@ -1,7 +1,7 @@
 using Application.Interfaces;
 using Application.DTOs;
 using Dapper;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 
 namespace Application.Services
 {
@@ -16,7 +16,7 @@ namespace Application.Services
 
         public async Task<IEnumerable<PlaylistDTO>> GetAllPlaylistsAsync()
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             return await conn.QueryAsync<PlaylistDTO>(@"
                 SELECT p.Id, p.Name, p.Description, p.CoverUrl, p.CreatedAt, p.UserId,
                        COALESCE(u.Username, 'Ẩn danh') AS CreatorName
@@ -27,7 +27,7 @@ namespace Application.Services
 
         public async Task<IEnumerable<PlaylistDTO>> GetPlaylistsByUserIdAsync(int userId)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             return await conn.QueryAsync<PlaylistDTO>(@"
                 SELECT p.Id, p.Name, p.Description, p.CoverUrl, p.CreatedAt, p.UserId,
                        COALESCE(u.Username, 'Ẩn danh') AS CreatorName
@@ -40,11 +40,11 @@ namespace Application.Services
 
         public async Task<PlaylistDTO> CreatePlaylistAsync(int userId, CreatePlaylistDTO dto)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             var sql = @"
                 INSERT INTO playlists (Name, Description, CoverUrl, UserId, CreatedAt)
-                VALUES (@Name, @Description, @CoverUrl, @UserId, NOW());
-                SELECT LAST_INSERT_ID();";
+                VALUES (@Name, @Description, @CoverUrl, @UserId, GETDATE());
+                SELECT SCOPE_IDENTITY();";
             
             var id = await conn.ExecuteScalarAsync<int>(sql, new {
                 dto.Name,
@@ -58,7 +58,7 @@ namespace Application.Services
 
         public async Task<PlaylistDTO?> GetPlaylistByIdAsync(int id)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             var playlist = await conn.QueryFirstOrDefaultAsync<PlaylistDTO>(@"
                 SELECT p.Id, p.Name, p.Description, p.CoverUrl, p.CreatedAt, p.UserId,
                        COALESCE(u.Username, 'Ẩn danh') AS CreatorName
@@ -82,15 +82,15 @@ namespace Application.Services
 
         public async Task<bool> AddSongToPlaylistAsync(int playlistId, int songId)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             try
             {
                 var sql = @"
-                    INSERT IGNORE INTO playlist_songs (PlaylistId, SongId, AddedAt) VALUES (@PlaylistId, @SongId, NOW());
-                    UPDATE playlists p 
-                    JOIN songs s ON s.Id = @SongId 
-                    SET p.CoverUrl = s.CoverUrl 
-                    WHERE p.Id = @PlaylistId;";
+                    IF NOT EXISTS (SELECT 1 FROM playlist_songs WHERE PlaylistId = @PlaylistId AND SongId = @SongId)
+                    BEGIN
+                        INSERT INTO playlist_songs (PlaylistId, SongId, AddedAt) VALUES (@PlaylistId, @SongId, GETDATE());
+                        UPDATE playlists SET CoverUrl = (SELECT CoverUrl FROM songs WHERE Id = @SongId) WHERE Id = @PlaylistId;
+                    END";
                 var rows = await conn.ExecuteAsync(sql, new { PlaylistId = playlistId, SongId = songId });
                 return rows > 0;
             }
@@ -102,7 +102,7 @@ namespace Application.Services
 
         public async Task<bool> DeletePlaylistAsync(int id)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             
             try 
             {
@@ -118,22 +118,21 @@ namespace Application.Services
 
         public async Task<bool> RemoveSongFromPlaylistAsync(int playlistId, int songId)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             try
             {
                 var sql = "DELETE FROM playlist_songs WHERE PlaylistId = @PlaylistId AND SongId = @SongId";
                 var rows = await conn.ExecuteAsync(sql, new { PlaylistId = playlistId, SongId = songId });
                 
                 // Cập nhật lại CoverUrl nếu cần
-                var remainingSongs = await conn.QueryAsync<int>("SELECT SongId FROM playlist_songs WHERE PlaylistId = @PlaylistId LIMIT 1", new { PlaylistId = playlistId });
+                var remainingSongs = await conn.QueryAsync<int>("SELECT TOP 1 SongId FROM playlist_songs WHERE PlaylistId = @PlaylistId ", new { PlaylistId = playlistId });
                 if (!remainingSongs.Any()) {
                     await conn.ExecuteAsync("UPDATE playlists SET CoverUrl = NULL WHERE Id = @PlaylistId", new { PlaylistId = playlistId });
                 } else {
                     await conn.ExecuteAsync(@"
-                        UPDATE playlists p 
-                        JOIN songs s ON s.Id = @RemainingSongId 
-                        SET p.CoverUrl = s.CoverUrl 
-                        WHERE p.Id = @PlaylistId", 
+                        UPDATE playlists 
+                        SET CoverUrl = (SELECT CoverUrl FROM songs WHERE Id = @RemainingSongId) 
+                        WHERE Id = @PlaylistId", 
                         new { PlaylistId = playlistId, RemainingSongId = remainingSongs.First() }
                     );
                 }
@@ -148,7 +147,7 @@ namespace Application.Services
 
         public async Task<IEnumerable<int>> GetPlaylistsContainingSongAsync(int userId, int songId)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             var sql = @"
                 SELECT ps.PlaylistId 
                 FROM playlist_songs ps
@@ -158,3 +157,4 @@ namespace Application.Services
         }
     }
 }
+

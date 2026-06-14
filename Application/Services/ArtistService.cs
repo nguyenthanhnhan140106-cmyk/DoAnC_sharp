@@ -1,7 +1,7 @@
 using Application.Interfaces;
 using Application.DTOs;
 using Dapper;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 
 namespace Application.Services
 {
@@ -16,7 +16,7 @@ namespace Application.Services
 
         public async Task<IEnumerable<ArtistDTO>> GetAllArtistsAsync()
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             return await conn.QueryAsync<ArtistDTO>(
                 "SELECT Id, Name, Bio, WorldRank, Followers, MonthlyListeners, IsVerified, BannerUrl FROM artists"
             );
@@ -24,7 +24,7 @@ namespace Application.Services
 
         public async Task<ArtistDTO?> GetArtistByIdAsync(int id)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             return await conn.QueryFirstOrDefaultAsync<ArtistDTO>(
                 "SELECT Id, Name, Bio, WorldRank, Followers, MonthlyListeners, IsVerified, BannerUrl FROM artists WHERE Id = @Id",
                 new { Id = id }

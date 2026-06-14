@@ -103,16 +103,14 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     const handleOpenVideoModal = () => {
       wasPlayingBeforeVideo.current = true; // Lưu cờ
       setIsVideoOpen(true);
-      // Tạm dừng nhạc
+      // Tạm dừng nhạc bằng hàm stable
       if (pauseSong) {
         pauseSong();
-      } else if (isPlaying && togglePlay) {
-        togglePlay();
       }
     };
     window.addEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
     return () => window.removeEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
-  }, [isPlaying, togglePlay, pauseSong]);
+  }, [pauseSong]);
 
 
 
@@ -342,61 +340,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
         <div className="right-sidebar-header">
           <h3>Đang phát</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', zIndex: 100 }} ref={moreMenuRef}>
-            <button
-              className="right-more-icon-btn"
-              onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-              title="Khác"
-              style={{ background: 'transparent', border: 'none', color: '#b3b3b3', cursor: 'pointer', padding: '4px' }}
-            >
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                <path d="M4.5 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm7.5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm7.5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
-              </svg>
-            </button>
-
-            {/* DROPDOWN MENU 3 CHẤM GIỐNG TRANG ALBUM */}
-            {isMoreMenuOpen && (
-              <ul
-                className="album-dropdown-menu"
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: 0,
-                  left: 'auto', // Quan trọng: ghi đè left: 0 của CSS gốc
-                  marginTop: '8px',
-                  zIndex: 1000,
-                  width: '240px'
-                }}
-              >
-                <li>
-                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z" /><path d="M11.75 8a.75.75 0 0 1-.75.75H8.75V11.5a.75.75 0 0 1-1.5 0V8.75H4.5a.75.75 0 0 1 0-1.5h2.75V4.5a.75.75 0 0 1 1.5 0v2.75h2.75a.75.75 0 0 1 .75.75z" /></svg>
-                  <span>Add to Your Library</span>
-                </li>
-                <li>
-                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 0 1 7.187 6H13.5a.75.75 0 0 0 0-1.5H7.187a5.484 5.484 0 0 1 .779-1.5h5.534a.75.75 0 0 0 0-1.5H6.984a6.967 6.967 0 0 0-1.28-1.077L4.496.643a.75.75 0 0 0-1.06 1.06l1.284 1.284A6.974 6.974 0 0 0 .5 8c0 3.866 3.134 7 7 7 2.1 0 4.02-.924 5.334-2.392l-1.121-1.015A5.483 5.483 0 0 1 7.5 13.5a5.5 5.5 0 1 1 0-11c1.332 0 2.554.474 3.512 1.26l-1.26 1.26a.75.75 0 0 0 .531 1.28h3.5a.75.75 0 0 0 .75-.75v-3.5a.75.75 0 0 0-1.28-.53l-1.287 1.287zM7.5 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></svg>
-                  <span>Add to playlist</span>
-                </li>
-                <li>
-                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8-6A4.5 4.5 0 0 1 2.5 0v1.5a3 3 0 1 0 0 6V9a4.5 4.5 0 0 1 4.5-4.5z" /></svg>
-                  <span>Add to queue</span>
-                </li>
-                <li className="album-dropdown-divider"></li>
-                <li className="has-submenu" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15.25 8a.75.75 0 0 1-.75.75H8.75v5.75a.75.75 0 0 1-1.5 0V8.75H1.5a.75.75 0 0 1 0-1.5h5.75V1.5a.75.75 0 0 1 1.5 0v5.75h5.75a.75.75 0 0 1 .75.75z" /></svg>
-                    <span>Add to playlist</span>
-                  </div>
-                  <svg className="submenu-arrow" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M5.5 13.5l5.5-5.5-5.5-5.5v11z" /></svg>
-                </li>
-                <li className="album-dropdown-divider"></li>
-                <li onClick={() => { setIsMoreMenuOpen(false); setIsShareModalOpen(true); }}>
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" />
-                  </svg>
-                  <span>Share</span>
-                </li>
-              </ul>
-            )}
-
             <button className="right-close-icon-btn" onClick={() => setIsCollapsed(true)} title="Thu gọn bảng thông tin">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                 <path d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H3zm1-2h16V4H4v16zm8-13v10l-5-5 5-5z" />
