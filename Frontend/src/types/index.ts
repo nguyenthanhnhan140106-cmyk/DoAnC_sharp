@@ -44,13 +44,14 @@ export interface Song {
 
 export interface Playlist {
   id: number;
-  userId: number;
   name: string;
-  creatorName?: string;
-  coverUrl?: string;
+  userId: number;
   description?: string;
+  coverUrl?: string;
+  creatorName: string;
   createdAt?: string;
-  songs?: Song[];
+  isPublic: boolean;
+  songs: Song[];
 }
 
 export interface Artist {

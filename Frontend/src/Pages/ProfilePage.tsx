@@ -28,6 +28,8 @@ export default function ProfilePage() {
   const [fullProfile, setFullProfile] = useState<UserProfile | null>(null);
   const [isFollowModalOpen, setIsFollowModalOpen] = useState(false);
   const [followModalTab, setFollowModalTab] = useState<'followers' | 'following'>('followers');
+  const [uploadedSongs, setUploadedSongs] = useState<Song[]>([]);
+  const [isUploadedModalOpen, setIsUploadedModalOpen] = useState(false);
 
   const fetchFollowing = React.useCallback(async () => {
     if (!isLoggedIn) return;
@@ -77,6 +79,17 @@ export default function ProfilePage() {
       }
     };
     window.addEventListener('followUpdated', handleFollowUpdate);
+    // Lấy danh sách nhạc upload
+    if (user?.id) {
+      API.get(`/songs/user/${user.id}`)
+        .then(res => {
+          if (Array.isArray(res.data)) {
+            setUploadedSongs(res.data);
+          }
+        })
+        .catch(err => console.error("Lỗi lấy nhạc upload", err));
+    }
+
     return () => window.removeEventListener('followUpdated', handleFollowUpdate);
   }, [isLoggedIn, fetchFollowing, user?.id]);
 
@@ -183,7 +196,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="profile-action-card">
+              <div className="profile-action-card" onClick={() => setIsUploadedModalOpen(true)}>
                 <div className="card-icon uploaded">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 14V3m0 0l-4 4m4-4l4 4" />
@@ -192,7 +205,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="card-info">
                   <div className="card-title">Uploaded</div>
-                  <div className="card-subtitle">0 song • 0 video</div>
+                  <div className="card-subtitle">{uploadedSongs.length} item{uploadedSongs.length !== 1 ? 's' : ''}</div>
                 </div>
               </div>
             </div>
@@ -302,6 +315,77 @@ export default function ProfilePage() {
           userId={user.id}
           initialTab={followModalTab}
         />
+      )}
+
+      {isUploadedModalOpen && (
+        <div className="follow-modal-overlay" onClick={() => setIsUploadedModalOpen(false)}>
+          <div className="follow-modal-content" onClick={e => e.stopPropagation()} style={{ width: '600px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+            <div className="follow-modal-header" style={{ padding: '24px', borderBottom: '1px solid #333' }}>
+              <h2 style={{ margin: 0, fontSize: '24px', color: '#fff' }}>Uploaded Items</h2>
+              <button className="close-modal-btn" onClick={() => setIsUploadedModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#b3b3b3', cursor: 'pointer' }}>
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+            <div className="follow-modal-body" style={{ padding: '0 24px 24px 24px', overflowY: 'auto', flex: 1 }}>
+              {uploadedSongs.length === 0 ? (
+                <div style={{ padding: '40px 0', textAlign: 'center', color: '#b3b3b3' }}>
+                  No uploaded items yet.
+                </div>
+              ) : (
+                <div className="profile-tracks-list" style={{ marginTop: '16px' }}>
+                  {uploadedSongs.map((song, index) => {
+                    const isActive = currentSong?.id === song.id;
+                    return (
+                      <div
+                        key={song.id}
+                        className="profile-track-item"
+                        onClick={(e) => handleForcePlay(e, song, index)}
+                        style={{ padding: '8px', borderRadius: '4px', display: 'flex', alignItems: 'center' }}
+                      >
+                        <div className="track-col track-index" style={{ width: '40px', textAlign: 'center' }}>
+                          {isActive && isPlaying ? (
+                            <div className="equalizer" style={{ width: '14px', height: '14px' }}>
+                              <span style={{ backgroundColor: '#1db954' }}></span>
+                              <span style={{ backgroundColor: '#1db954' }}></span>
+                              <span style={{ backgroundColor: '#1db954' }}></span>
+                            </div>
+                          ) : (
+                            <span className="track-number">{index + 1}</span>
+                          )}
+                          <button className="track-play-btn">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          </button>
+                        </div>
+                        <div className="track-col track-info" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <img
+                            src={song.coverUrl || `https://picsum.photos/seed/${song.id}/40/40`}
+                            alt={song.title}
+                            className="track-cover"
+                            style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }}
+                          />
+                          <div className="track-text">
+                            <div className="track-title" style={{ color: isActive ? '#1db954' : '#fff', fontWeight: 500 }}>{song.title}</div>
+                            <div className="track-artist" style={{ color: '#b3b3b3', fontSize: '14px' }}>{song.artist}</div>
+                          </div>
+                        </div>
+                        <div className="track-col" style={{ width: '120px', color: '#b3b3b3', fontSize: '14px' }}>
+                          {song.categoryName || 'Unknown Category'}
+                        </div>
+                        <div className="track-col" style={{ width: '100px', textAlign: 'right', color: '#b3b3b3', fontSize: '14px' }}>
+                          {song.createdAt ? new Date(song.createdAt).toLocaleDateString() : 'N/A'}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

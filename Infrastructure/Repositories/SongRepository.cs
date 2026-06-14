@@ -115,11 +115,30 @@ namespace Infrastructure.Repositories
             return await connection.QueryAsync<Song>(query, new { ArtistId = artistId });
         }
 
+        public async Task<IEnumerable<Song>> GetByUploaderIdAsync(int uploaderId)
+        {
+            const string query = @"
+                SELECT s.*, 
+                       c.Name as CategoryName,
+                       COALESCE(a.WorldRank, 0) as WorldRank, 
+                       COALESCE(a.Followers, 0) as Followers, 
+                       COALESCE(a.MonthlyListeners, 0) as MonthlyListeners, 
+                       a.Bio, 
+                       COALESCE(a.IsVerified, 1) as IsVerified
+                FROM songs s
+                LEFT JOIN artists a ON s.ArtistId = a.Id
+                LEFT JOIN categories c ON s.CategoryId = c.Id
+                WHERE s.UploaderId = @UploaderId";
+
+            using var connection = CreateConnection();
+            return await connection.QueryAsync<Song>(query, new { UploaderId = uploaderId });
+        }
+
         public async Task<int> CreateAsync(Song song)
         {
                         const string query = @"
-                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, VideoUrl, CategoryId, LyricsUrl, ArtistBanner, ArtistId, CreatedAt) 
-                VALUES (@Title, @Artist, @CoverUrl, @AudioUrl, @VideoUrl, @CategoryId, @LyricsUrl, @ArtistBanner, @ArtistId, @CreatedAt);
+                INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, VideoUrl, CategoryId, LyricsUrl, ArtistBanner, ArtistId, UploaderId, CreatedAt) 
+                VALUES (@Title, @Artist, @CoverUrl, @AudioUrl, @VideoUrl, @CategoryId, @LyricsUrl, @ArtistBanner, @ArtistId, @UploaderId, @CreatedAt);
                 SELECT SCOPE_IDENTITY();";
 
 
@@ -140,7 +159,8 @@ namespace Infrastructure.Repositories
                     CategoryId = @CategoryId,
                     LyricsUrl = @LyricsUrl,
                     ArtistBanner = @ArtistBanner,
-                    ArtistId = @ArtistId
+                    ArtistId = @ArtistId,
+                    UploaderId = @UploaderId
                 WHERE Id = @Id";
 
             using var connection = CreateConnection();

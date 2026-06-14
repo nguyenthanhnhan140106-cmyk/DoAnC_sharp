@@ -18,10 +18,11 @@ namespace Application.Services
         {
             using var conn = new SqlConnection(_connectionString);
             return await conn.QueryAsync<PlaylistDTO>(@"
-                SELECT p.Id, p.Name, p.Description, p.CoverUrl, p.CreatedAt, p.UserId,
+                SELECT p.Id, p.Name, p.Description, p.CoverUrl, p.CreatedAt, p.UserId, p.IsPublic,
                        COALESCE(u.Username, 'Ẩn danh') AS CreatorName
                 FROM playlists p
-                LEFT JOIN users u ON p.UserId = u.Id"
+                LEFT JOIN users u ON p.UserId = u.Id
+                WHERE p.IsPublic = 1"
             );
         }
 
@@ -29,7 +30,7 @@ namespace Application.Services
         {
             using var conn = new SqlConnection(_connectionString);
             return await conn.QueryAsync<PlaylistDTO>(@"
-                SELECT p.Id, p.Name, p.Description, p.CoverUrl, p.CreatedAt, p.UserId,
+                SELECT p.Id, p.Name, p.Description, p.CoverUrl, p.CreatedAt, p.UserId, p.IsPublic,
                        COALESCE(u.Username, 'Ẩn danh') AS CreatorName
                 FROM playlists p
                 LEFT JOIN users u ON p.UserId = u.Id
@@ -60,7 +61,7 @@ namespace Application.Services
         {
             using var conn = new SqlConnection(_connectionString);
             var playlist = await conn.QueryFirstOrDefaultAsync<PlaylistDTO>(@"
-                SELECT p.Id, p.Name, p.Description, p.CoverUrl, p.CreatedAt, p.UserId,
+                SELECT p.Id, p.Name, p.Description, p.CoverUrl, p.CreatedAt, p.UserId, p.IsPublic,
                        COALESCE(u.Username, 'Ẩn danh') AS CreatorName
                 FROM playlists p
                 LEFT JOIN users u ON p.UserId = u.Id
@@ -143,6 +144,13 @@ namespace Application.Services
             {
                 return false;
             }
+        }
+
+        public async Task<bool> TogglePlaylistPrivacyAsync(int id, bool isPublic)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            var rows = await conn.ExecuteAsync("UPDATE playlists SET IsPublic = @IsPublic WHERE Id = @Id", new { Id = id, IsPublic = isPublic });
+            return rows > 0;
         }
 
         public async Task<IEnumerable<int>> GetPlaylistsContainingSongAsync(int userId, int songId)

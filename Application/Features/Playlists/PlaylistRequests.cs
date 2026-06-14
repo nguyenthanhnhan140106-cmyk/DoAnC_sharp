@@ -1,6 +1,7 @@
 using MediatR;
 using Application.DTOs;
 using System.Collections.Generic;
+using Application.Interfaces;
 
 namespace Application.Features.Playlists.Queries
 {
@@ -13,7 +14,18 @@ namespace Application.Features.Playlists.Queries
 namespace Application.Features.Playlists.Commands
 {
     public record CreatePlaylistCommand(int UserId, CreatePlaylistDTO Dto) : IRequest<PlaylistDTO>;
-    public record AddSongToPlaylistCommand(int PlaylistId, int SongId) : IRequest<bool>;
-    public record DeletePlaylistCommand(int Id) : IRequest<bool>;
-    public record RemoveSongFromPlaylistCommand(int PlaylistId, int SongId) : IRequest<bool>;
+    
+    public record AddSongToPlaylistCommand(int PlaylistId, int SongId, int UserId) : IRequest<bool>, IRequirePlaylistOwnership;
+    
+    public record DeletePlaylistCommand(int Id, int UserId) : IRequest<bool>, IRequirePlaylistOwnership
+    {
+        public int PlaylistId => Id;
+    }
+    
+    public record RemoveSongFromPlaylistCommand(int PlaylistId, int SongId, int UserId) : IRequest<bool>, IRequirePlaylistOwnership;
+    
+    public record TogglePlaylistPrivacyCommand(int Id, int UserId, bool IsPublic) : IRequest<bool>, IRequirePlaylistOwnership
+    {
+        public int PlaylistId => Id;
+    }
 }

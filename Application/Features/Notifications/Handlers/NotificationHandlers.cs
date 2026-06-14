@@ -16,13 +16,16 @@ namespace Application.Features.Notifications.Handlers
         IRequestHandler<ShareMediaCommand, bool>,
         IRequestHandler<MarkNotificationAsReadCommand, bool>,
         IRequestHandler<MarkAllNotificationsAsReadCommand, int>,
-        IRequestHandler<GetMyNotificationsQuery, IEnumerable<Notification>>
+        IRequestHandler<GetMyNotificationsQuery, IEnumerable<Notification>>,
+        IRequestHandler<GetSharedWithMeQuery, IEnumerable<MediaShareDTO>>
     {
         private readonly INotificationRepository _notificationRepository;
+        private readonly IMediaShareRepository _mediaShareRepository;
 
-        public NotificationHandlers(INotificationRepository notificationRepository)
+        public NotificationHandlers(INotificationRepository notificationRepository, IMediaShareRepository mediaShareRepository)
         {
             _notificationRepository = notificationRepository;
+            _mediaShareRepository = mediaShareRepository;
         }
 
         public async Task<bool> Handle(ShareMediaCommand requestCmd, CancellationToken cancellationToken)
@@ -75,6 +78,20 @@ namespace Application.Features.Notifications.Handlers
                 await _notificationRepository.InsertNotificationAsync(senderNotification);
             }
 
+            // 🟢 BỔ SUNG: Lưu lịch sử chia sẻ vào bảng MediaShare
+            if (success)
+            {
+                var mediaShare = new MediaShare
+                {
+                    SenderId = request.SenderId,
+                    ReceiverId = request.ReceiverId,
+                    SongId = request.MediaType == "song" ? request.MediaId : (int?)null,
+                    PlaylistId = request.MediaType == "playlist" ? request.MediaId : (int?)null,
+                    SharedAt = DateTime.UtcNow
+                };
+                await _mediaShareRepository.InsertMediaShareAsync(mediaShare);
+            }
+
             return success;
         }
 
@@ -91,6 +108,11 @@ namespace Application.Features.Notifications.Handlers
         public async Task<IEnumerable<Notification>> Handle(GetMyNotificationsQuery request, CancellationToken cancellationToken)
         {
             return await _notificationRepository.GetNotificationsByUserIdAsync(request.UserId);
+        }
+
+        public async Task<IEnumerable<MediaShareDTO>> Handle(GetSharedWithMeQuery request, CancellationToken cancellationToken)
+        {
+            return await _mediaShareRepository.GetSharedWithMeAsync(request.ReceiverId);
         }
     }
 }

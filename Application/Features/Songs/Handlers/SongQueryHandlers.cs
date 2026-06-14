@@ -15,7 +15,8 @@ namespace Application.Features.Songs.Handlers
         IRequestHandler<GetSongByIdQuery, SongDTO?>,
         IRequestHandler<SearchSongsQuery, IEnumerable<SongDTO>>,
         IRequestHandler<GetSongsByCategoryQuery, IEnumerable<SongDTO>>,
-        IRequestHandler<GetSongsByArtistQuery, IEnumerable<SongDTO>>
+        IRequestHandler<GetSongsByArtistQuery, IEnumerable<SongDTO>>,
+        IRequestHandler<GetSongsByUploaderQuery, IEnumerable<SongDTO>>
     {
         private readonly ISongRepository _songRepository;
 
@@ -54,11 +55,17 @@ namespace Application.Features.Songs.Handlers
             return songs.Select(s => ToDTO(s));
         }
 
+        public async Task<IEnumerable<SongDTO>> Handle(GetSongsByUploaderQuery request, CancellationToken cancellationToken)
+        {
+            var songs = await _songRepository.GetByUploaderIdAsync(request.UploaderId);
+            return songs.Select(s => ToDTO(s));
+        }
+
         private static SongDTO ToDTO(Song s) => new()
         {
             Id = s.Id, Title = s.Title, Artist = s.Artist, CoverUrl = s.CoverUrl, AudioUrl = s.AudioUrl,
             VideoUrl = s.VideoUrl ?? string.Empty, CategoryId = s.CategoryId, CategoryName = s.CategoryName,
-            LyricsUrl = s.LyricsUrl, CreatedAt = s.CreatedAt, ArtistId = s.ArtistId, WorldRank = s.WorldRank,
+            LyricsUrl = s.LyricsUrl, CreatedAt = s.CreatedAt, ArtistId = s.ArtistId, UploaderId = s.UploaderId, WorldRank = s.WorldRank,
             Followers = s.Followers, MonthlyListeners = s.MonthlyListeners, Bio = s.Bio, ArtistBanner = s.ArtistBanner,
             IsVerified = s.IsVerified
         };

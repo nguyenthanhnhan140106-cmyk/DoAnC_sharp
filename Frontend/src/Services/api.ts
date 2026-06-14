@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API = axios.create({
   baseURL: 'http://localhost:5000/api', 
-  timeout: 5000,
+  timeout: 0, // Disable timeout for uploads
 });
 
 API.interceptors.request.use(

@@ -33,6 +33,7 @@ namespace Application.Features.Songs.Handlers
                 CategoryId = dto.CategoryId,
                 LyricsUrl = dto.LyricsUrl,
                 ArtistId = dto.ArtistId,
+                UploaderId = dto.UploaderId,
                 CreatedAt = System.DateTime.UtcNow
             };
 
@@ -68,7 +69,7 @@ namespace Application.Features.Songs.Handlers
         {
             Id = s.Id, Title = s.Title, Artist = s.Artist, CoverUrl = s.CoverUrl, AudioUrl = s.AudioUrl,
             VideoUrl = s.VideoUrl ?? string.Empty, CategoryId = s.CategoryId, CategoryName = s.CategoryName,
-            LyricsUrl = s.LyricsUrl, CreatedAt = s.CreatedAt, ArtistId = s.ArtistId, WorldRank = s.WorldRank,
+            LyricsUrl = s.LyricsUrl, CreatedAt = s.CreatedAt, ArtistId = s.ArtistId, UploaderId = s.UploaderId, WorldRank = s.WorldRank,
             Followers = s.Followers, MonthlyListeners = s.MonthlyListeners, Bio = s.Bio, ArtistBanner = s.ArtistBanner,
             IsVerified = s.IsVerified
         };

@@ -17,6 +17,8 @@ import UploadPage from './Pages/UploadPage';
 import NotificationsPage from './Pages/NotificationsPage';
 import ArtistPage from './Pages/ArtistPage';
 import UserProfilePage from './Pages/UserProfilePage';
+import InboxPage from './Pages/InboxPage';
+import VideoPage from './Pages/VideoPage';
 
 import AddToPlaylistModal from './Components/AddToPlaylistModal';
 import Toast from './Components/Toast';
@@ -41,12 +43,14 @@ function App() {
               <Route path="/search" element={<SearchPage />} />
               <Route path="/artist/:id" element={<ArtistPage />} />
               <Route path="/user/:id" element={<UserProfilePage />} />
+              <Route path="/video/:id" element={<VideoPage />} />
 
               {/* Các trang bắt buộc đăng nhập */}
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="/history" element={<ProtectedRoute><ListeningHistoryPage /></ProtectedRoute>} />
               <Route path="/upload" element={<ProtectedRoute><UploadPage /></ProtectedRoute>} />
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+              <Route path="/inbox" element={<ProtectedRoute><InboxPage /></ProtectedRoute>} />
             </Routes>
             <AddToPlaylistModal />
             <Toast />

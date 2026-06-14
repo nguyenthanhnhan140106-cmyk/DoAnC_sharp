@@ -28,7 +28,18 @@ namespace API.Controllers
         public async Task<IActionResult> GetPlaylistById(int id)
         {
             var playlist = await _mediator.Send(new GetPlaylistByIdQuery(id));
-            return playlist == null ? NotFound() : Ok(playlist);
+            if (playlist == null) return NotFound();
+
+            if (!playlist.IsPublic)
+            {
+                var userIdClaim = User.FindFirst("id")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId) || currentUserId != playlist.UserId)
+                {
+                    return Unauthorized("Playlist này đã được cài đặt riêng tư.");
+                }
+            }
+
+            return Ok(playlist);
         }
 
         [HttpGet("user/{userId}")]
@@ -55,7 +66,11 @@ namespace API.Controllers
         [HttpPost("{id}/songs/{songId}")]
         public async Task<IActionResult> AddSongToPlaylist(int id, int songId)
         {
-            var success = await _mediator.Send(new AddSongToPlaylistCommand(id, songId));
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+                return Unauthorized("Vui lòng đăng nhập.");
+
+            var success = await _mediator.Send(new AddSongToPlaylistCommand(id, songId, currentUserId));
             if (!success) return BadRequest("Không thể thêm bài hát vào Playlist (có thể bài hát đã tồn tại hoặc Playlist không đúng)");
             return Ok(new { message = "Thêm bài hát thành công" });
         }
@@ -63,7 +78,11 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePlaylist(int id)
         {
-            var success = await _mediator.Send(new DeletePlaylistCommand(id));
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+                return Unauthorized("Vui lòng đăng nhập.");
+
+            var success = await _mediator.Send(new DeletePlaylistCommand(id, currentUserId));
             if (!success) return NotFound("Không tìm thấy Playlist để xóa hoặc có lỗi xảy ra");
             return Ok(new { message = "Xóa Playlist thành công" });
         }
@@ -71,9 +90,25 @@ namespace API.Controllers
         [HttpDelete("{id}/songs/{songId}")]
         public async Task<IActionResult> RemoveSongFromPlaylist(int id, int songId)
         {
-            var success = await _mediator.Send(new RemoveSongFromPlaylistCommand(id, songId));
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+                return Unauthorized("Vui lòng đăng nhập.");
+
+            var success = await _mediator.Send(new RemoveSongFromPlaylistCommand(id, songId, currentUserId));
             if (!success) return BadRequest("Không thể xóa bài hát khỏi Playlist");
             return Ok(new { message = "Xóa bài hát thành công" });
+        }
+
+        [HttpPut("{id}/privacy")]
+        public async Task<IActionResult> TogglePlaylistPrivacy(int id, [FromBody] bool isPublic)
+        {
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+                return Unauthorized("Vui lòng đăng nhập.");
+
+            var success = await _mediator.Send(new TogglePlaylistPrivacyCommand(id, currentUserId, isPublic));
+            if (!success) return BadRequest("Không thể cập nhật trạng thái riêng tư");
+            return Ok(new { message = "Cập nhật thành công" });
         }
 
         [HttpGet("user/{userId}/contains/{songId}")]

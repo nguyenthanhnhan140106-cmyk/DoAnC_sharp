@@ -19,6 +19,7 @@ namespace Domain.Entities
 
         // 🟢 BỔ SUNG CÁC THUỘC TÍNH ĐÓN DỮ LIỆU NGHỆ SĨ THẬT (HỨNG LỆNH JOIN DAPPER)
         public int? ArtistId { get; set; }       // Khóa ngoại liên kết sang bảng artists
+        public int? UploaderId { get; set; }     // Khóa ngoại liên kết sang bảng users
         public int WorldRank { get; set; }       // Thứ hạng thế giới (#36, #120,...)
         public int Followers { get; set; }       // Số lượng người theo dõi
         public int MonthlyListeners { get; set; } // Số lượt nghe hàng tháng

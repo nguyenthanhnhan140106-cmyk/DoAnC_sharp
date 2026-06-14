@@ -325,6 +325,27 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           </div>
         )}
 
+        {isLoggedIn && (
+          <div
+            className="playlist-item"
+            title="Inbox"
+            onClick={() => handleNavigateToggle('/inbox')}
+          >
+            <div className="playlist-cover default-cover" style={{ background: 'linear-gradient(135deg, #e50914, #ff5c5c)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </div>
+            {!isCollapsed && (
+              <div className="playlist-info">
+                <p className="playlist-title">Inbox</p>
+                <p className="playlist-subtitle">Shared with me</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Section Albums đã lưu vào thư viện */}
         {isLoggedIn && savedAlbums.length > 0 && savedAlbums.map((album) => (
           <div
