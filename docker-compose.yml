@@ -1,24 +1,39 @@
 services:
-  # 1. Container Cơ sở dữ liệu (MySQL)
+  # 1. Container Cơ sở dữ liệu (SQL Server)
   db:
-    image: mysql:8.0
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: tunevault-db
     restart: always
     environment:
-      MYSQL_DATABASE: DoAnNhom_Db
-      MYSQL_ROOT_PASSWORD: Aa123456
-      MYSQL_INITDB_SKIP_TZINFO: 1
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: Aa123456
     ports:
-      - "3307:3306"
+      - "1433:1433"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mssql_data:/var/opt/mssql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "Aa123456", "-Q", "SELECT 1", "-No"]
       timeout: 5s
       retries: 10
-      interval: 3s
+      interval: 5s
+
+  # 1.5. Container chạy script khởi tạo CSDL
+  db-init:
+    image: mcr.microsoft.com/mssql-tools:latest
+    container_name: tunevault-db-init
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      /bin/bash -c "
+        echo 'Waiting for SQL Server to be ready...';
+        sleep 5;
+        /opt/mssql-tools/bin/sqlcmd -S db -U sa -P 'Aa123456' -d master -i /scripts/init.sql;
+        echo 'Database initialized successfully!';
+      "
+    volumes:
+      - ./init.sql:/scripts/init.sql
 
   # 2. Container Backend
   backend:
@@ -31,7 +46,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=server=db;port=3306;database=DoAnNhom_Db;user=root;password=Aa123456;charset=utf8mb4
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=master;User Id=sa;Password=Aa123456;TrustServerCertificate=True;
     depends_on:
       db:
         condition: service_healthy
@@ -50,5 +65,5 @@ services:
       - backend
 
 volumes:
-  mysql_data:
+  mssql_data:
     driver: local

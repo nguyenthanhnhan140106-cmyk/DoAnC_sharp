@@ -2,7 +2,7 @@ using Application.DTOs;
 using Application.Interfaces;
 using Dapper;
 using Domain.Entities;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Repositories
@@ -16,14 +16,17 @@ namespace Infrastructure.Repositories
             _connectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
-        private MySqlConnection CreateConnection() => new MySqlConnection(_connectionString);
+        private SqlConnection CreateConnection() => new SqlConnection(_connectionString);
 
         public async Task FollowAsync(int userId, int artistId)
         {
             using var conn = CreateConnection();
             await conn.ExecuteAsync(
-                "INSERT IGNORE INTO follows (UserId, ArtistId) VALUES (@UserId, @ArtistId); " +
-                "UPDATE artists SET Followers = Followers + 1 WHERE Id = @ArtistId;",
+                "IF NOT EXISTS (SELECT 1 FROM follows WHERE UserId = @UserId AND ArtistId = @ArtistId) " +
+                "BEGIN " +
+                "    INSERT INTO follows (UserId, ArtistId) VALUES (@UserId, @ArtistId); " +
+                "    UPDATE artists SET Followers = Followers + 1 WHERE Id = @ArtistId; " +
+                "END",
                 new { UserId = userId, ArtistId = artistId });
         }
 
@@ -53,7 +56,7 @@ namespace Infrastructure.Repositories
                 SELECT 
                     a.Id AS ArtistId,
                     a.Name,
-                    (SELECT s.CoverUrl FROM songs s WHERE s.ArtistId = a.Id ORDER BY s.CreatedAt DESC LIMIT 1) AS CoverUrl
+                    (SELECT TOP 1 s.CoverUrl FROM songs s WHERE s.ArtistId = a.Id ORDER BY s.CreatedAt DESC) AS CoverUrl
                 FROM follows f
                 INNER JOIN artists a ON f.ArtistId = a.Id
                 WHERE f.UserId = @UserId
@@ -65,7 +68,10 @@ namespace Infrastructure.Repositories
         {
             using var conn = CreateConnection();
             await conn.ExecuteAsync(
-                "INSERT IGNORE INTO user_follows (FollowerId, FollowedUserId) VALUES (@FollowerId, @FollowedUserId)",
+                "IF NOT EXISTS (SELECT 1 FROM user_follows WHERE FollowerId = @FollowerId AND FollowedUserId = @FollowedUserId) " +
+                "BEGIN " +
+                "    INSERT INTO user_follows (FollowerId, FollowedUserId) VALUES (@FollowerId, @FollowedUserId); " +
+                "END",
                 new { FollowerId = followerId, FollowedUserId = followedUserId });
         }
 
@@ -117,3 +123,4 @@ namespace Infrastructure.Repositories
         }
     }
 }
+

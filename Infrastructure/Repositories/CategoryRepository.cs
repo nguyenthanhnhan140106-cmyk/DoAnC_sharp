@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Application.Interfaces;
 using Domain.Entities;
 using Dapper;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Repositories
@@ -18,7 +18,7 @@ namespace Infrastructure.Repositories
             _connectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
-        private IDbConnection CreateConnection() => new MySqlConnection(_connectionString);
+        private IDbConnection CreateConnection() => new SqlConnection(_connectionString);
 
         public async Task<IEnumerable<Category>> GetAllAsync()
         {
@@ -34,3 +34,4 @@ namespace Infrastructure.Repositories
         }
     }
 }
+

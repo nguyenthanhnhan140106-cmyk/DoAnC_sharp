@@ -2,7 +2,7 @@ using System.Data;
 using Application.Interfaces;
 using Domain.Entities;
 using Dapper;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,7 +18,7 @@ namespace Infrastructure.Repositories
             _connectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
         }
 
-        private IDbConnection CreateConnection() => new MySqlConnection(_connectionString);
+        private IDbConnection CreateConnection() => new SqlConnection(_connectionString);
 
         public async Task<IEnumerable<Song>> GetAllSongsAsync()
         {
@@ -120,7 +120,7 @@ namespace Infrastructure.Repositories
                         const string query = @"
                 INSERT INTO songs (Title, Artist, CoverUrl, AudioUrl, VideoUrl, CategoryId, LyricsUrl, ArtistBanner, ArtistId, CreatedAt) 
                 VALUES (@Title, @Artist, @CoverUrl, @AudioUrl, @VideoUrl, @CategoryId, @LyricsUrl, @ArtistBanner, @ArtistId, @CreatedAt);
-                SELECT LAST_INSERT_ID();";
+                SELECT SCOPE_IDENTITY();";
 
 
             using var connection = CreateConnection();
@@ -161,8 +161,9 @@ namespace Infrastructure.Repositories
             using var connection = CreateConnection();
             foreach (var tag in tags)
             {
-                await connection.ExecuteAsync("INSERT IGNORE INTO media_tags (SongId, Tag) VALUES (@SongId, @Tag)", new { SongId = songId, Tag = tag });
+                await connection.ExecuteAsync("IF NOT EXISTS (SELECT 1 FROM media_tags WHERE SongId = @SongId AND Tag = @Tag) INSERT INTO media_tags (SongId, Tag) VALUES (@SongId, @Tag)", new { SongId = songId, Tag = tag });
             }
         }
     }
 }
+

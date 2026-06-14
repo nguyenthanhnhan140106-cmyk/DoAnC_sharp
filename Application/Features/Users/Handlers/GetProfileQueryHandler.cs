@@ -1,6 +1,6 @@
 using MediatR;
 using Dapper;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Application.DTOs;
 using Application.Features.Users.Queries;
@@ -20,7 +20,7 @@ namespace Application.Features.Users.Handlers
 
         public async Task<UserResponseDTO?> Handle(GetProfileQuery request, CancellationToken cancellationToken)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             
             var query = @"
                 SELECT 
@@ -39,3 +39,4 @@ namespace Application.Features.Users.Handlers
         }
     }
 }
+

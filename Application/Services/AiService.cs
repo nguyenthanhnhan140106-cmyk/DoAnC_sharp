@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Dapper;
 using Application.DTOs;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace Application.Services
@@ -103,3 +103,4 @@ namespace Application.Services
         private static string GetFallbackReply(string message) => "👋 Xin chào! TuneBot đang sẵn sàng giúp bạn.";
     }
 }
+

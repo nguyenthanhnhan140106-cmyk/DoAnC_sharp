@@ -1,7 +1,7 @@
 using System.Data;
 using BCrypt.Net;
 using Dapper;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 using Application.Interfaces;
 using Application.DTOs;
 using System.IdentityModel.Tokens.Jwt;
@@ -41,7 +41,7 @@ namespace Application.Services
                 return (false, "Username và mật khẩu không được để trống.");
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, 12);
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             
             string sql = @"INSERT INTO users (Username, Email, PasswordHash) VALUES (@Username, @Email, @PasswordHash)";
             
@@ -50,7 +50,7 @@ namespace Application.Services
                 var affectedRows = await conn.ExecuteAsync(sql, new { request.Username, request.Email, PasswordHash = passwordHash });
                 return affectedRows > 0 ? (true, "Đăng ký thành công!") : (false, "Không thể tạo tài khoản.");
             }
-            catch (MySqlException ex) when (ex.Number == 1062)
+            catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
             {
                 return (false, "Tên đăng nhập hoặc Email đã tồn tại.");
             }
@@ -66,7 +66,7 @@ namespace Application.Services
 
         public async Task<string?> LoginAsync(LoginRequestDTO request)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             var user = await conn.QuerySingleOrDefaultAsync<UserEntity>("SELECT * FROM users WHERE Username = @Username", new { request.Username });
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash)) return null;
             var claims = new[] { new Claim(ClaimTypes.Name, user.Username), new Claim("id", user.Id.ToString()) };
@@ -89,20 +89,20 @@ namespace Application.Services
 
         public async Task<IEnumerable<UserResponseDTO>> SearchUsersAsync(string keyword, int currentUserId)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             string sql = @"
-                SELECT Id, Username, Email 
+                SELECT TOP 20 Id, Username, Email 
                 FROM users 
                 WHERE (Username LIKE @Keyword OR Email LIKE @Keyword)
                   AND Id != @CurrentUserId
-                LIMIT 20";
+                ";
             
             return await conn.QueryAsync<UserResponseDTO>(sql, new { Keyword = $"%{keyword}%", CurrentUserId = currentUserId });
         }
 
         public async Task<bool> CheckEmailExistsAsync(string email)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             var count = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM users WHERE Email = @Email", new { Email = email });
             return count > 0;
         }
@@ -117,7 +117,7 @@ namespace Application.Services
                 return (false, "Mã OTP không hợp lệ hoặc đã hết hạn.");
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(newPassword, 12);
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             
             string sql = "UPDATE users SET PasswordHash = @PasswordHash WHERE Email = @Email";
             var affectedRows = await conn.ExecuteAsync(sql, new { PasswordHash = passwordHash, Email = email });
@@ -129,3 +129,5 @@ namespace Application.Services
         }
     }
 }
+
+

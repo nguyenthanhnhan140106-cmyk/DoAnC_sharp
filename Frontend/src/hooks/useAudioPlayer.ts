@@ -12,7 +12,14 @@ export function useAudioPlayer() {
   const [currentSong, setCurrentSong] = useState<Song | null>(() => {
     try {
       const saved = localStorage.getItem('lastPlayedSong');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.title?.includes('?') || parsed.artist?.includes('?')) {
+          localStorage.removeItem('lastPlayedSong');
+          return null;
+        }
+        return parsed;
+      }
     } catch (e) { console.error('Failed to parse last played song', e); }
     return null;
   });
@@ -27,7 +34,15 @@ export function useAudioPlayer() {
   const [recentlyPlayed, setRecentlyPlayed] = useState<Song[]>(() => {
     try {
       const saved = localStorage.getItem('recentlyPlayed');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Tự động lọc các bài bị lỗi phông chữ (chứa dấu ?) từ cache cũ ở cả title và artist
+        const validSongs = parsed.filter((s: Song) => s.title && !s.title.includes('?') && (!s.artist || !s.artist.includes('?')));
+        if (validSongs.length !== parsed.length) {
+          localStorage.setItem('recentlyPlayed', JSON.stringify(validSongs));
+        }
+        return validSongs;
+      }
     } catch (e) { console.error('Failed to parse recently played', e); }
     return [];
   });

@@ -1,6 +1,6 @@
 using MediatR;
 using Dapper;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -24,7 +24,7 @@ namespace Application.Features.Auth.Handlers
 
         public async Task<string?> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             
             // We can just use dynamic here to avoid importing Domain.Entities if not needed, 
             // but let's query the specific fields we need.
@@ -66,3 +66,4 @@ namespace Application.Features.Auth.Handlers
         }
     }
 }
+

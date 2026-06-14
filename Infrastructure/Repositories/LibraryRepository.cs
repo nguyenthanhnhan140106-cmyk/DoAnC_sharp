@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
 using Dapper;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 
 namespace Infrastructure.Repositories
 {
@@ -19,16 +19,19 @@ namespace Infrastructure.Repositories
 
         public async Task SaveAlbumAsync(int userId, int albumId)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             const string sql = @"
-                INSERT IGNORE INTO user_saved_albums (UserId, AlbumId, SavedAt)
-                VALUES (@UserId, @AlbumId, UTC_TIMESTAMP())";
+                IF NOT EXISTS (SELECT 1 FROM user_saved_albums WHERE UserId = @UserId AND AlbumId = @AlbumId)
+                BEGIN
+                    INSERT INTO user_saved_albums (UserId, AlbumId, SavedAt)
+                    VALUES (@UserId, @AlbumId, GETUTCDATE())
+                END";
             await conn.ExecuteAsync(sql, new { UserId = userId, AlbumId = albumId });
         }
 
         public async Task RemoveAlbumAsync(int userId, int albumId)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             const string sql = @"
                 DELETE FROM user_saved_albums
                 WHERE UserId = @UserId AND AlbumId = @AlbumId";
@@ -37,7 +40,7 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> IsAlbumSavedAsync(int userId, int albumId)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             const string sql = @"
                 SELECT COUNT(1) FROM user_saved_albums
                 WHERE UserId = @UserId AND AlbumId = @AlbumId";
@@ -47,7 +50,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<AlbumDTO>> GetSavedAlbumsAsync(int userId)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             const string sql = @"
                 SELECT a.Id, a.Title, a.CoverUrl,
                        COALESCE(art.Name, 'Various Artists') AS ArtistName
@@ -60,3 +63,4 @@ namespace Infrastructure.Repositories
         }
     }
 }
+

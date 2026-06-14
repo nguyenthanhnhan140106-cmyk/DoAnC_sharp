@@ -2,7 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.DTOs;
 using Dapper;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 
 namespace Application.Services
 {
@@ -18,7 +18,7 @@ namespace Application.Services
         // Lấy toàn bộ danh sách Album
         public async Task<IEnumerable<AlbumDTO>> GetAllAlbumsAsync()
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             
             var sql = @"
                 SELECT a.Id, a.Title, a.CoverUrl, 
@@ -33,7 +33,7 @@ namespace Application.Services
         // Lấy chi tiết 1 album kèm danh sách bài hát
         public async Task<AlbumDTO?> GetAlbumDetailsAsync(int albumId)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = new SqlConnection(_connectionString);
             
             var sql = @"
                 SELECT a.Id, a.Title, a.CoverUrl, 
@@ -59,3 +59,4 @@ namespace Application.Services
         }
     }
 }
+
