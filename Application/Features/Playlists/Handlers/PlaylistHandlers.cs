@@ -18,7 +18,8 @@ namespace Application.Features.Playlists.Handlers
         IRequestHandler<CreatePlaylistCommand, PlaylistDTO>,
         IRequestHandler<AddSongToPlaylistCommand, bool>,
         IRequestHandler<DeletePlaylistCommand, bool>,
-        IRequestHandler<RemoveSongFromPlaylistCommand, bool>
+        IRequestHandler<RemoveSongFromPlaylistCommand, bool>,
+        IRequestHandler<TogglePlaylistPrivacyCommand, bool>
     {
         private readonly IPlaylistService _playlistService; // temporarily wrapping Service since it has complex raw SQL logic
 
@@ -65,6 +66,11 @@ namespace Application.Features.Playlists.Handlers
         public async Task<bool> Handle(RemoveSongFromPlaylistCommand request, CancellationToken cancellationToken)
         {
             return await _playlistService.RemoveSongFromPlaylistAsync(request.PlaylistId, request.SongId);
+        }
+
+        public async Task<bool> Handle(TogglePlaylistPrivacyCommand request, CancellationToken cancellationToken)
+        {
+            return await _playlistService.TogglePlaylistPrivacyAsync(request.Id, request.IsPublic);
         }
     }
 }

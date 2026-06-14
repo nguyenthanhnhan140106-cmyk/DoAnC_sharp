@@ -13,4 +13,6 @@ namespace Application.Features.Songs.Queries
     public record GetSongsByCategoryQuery(string Category) : IRequest<IEnumerable<SongDTO>>;
     
     public record GetSongsByArtistQuery(int ArtistId) : IRequest<IEnumerable<SongDTO>>;
+    
+    public record GetSongsByUploaderQuery(int UploaderId) : IRequest<IEnumerable<SongDTO>>;
 }

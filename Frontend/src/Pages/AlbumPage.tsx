@@ -140,9 +140,13 @@ export default function AlbumPage() {
       const targetPlaylist = playlists.find(p => p.id === playlistId);
       const playlistName = targetPlaylist ? targetPlaylist.name : "Playlist";
       
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const results = await Promise.all(
         songs.map(song =>
-          fetch(`/api/playlists/${playlistId}/songs/${song.id}`, { method: 'POST' })
+          fetch(`/api/playlists/${playlistId}/songs/${song.id}`, { method: 'POST', headers })
         )
       );
       
@@ -174,9 +178,13 @@ export default function AlbumPage() {
     const newName = `Playlist #${nextNumber}`;
 
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`/api/playlists/user/${user.id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           name: newName,
           description: '',
@@ -186,9 +194,13 @@ export default function AlbumPage() {
 
       if (res.ok) {
         const newPlaylist = await res.json();
+        
+        const songHeaders: any = {};
+        if (token) songHeaders['Authorization'] = `Bearer ${token}`;
+
         const results = await Promise.all(
           songs.map(song =>
-            fetch(`/api/playlists/${newPlaylist.id}/songs/${song.id}`, { method: 'POST' })
+            fetch(`/api/playlists/${newPlaylist.id}/songs/${song.id}`, { method: 'POST', headers: songHeaders })
           )
         );
         
@@ -570,6 +582,21 @@ export default function AlbumPage() {
                           <p style={{ margin: 0, fontSize: 13, color: '#b3b3b3' }}>{song.artist}</p>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8, gap: 16 }}>
+                          {song.videoUrl && (
+                            <button 
+                              style={{ background: 'none', border: '1px solid #b3b3b3', borderRadius: '4px', color: '#b3b3b3', cursor: 'pointer', padding: '2px 6px', fontSize: '10px', fontWeight: 'bold' }}
+                              title="Xem MV"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/video/${song.id}`);
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#fff'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.color = '#b3b3b3'; e.currentTarget.style.borderColor = '#b3b3b3'; }}
+                            >
+                              MV
+                            </button>
+                          )}
+
                           {(isHovered || activeSongMenu === index || isSongLiked(song.id)) && (
                             <button style={{ background: 'none', border: 'none', color: isSongLiked(song.id) ? '#1db954' : '#b3b3b3', cursor: 'pointer', padding: 4 }} title={isSongLiked(song.id) ? "Đã lưu vào Liked Songs" : "Thêm vào danh sách phát"}
                               onClick={(e) => { 

@@ -11,6 +11,7 @@ namespace Application.Interfaces
         Task<bool> AddSongToPlaylistAsync(int playlistId, int songId);
         Task<bool> RemoveSongFromPlaylistAsync(int playlistId, int songId);
         Task<bool> DeletePlaylistAsync(int id);
+        Task<bool> TogglePlaylistPrivacyAsync(int id, bool isPublic);
         Task<IEnumerable<int>> GetPlaylistsContainingSongAsync(int userId, int songId);
     }
 }

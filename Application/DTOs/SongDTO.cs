@@ -20,6 +20,7 @@ namespace Application.DTOs
 
         // 🟢 BỔ SUNG CÁC TRƯỜNG THÔNG TIN NGHỆ SĨ THẬT ĐỂ TRẢ VỀ FRONTEND DIALOG
         public int? ArtistId { get; set; }
+        public int? UploaderId { get; set; }
         public int? AlbumId { get; set; }
         public string? AlbumName { get; set; }
         public string VideoUrl { get; set; } = string.Empty;
@@ -42,6 +43,7 @@ namespace Application.DTOs
         public string? CategoryName { get; set; }
         public string? LyricsUrl { get; set; }
         public int? ArtistId { get; set; } // Thêm nếu sau này làm giao diện Admin tạo bài hát gắn với Ca sĩ
+        public int? UploaderId { get; set; }
     }
 
     public class UpdateSongDTO

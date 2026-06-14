@@ -127,7 +127,10 @@ SET IDENTITY_INSERT categories ON;
 INSERT INTO categories (Id, Name, Slug, Description, CoverUrl) VALUES
 (1, N'It`s New Music Friday!', N'friday', N'Những bản hit mới nhất được cập nhật mỗi thứ 6', N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop'),
 (2, N'V-Sound', N'vsound', N'Nhạc Việt thịnh hành nhất', N'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop'),
-(3, N'Thế Giới Rap', N'rap', N'Nơi hội tụ các Rapper cực chất', N'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500&h=240&fit=crop');
+(3, N'Thế Giới Rap', N'rap', N'Nơi hội tụ các Rapper cực chất', N'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500&h=240&fit=crop'),
+(4, N'Pop', N'pop', N'Nhạc Pop nổi bật nhất', N'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&h=240&fit=crop'),
+(5, N'Podcast', N'podcast', N'Podcast & Trò chuyện', N'https://images.unsplash.com/photo-1478737270239-2f02b85af684?w=500&h=240&fit=crop'),
+(6, N'Other', N'other', N'Các thể loại khác', N'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=240&fit=crop');
 SET IDENTITY_INSERT categories OFF;
 GO
 
@@ -145,9 +148,11 @@ CREATE TABLE songs (
     ArtistBanner NVARCHAR(500) NULL,
     LyricsUrl NVARCHAR(MAX) NULL,
     ArtistId INT NULL,
+    UploaderId INT NULL,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ArtistId) REFERENCES artists(Id) ON DELETE SET NULL,
-    FOREIGN KEY (CategoryId) REFERENCES categories(Id) ON DELETE SET NULL
+    FOREIGN KEY (CategoryId) REFERENCES categories(Id) ON DELETE SET NULL,
+    FOREIGN KEY (UploaderId) REFERENCES users(Id) ON DELETE SET NULL
 );
 GO
 
@@ -603,6 +608,7 @@ CREATE TABLE playlists (
     UserId INT NOT NULL,
     Description NVARCHAR(MAX),
     CoverUrl NVARCHAR(500) NULL,
+    IsPublic BIT DEFAULT 1,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
 );

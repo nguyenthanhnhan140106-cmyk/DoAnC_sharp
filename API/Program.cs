@@ -5,11 +5,22 @@ using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Infrastructure.Services; // Thêm dòng này để tìm thấy EmailService
 using API.Hubs; // SignalR Hub
 using Application; // BỔ SUNG: Thêm thư viện Application
 using FluentValidation; // BỔ SUNG: Bắt lỗi Validation
+using Infrastructure.Configuration; // BỔ SUNG: Cloudinary Config
+using Infrastructure.Services; // Thêm lại
 var builder = WebApplication.CreateBuilder(args);
+
+// BỔ SUNG: Tăng giới hạn dung lượng upload lên 100MB cho Video
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 104857600; // 100MB
+});
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // 100MB
+});
 
 // Lấy connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
@@ -57,6 +68,13 @@ builder.Services.AddScoped<Application.Interfaces.ILibraryRepository>(_ => new I
 
 // 🟢 BỔ SUNG: Đăng ký Follow Repository (theo dõi nghệ sĩ)
 builder.Services.AddScoped<Application.Interfaces.IFollowRepository, Infrastructure.Repositories.FollowRepository>();
+
+// 🟢 BỔ SUNG: Đăng ký MediaShare Repository
+builder.Services.AddScoped<Application.Interfaces.IMediaShareRepository>(_ => new Infrastructure.Repositories.MediaShareRepository(connectionString));
+
+// 🟢 BỔ SUNG: Đăng ký Cloudinary
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 // 🟢 BỔ SUNG: Đăng ký MediatR và FluentValidation (CQRS Pipeline)
 builder.Services.AddApplication();
@@ -119,6 +137,7 @@ app.Use(async (context, next) =>
     catch (Exception ex)
     {
         // Ghi log lỗi tại đây nếu có ILogger
+        Console.WriteLine($"[GLOBAL ERROR HANDLER] {ex.ToString()}");
         context.Response.StatusCode = 500;
         context.Response.ContentType = "application/json";
         

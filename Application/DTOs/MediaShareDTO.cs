@@ -10,5 +10,9 @@ namespace Application.DTOs
         public int? SongId { get; set; }
         public int? PlaylistId { get; set; }
         public DateTime SharedAt { get; set; }
+        public string SenderName { get; set; } = string.Empty;
+        public string MediaTitle { get; set; } = string.Empty;
+        public string? MediaCover { get; set; }
+        public string MediaType { get; set; } = string.Empty;
     }
 }

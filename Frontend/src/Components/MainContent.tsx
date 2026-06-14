@@ -78,19 +78,13 @@ const SongCard = ({ song, onHover }: { song: Song; onHover?: (url: string | null
 };
 
 const VideoCard = ({ song, onHover }: { song: Song; onHover?: (url: string | null) => void }) => {
-  const { playSong, currentSong, isPlaying } = useMusic();
+  const { currentSong, isPlaying } = useMusic();
+  const navigate = useNavigate();
   const isActive = currentSong?.id === song.id;
 
   const handleForcePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    if (currentSong?.id !== song.id) {
-      playSong(song);
-    }
-
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('OPEN_VIDEO_MODAL'));
-    }, 150);
+    navigate(`/video/${song.id}`);
   };
 
   return (

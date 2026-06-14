@@ -13,4 +13,5 @@ namespace Application.Features.Notifications.Commands
 namespace Application.Features.Notifications.Queries
 {
     public record GetMyNotificationsQuery(int UserId) : IRequest<IEnumerable<Notification>>;
+    public record GetSharedWithMeQuery(int ReceiverId) : IRequest<IEnumerable<MediaShareDTO>>;
 }

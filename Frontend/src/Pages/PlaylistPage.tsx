@@ -73,8 +73,13 @@ export default function PlaylistPage() {
 
   const handleAddSongToPlaylist = async (song: Song, playlistId: number) => {
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`/api/playlists/${playlistId}/songs/${song.id}`, {
-        method: 'POST'
+        method: 'POST',
+        headers
       });
       if (res.ok) {
         const targetPlaylist = playlists.find(p => p.id === playlistId);
@@ -104,9 +109,13 @@ export default function PlaylistPage() {
     const nextNumber = maxNumber + 1;
 
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`/api/playlists/user/${user.id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           name: `Playlist #${nextNumber}`,
           description: '',
@@ -116,8 +125,13 @@ export default function PlaylistPage() {
 
       if (res.ok) {
         const newPlaylist = await res.json();
+        
+        const songHeaders: any = {};
+        if (token) songHeaders['Authorization'] = `Bearer ${token}`;
+
         const addRes = await fetch(`/api/playlists/${newPlaylist.id}/songs/${song.id}`, {
-          method: 'POST'
+          method: 'POST',
+          headers: songHeaders
         });
         if (addRes.ok) {
           showToast(`Added to ${newPlaylist.name}`, song.coverUrl);
@@ -135,6 +149,26 @@ export default function PlaylistPage() {
     }
   };
 
+  const handleTogglePrivacy = async () => {
+    if (!playlist || playlist.id === ('liked' as any) || !user) return;
+    try {
+      const newIsPublic = !playlist.isPublic;
+      const res = await fetch(`/api/playlists/${playlist.id}/privacy`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newIsPublic)
+      });
+      if (res.ok) {
+        setPlaylist(prev => prev ? { ...prev, isPublic: newIsPublic } : prev);
+        showToast?.(`Đã đổi playlist sang trạng thái ${newIsPublic ? 'Công khai' : 'Riêng tư'}`);
+      } else {
+        const text = await res.text();
+        showToast?.(text || 'Không thể thay đổi trạng thái.');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     if (id === 'liked') {
@@ -145,6 +179,7 @@ export default function PlaylistPage() {
         userId: user?.id || 0,
         coverUrl: 'none',
         creatorName: user?.username || 'Bạn',
+        isPublic: false,
         songs: likedSongs || [],
       });
       setShowSearch(false);
@@ -192,8 +227,13 @@ export default function PlaylistPage() {
     }
 
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`/api/playlists/${playlist.id}/songs/${song.id}`, {
-        method: 'POST'
+        method: 'POST',
+        headers
       });
       if (res.ok) {
         // Cập nhật giao diện: thêm bài hát vào danh sách playlist
@@ -377,6 +417,27 @@ export default function PlaylistPage() {
                         <svg viewBox="0 0 16 16" width="32" height="32" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zM7.25 4v4.44l-1.47-1.47-1.06 1.06L8 11.31l3.28-3.28-1.06-1.06-1.47 1.47V4h-1.5z" /></svg>
                       </button>
 
+                      {/* Nút Toggle Privacy */}
+                      {user && user.id === playlist.userId && (
+                        <button
+                          className="playlist-icon-btn"
+                          title={playlist.isPublic ? 'Công khai (Nhấn để đổi thành Riêng tư)' : 'Riêng tư (Nhấn để đổi thành Công khai)'}
+                          onClick={handleTogglePrivacy}
+                          style={{
+                            color: playlist.isPublic ? '#1db954' : '#b3b3b3',
+                            transition: 'color 0.15s, transform 0.15s'
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.08)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.color = playlist.isPublic ? '#1db954' : '#b3b3b3'; e.currentTarget.style.transform = 'scale(1)'; }}
+                        >
+                          {playlist.isPublic ? (
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                          ) : (
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                          )}
+                        </button>
+                      )}
+
                       {/* Nút More Options */}
                       <div className="album-more-menu-container" ref={menuRef}>
                         <button className="playlist-icon-btn" title="Tùy chọn khác" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -513,6 +574,21 @@ export default function PlaylistPage() {
 
                           {/* Nút Cộng và 3 chấm */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8, gap: 16 }}>
+                            {song.videoUrl && (
+                              <button 
+                                style={{ background: 'none', border: '1px solid #b3b3b3', borderRadius: '4px', color: '#b3b3b3', cursor: 'pointer', padding: '2px 6px', fontSize: '10px', fontWeight: 'bold' }}
+                                title="Xem MV"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/video/${song.id}`);
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#fff'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.color = '#b3b3b3'; e.currentTarget.style.borderColor = '#b3b3b3'; }}
+                              >
+                                MV
+                              </button>
+                            )}
+
                             {(hoveredIndex === idx || activeSongMenu === idx || isSongLiked(song.id)) && (
                               <button style={{ background: 'none', border: 'none', color: isSongLiked(song.id) ? '#1db954' : '#b3b3b3', cursor: 'pointer', padding: 4 }} title={isSongLiked(song.id) ? "Đã lưu vào Liked Songs" : "Thêm vào danh sách phát"}
                                 onClick={(e) => { 

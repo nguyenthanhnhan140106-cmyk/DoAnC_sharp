@@ -92,5 +92,18 @@ namespace API.Controllers
             var updatedCount = await _mediator.Send(new MarkAllNotificationsAsReadCommand(currentUserId));
             return Ok(new { Message = $"Đã đánh dấu {updatedCount} thông báo là đã đọc." });
         }
+
+        // 🟢 BỔ SUNG: Lấy danh sách MediaShare (Inbox)
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        [HttpGet("shared")]
+        public async Task<IActionResult> GetSharedMedia()
+        {
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+                return Unauthorized(new { Message = "Vui lòng đăng nhập." });
+
+            var shares = await _mediator.Send(new GetSharedWithMeQuery(currentUserId));
+            return Ok(shares);
+        }
     }
 }
