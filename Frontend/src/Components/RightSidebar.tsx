@@ -309,7 +309,49 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
 
   const songData = currentSong;
   const activeCover = songData.coverUrl || `https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop`;
-  const artistBanner = songData.artistBanner || `https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop`;
+  const artistBanner =
+  songData.title === "Sài Gòn đâu có lạnh"
+    ? "https://bloganchoi.com/wp-content/uploads/2021/12/chill-la-gi-nghe-nhac-chill-4.jpg"
+    : songData.title === "Định mệnh tình yêu"
+    ? "https://haycafe.vn/wp-content/uploads/2022/03/Anh-bia-zalo-tranh-ve-phong-canh.jpg"
+    : songData.title === "Liễu Thanh Yên"
+    ? "https://khoinguonsangtao.vn/wp-content/uploads/2022/12/hinh-anh-bia-youtube-anime-bau-troi-huyen-ao.jpg"
+    : songData.title === "Không buông"
+    ? "https://image.dienthoaivui.com.vn/x,webp,q90/https://dashboard.dienthoaivui.com.vn/uploads/dashboard/editor_upload/anh-bia-facebook-4.jpg"
+    : songData.title === "100 cuộc gọi nhỡ"
+    ? "https://cellphones.com.vn/sforum/wp-content/uploads/2024/04/anh-bia-facebook-14.jpg"
+    : songData.title === "01 ngoại lệ"
+    ? "https://antimatter.vn/wp-content/uploads/2022/05/hinh-anh-bia-zalo.jpg"
+    : songData.title === "Về bên anh"
+    ? "https://tse4.mm.bing.net/th/id/OIP.r0QBLpsynGyw-Y2vB9Ki2QHaJ4?r=0&cb=thfvnextfalcon2&rs=1&pid=ImgDetMain&o=7&rm=3"
+    : songData.title === "Tuesday"
+    ? "https://tse4.mm.bing.net/th/id/OIP.r0QBLpsynGyw-Y2vB9Ki2QHaJ4?r=0&cb=thfvnextfalcon2&rs=1&pid=ImgDetMain&o=7&rm=3"
+    : songData.title === "Về bên anh"
+    ? "https://image.dienthoaivui.com.vn/x,webp,q90/https://dashboard.dienthoaivui.com.vn/uploads/dashboard/editor_upload/anh-bia-facebook-7.jpg"
+    : songData.title === "Sóng gió"
+    ? "https://khoinguonsangtao.vn/wp-content/uploads/2022/12/anh-bia-zalo-anime-hoang-hon-buon.jpg"
+    : songData.title === "Nơi này có anh"
+    ? "https://mayweddingstudio.vn/wp-content/uploads/anh-bia-zalo-phong-canh-1.webp"
+    : songData.title === "Mất kết nối"
+    ? "https://i.pinimg.com/736x/f4/6b/4a/f46b4ae777081480fe2ec455d1b0b3a6.jpg"
+    : songData.title === "Em thua cô ta"
+    ? "https://i.pinimg.com/736x/f4/6b/4a/f46b4ae777081480fe2ec455d1b0b3a6.jpg"
+    : songData.title === "Thanh Tân"
+    ? "https://images.pexels.com/photos/8240280/pexels-photo-8240280.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    : songData.title === "Ngày rời chuyến bay"
+    ? "https://tse2.mm.bing.net/th/id/OIP.ye4X5PiclvsYnHBV_UOcAQHaE8?r=0&cb=thfvnextfalcon2&rs=1&pid=ImgDetMain&o=7&rm=3"
+    : songData.title === "Đớn đau vô cùng"
+    ? "https://inkythuatso.com/uploads/thumbnails/800/2022/04/anh-bia-phong-canh-dep-cho-facebook-9-12-08-30-53.jpg"
+    : songData.title === "Thủ đô Cypher"
+    ? "https://intphcm.com/data/upload/poster-am-nhac-dien-tu.jpg"
+    : songData.title === "Ex hate me"
+    ? "https://img4.thuthuatphanmem.vn/uploads/2020/12/26/anh-toi-yeu-am-nhac_050504782.jpg"
+    : songData.title === "She never know"
+    ? "https://tse1.mm.bing.net/th/id/OIP.HX9pqngKohaMNZnLSXxdfwHaH0?r=0&cb=thfvnextfalcon2&w=1566&h=1655&rs=1&pid=ImgDetMain&o=7&rm=3"
+
+
+
+    : "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop";
 
   // Kiểm tra video hợp lệ
   const hasVideo = !!songData.videoUrl;
