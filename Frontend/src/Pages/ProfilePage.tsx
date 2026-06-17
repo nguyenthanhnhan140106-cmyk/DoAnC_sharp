@@ -318,10 +318,15 @@ export default function ProfilePage() {
       )}
 
       {isUploadedModalOpen && (
-        <div className="follow-modal-overlay" onClick={() => setIsUploadedModalOpen(false)}>
-          <div className="follow-modal-content" onClick={e => e.stopPropagation()} style={{ width: '600px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
-            <div className="follow-modal-header" style={{ padding: '24px', borderBottom: '1px solid #333' }}>
-              <h2 style={{ margin: 0, fontSize: '24px', color: '#fff' }}>Uploaded Items</h2>
+        <div className="auth-modal-overlay" onClick={() => setIsUploadedModalOpen(false)} style={{ zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="auth-modal-content" onClick={e => e.stopPropagation()} style={{ width: '600px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', background: '#181818', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
+            <div className="follow-modal-header" style={{ padding: '24px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <h2 style={{ margin: 0, fontSize: '24px', color: '#fff' }}>Uploaded Items</h2>
+                <button onClick={() => { setIsUploadedModalOpen(false); navigate('/upload'); }} style={{ background: '#1db954', color: '#000', border: 'none', borderRadius: '500px', padding: '6px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                  Upload New
+                </button>
+              </div>
               <button className="close-modal-btn" onClick={() => setIsUploadedModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#b3b3b3', cursor: 'pointer' }}>
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>

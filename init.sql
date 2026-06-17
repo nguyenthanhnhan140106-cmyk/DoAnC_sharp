@@ -1,4 +1,4 @@
-﻿-- =========================================================
+-- =========================================================
 -- TUNEVAULT - SCRIPT KHỞI TẠO DATABASE VỚI CLOUDINARY LINKS
 -- =========================================================
 
@@ -91,9 +91,9 @@ SET IDENTITY_INSERT artists OFF;
 
 -- ─────────────────────────────────────────────────────────
 
--- 1.5. BẢNG CATE RIES
+-- 1.5. BẢNG CATEGORIES
 -- ─────────────────────────────────────────────────────────
-CREATE TABLE cate ries (
+CREATE TABLE categories (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(255) NOT NULL,
     Slug NVARCHAR(255) NOT NULL UNIQUE,
@@ -103,8 +103,8 @@ CREATE TABLE cate ries (
  
 
 
-SET IDENTITY_INSERT cate ries ON;
-INSERT INTO cate ries (Id, Name, Slug, Description, CoverUrl) VALUES
+SET IDENTITY_INSERT categories ON;
+INSERT INTO categories (Id, Name, Slug, Description, CoverUrl) VALUES
 (1, N'It`s New Music Friday!', N'friday', N'Những bản hit mới nhất được cập nhật mỗi thứ 6', N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop'),
 (2, N'V-Sound', N'vsound', N'Nhạc Việt thịnh hành nhất', N'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop'),
 (3, N'Thế Giới Rap', N'rap', N'Nơi hội tụ các Rapper cực chất', N'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500&h=240&fit=crop'),
@@ -220,58 +220,58 @@ INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, VideoUrl, CategoryId, 
      2, N'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=240&fit=crop', 3,N'/lyrics/bacphan.lrc', GETDATE()),
 
 (14, N'Túc Duyên Lofi',                N'Elly',
-     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781681904/Screenshot_2026-06-17_143410_yuxslt.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660154/T%C3%BAc_Duy%C3%AAn_Lofi_uisjpw.mp3',
      '',
      1, N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12,N'/lyrics/tucduyen.lrc', GETDATE()),
 (15, N'Góc Nhỏ Trong Tim Lofi',       N'Elly',
-     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781681903/Screenshot_2026-06-17_143347_kdieme.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660154/G%C3%B3c_Nh%E1%BB%8F_Trong_Tim_Lofi_w4njus.mp3',
      '',
      1, N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12,N'/lyrics/gocnhotrongtim.lrc', GETDATE()),
 (16, N'Hoang Mang Lofi',              N'Elly',
-     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781681905/Screenshot_2026-06-17_143435_iezm0i.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660154/Hoang_Mang_Lofi_z1hp0i.mp3',
      '',
      1, N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12 ,N'/lyrics/hoangmang.lrc', GETDATE()),
 (17, N'Nhường Lại Nỗi Đau Lofi',     N'Elly',
-     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781681905/Screenshot_2026-06-17_143519_aea9pl.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660153/Nh%C6%B0%E1%BB%9Dng_L%E1%BA%A1i_N%E1%BB%97i_%C4%90au_Lofi_zr6bnn.mp3',
      '',
      1, N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12,N'/lyrics/nhuonglainoidau.lrc', GETDATE()),
 (18, N'Em Thua Người Ta Nhiều Lắm Lofi', N'Elly',
-     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781681905/Screenshot_2026-06-17_143535_j5w2ti.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660153/Em_Thua_Ng%C6%B0%E1%BB%9Di_Ta_Nhi%E1%BB%81u_L%E1%BA%AFm_Lofi_uhbest.mp3',
      '',
      1, N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12,N'/lyrics/emthuanguoitanhieulam.lrc', GETDATE()),
 (19, N'Bên Nhau Cả Đời Lofi',         N'Elly',
-     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781681905/Screenshot_2026-06-17_143554_qh7wad.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660153/B%C3%AAn_Nhau_C%E1%BA%A3_%C4%90%E1%BB%9Di_Lofi_povrxf.mp3',
      '',
      1, N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12,N'/lyrics/bennhaucadoi.lrc', GETDATE()),
 (20, N'Ngôi Nhà Hạnh Phúc Lofi',      N'Elly',
-     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781681906/Screenshot_2026-06-17_143614_vyp80v.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660152/Ng%C3%B4i_Nh%C3%A0_H%E1%BA%A1nh_Ph%C3%BAc_Lofi_sopoqg.mp3',
      '',
      1, N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12,N'/lyrics/ngoinhahanhphuc.lrc', GETDATE()),
 (21, N'Dặm Trong Tim Lofi',           N'Elly',
-     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781681906/Screenshot_2026-06-17_143633_livn5v.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660152/D%E1%BA%B1m_Trong_Tim_Lofi_jeca4h.mp3',
      '',
      1, N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12,N'/lyrics/damtrongtim.lrc', GETDATE()),
 (22, N'Nửa Vầng Trăng Lofi',          N'Elly',
-     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781681906/Screenshot_2026-06-17_143653_bnur3y.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660151/N%E1%BB%ADa_V%E1%BA%A7ng_Tr%C4%83ng_Lofi_b6nhos.mp3',
      '',
      1, N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12,N'/lyrics/nuavangtrang.lrc', GETDATE()),
 (23, N'Anh Lofi',                     N'Elly',
-     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780660046/Screenshot_2026-06-05_184624_q5mqnh.png',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781681907/Screenshot_2026-06-17_143703_mhecu5.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780660149/Anh_Lofi_mfw3vv.mp3',
      '',
      1, N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=400&fit=crop', 12,N'/lyrics/anh.lrc', GETDATE()),
 (24, N'Hiểu lầm', N'Changg',
+     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113834_dvharv.png',
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780720503/Hi%E1%BB%83u_L%E1%BA%A7m_plbimo.mp3',
-     NULL,
      '',
      1, N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113834_dvharv.png', 13,NULL, GETDATE()),
 (25, N'Em không hiểu', N'Changg',
@@ -281,7 +281,7 @@ INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, VideoUrl, CategoryId, 
      1, N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_114001_oq3gwg.png', 13,NULL, GETDATE()),
 (26, N'Anh đang nơi đâu', N'Changg',
      N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113920_iq4rr0.png',
-     NULL,
+     N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1781682572/Anh_%C4%90ang_N%C6%A1i_%C4%90%C3%A2u_liucim.mp3',
      '',
      1, N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780721003/Screenshot_2026-06-06_113920_iq4rr0.png', 13,NULL, GETDATE()),
 (27, N'Và thế giới đã mất đi một người cô đơn', N'Changg',
@@ -483,15 +483,15 @@ INSERT INTO albums (Id, Title, CoverUrl, ArtistId, CreatedAt) VALUES
 (7, N'Nhạc Trẻ Gây Nghiện',
     N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1780657516/chatgayhai_vgatml.jpg', NULL, GETDATE()),
 (8, N'Bolero Tình Ca Giao Thời',
-    N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=500&fit=crop', NULL, GETDATE()),
+    N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781680484/OIP_4_b3uamy.jpg', NULL, GETDATE()),
 (9, N'Ballad Xoa Dịu Trái Tim',
-    N'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=500&h=500&fit=crop', NULL, GETDATE()),
+    N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781680483/OIP_3_zliwgp.jpg', NULL, GETDATE()),
 (10, N'Acoustic Thư Giãn Cuối Tuần',
-    N'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop', NULL, GETDATE()),
+    N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781680483/OIP_2_prerfx.jpg', NULL, GETDATE()),
 (11, N'Nhạc Sàn Sôi Động Nhất',
-    N'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=500&fit=crop', NULL, GETDATE()),
+    N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781680483/OIP_1_qbw9of.jpg', NULL, GETDATE()),
 (12, N'Indie Khám Phá Âm Nhạc Mới',
-    N'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=500&fit=crop', NULL, GETDATE());
+    N'https://res.cloudinary.com/dawcwuwmm/image/upload/v1781680484/OIP_jhy7qi.jpg', NULL, GETDATE());
 SET IDENTITY_INSERT albums OFF;
 
 
@@ -510,68 +510,41 @@ CREATE TABLE album_songs (
 
 
 INSERT INTO album_songs (AlbumId, SongId, OrderNumber) VALUES
-(1, 1,  1),
-(1, 2,  2),
-(1, 3,  3),
-(1, 4,  4),
-(1, 5,  5),
-(1, 6,  6),
-(1, 7,  7),
-(1, 8,  8),
-(1, 9,  9),
-(1, 10, 10),
+-- Album 1: Sơn Tùng M-TP (Song 4)
+(1, 4, 1),
 
-(2, 14, 1),
-(2, 15, 2),
-(2, 16, 3),
-(2, 17, 4),
-(2, 18, 5),
-(2, 19, 6),
-(2, 20, 7),
-(2, 21, 8),
-(2, 22, 9),
-(2, 23, 10),
+-- Album 2: Elly (Lofi Chill)
+(2, 14, 1), (2, 15, 2), (2, 16, 3), (2, 17, 4), (2, 18, 5), (2, 19, 6), (2, 20, 7), (2, 21, 8), (2, 22, 9), (2, 23, 10),
 
-(3, 24, 1),
-(3, 25, 2),
-(3, 26, 3),
-(3, 27, 4),
-(3, 28, 5),
-(3, 29, 6),
-(3, 30, 7),
-(3, 31, 8),
-(3, 32, 9),
+-- Album 3: Changg
+(3, 24, 1), (3, 25, 2), (3, 26, 3), (3, 27, 4), (3, 28, 5), (3, 29, 6), (3, 30, 7), (3, 31, 8), (3, 32, 9),
 
-(4, 2, 1),
-(4, 3, 2),
-(4, 7, 3),
+-- Album 4: Jack-J97
+(4, 2, 1), (4, 3, 2), (4, 7, 3), (4, 13, 4), (4, 33, 5), (4, 39, 6), (4, 40, 7), (4, 42, 8), (4, 43, 9), (4, 51, 10),
 
-(5, 52, 1),
-(5, 53, 2),
-(5, 54, 3),
+-- Album 5: Rap Cực Chất (Andree, LowG, Bray, JustaTee, HIEUTHUHAI, Karik, MCK, Ronboogz)
+(5, 35, 1), (5, 37, 2), (5, 44, 3), (5, 45, 4), (5, 52, 5), (5, 53, 6), (5, 54, 7), (5, 55, 8), (5, 56, 9), (5, 57, 10), (5, 58, 11), (5, 59, 12),
 
-(6, 34, 1),
-(6, 35, 2),
-(6, 36, 3),
+-- Album 6: V-Pop Đình Đám
+(6, 1, 1), (6, 5, 2), (6, 6, 3), (6, 8, 4), (6, 9, 5), (6, 11, 6), (6, 12, 7), (6, 34, 8), (6, 36, 9), (6, 50, 10),
 
-(7, 10, 1),
-(7, 11, 2),
-(7, 12, 3),
+-- Album 7: Nhạc Trẻ Gây Nghiện
+(7, 10, 1), (7, 38, 2), (7, 41, 3), (7, 46, 4), (7, 47, 5), (7, 49, 6),
 
-(8, 10, 1),
-(8, 11, 2),
+-- Album 8: Bolero / Acoustic / Khác (phân bổ tạm các bài còn lại cho phong phú)
+(8, 10, 1), (8, 11, 2),
 
-(9, 20, 1),
-(9, 21, 2),
+-- Album 9: Ballad Xoa Dịu
+(9, 20, 1), (9, 21, 2), (9, 5, 3), (9, 6, 4),
 
-(10, 30, 1),
-(10, 31, 2),
+-- Album 10: Acoustic Thư Giãn
+(10, 30, 1), (10, 31, 2), (10, 14, 3), (10, 15, 4),
 
-(11, 40, 1),
-(11, 41, 2),
+-- Album 11: Nhạc Sàn
+(11, 40, 1), (11, 41, 2), (11, 48, 3),
 
-(12, 50, 1),
-(12, 51, 2);
+-- Album 12: Indie Khám Phá
+(12, 50, 1), (12, 51, 2), (12, 8, 3), (12, 9, 4);
 
 -- ─────────────────────────────────────────────────────────
 -- 5. BẢNG PLAYLISTS VÀ PLAYLIST_SONGS
