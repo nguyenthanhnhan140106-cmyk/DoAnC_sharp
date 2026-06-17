@@ -12,7 +12,7 @@ export const startSignalRConnection = async (token: string, onNotificationReceiv
         .withUrl(hubUrl, {
             accessTokenFactory: () => token,
             // Đảm bảo SignalR sử dụng WebSockets
-            transport: signalR.HttpTransportType.WebSockets
+            transport: signalR.HttpTransportType.LongPolling
         })
         .withAutomaticReconnect()
         .build();
