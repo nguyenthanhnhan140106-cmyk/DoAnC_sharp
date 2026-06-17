@@ -6,7 +6,7 @@ export const startSignalRConnection = async (token: string, onNotificationReceiv
     if (connection) return; // Prevent multiple connections
 
     // Sửa trực tiếp thành đường dẫn tương đối, Vite proxy sẽ tự động thêm ngrok host vào
-    const hubUrl = 'https://tunevault-backend.somee.com/hubs/notification';
+    const hubUrl = '/hubs/notification';
 
     connection = new signalR.HubConnectionBuilder()
         .withUrl(hubUrl, {
