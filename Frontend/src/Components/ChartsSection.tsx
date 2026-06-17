@@ -21,7 +21,7 @@ interface Props {
 }
 
 export default function ChartsSection({ songs }: Props) {
-    const { playSong, currentSong } = useMusic();
+    const { playSong, currentSong, setQueue } = useMusic();
 
     // Chia songs thành các cột chart
     const charts: ChartColumn[] = [
@@ -53,7 +53,6 @@ export default function ChartsSection({ songs }: Props) {
         <div className="playlist-section">
             <div className="section-header">
                 <h2 className="section-title">Charts</h2>
-                <button className="show-all-btn">More</button>
             </div>
 
             <div className="charts-grid">
@@ -66,7 +65,16 @@ export default function ChartsSection({ songs }: Props) {
                         {/* Header cột */}
                         <div className="chart-col-header">
                             <span className="chart-col-title">{chart.title}</span>
-                            <button className="chart-play-btn">
+                            <button 
+                                className="chart-play-btn"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (chart.songs.length > 0) {
+                                        setQueue(chart.songs);
+                                        playSong(chart.songs[0]);
+                                    }
+                                }}
+                            >
                                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                                     <path d="M8 5v14l11-7z" />
                                 </svg>

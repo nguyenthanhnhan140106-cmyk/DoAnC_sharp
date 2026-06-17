@@ -127,7 +127,6 @@ function AuthModal({ data, onClose }: { data: { title: string, coverUrl: string 
           <div className="auth-modal-info">
             <h2 className="auth-modal-title">Start listening with a<br/>free TuneVault account</h2>
             <button className="auth-modal-signup-btn" onClick={handleSignup}>Sign up free</button>
-            <button className="auth-modal-download-btn">Download app</button>
             <div className="auth-modal-login-text">
               Already have an account? <span className="auth-modal-login-link" onClick={handleLogin}>Log in</span>
             </div>
