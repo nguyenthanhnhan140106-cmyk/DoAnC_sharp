@@ -5,78 +5,60 @@ using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using API.Hubs; // SignalR Hub
-using Application; // BỔ SUNG: Thêm thư viện Application
-using FluentValidation; // BỔ SUNG: Bắt lỗi Validation
-using Infrastructure.Configuration; // BỔ SUNG: Cloudinary Config
-using Infrastructure.Services; // Thêm lại
+using API.Hubs;
+using Application;
+using FluentValidation;
+using Infrastructure.Configuration;
+using Infrastructure.Services;
+using Microsoft.AspNetCore.SignalR;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// BỔ SUNG: Tăng giới hạn dung lượng upload lên 100MB cho Video
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.Limits.MaxRequestBodySize = 104857600; // 100MB
-});
-builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = 104857600; // 100MB
-});
+// Cấu hình Kestrel và Form
+builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = 104857600; });
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options => { options.MultipartBodyLengthLimit = 104857600; });
 
-// Lấy connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
-// CORS, Controllers, Swagger...
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowReact", p => p
-        .WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:3000") // Liệt kê rõ các domain frontend
+        .WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:3000")
         .AllowAnyMethod()
         .AllowAnyHeader()
-        .AllowCredentials()); // 🟢 BẮT BUỘC để SignalR kết nối được
+        .AllowCredentials());
 });
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSignalR(); // BỔ SUNG SignalR
-builder.Services.AddSingleton<Microsoft.AspNetCore.SignalR.IUserIdProvider, CustomUserIdProvider>();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
-// Đăng ký các Service
+// Services Registration
 builder.Services.AddScoped<IOtpRepository>(_ => new OtpRepository(connectionString));
 builder.Services.AddScoped<ISongRepository, SongRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IArtistService>(_ => new ArtistService(connectionString));
 builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connectionString));
 builder.Services.AddScoped<AlbumService>(_ => new AlbumService(connectionString));
-// Đăng ký HttpClient để gọi API AI (tránh cạn kiệt socket)
 builder.Services.AddHttpClient<Application.Services.AiService>();
-
-builder.Services.AddScoped<IOtpService, OtpService>(); // Hãy thay OtpService bằng class thực tế của bạn
+builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService>(provider => 
 {
     var config = provider.GetRequiredService<IConfiguration>();
     var otpService = provider.GetRequiredService<IOtpService>();
     var emailService = provider.GetRequiredService<IEmailService>();
-    
     return new AuthService(connectionString, config, otpService, emailService);
-});builder.Services.AddScoped<IHistoryRepository>(_ => new HistoryRepository(connectionString));
-// 🟢 BỔ SUNG: Đăng ký Notification Repository và Service
-builder.Services.AddScoped<Application.Interfaces.INotificationRepository, Infrastructure.Repositories.NotificationRepository>(provider => 
+});
+builder.Services.AddScoped<IHistoryRepository>(_ => new HistoryRepository(connectionString));
+builder.Services.AddScoped<INotificationRepository, Infrastructure.Repositories.NotificationRepository>(provider => 
     new Infrastructure.Repositories.NotificationRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
-
-// 🟢 BỔ SUNG: Đăng ký Library Repository (lưu album vào thư viện)
-builder.Services.AddScoped<Application.Interfaces.ILibraryRepository>(_ => new Infrastructure.Repositories.LibraryRepository(connectionString));
-
-// 🟢 BỔ SUNG: Đăng ký Follow Repository (theo dõi nghệ sĩ)
-builder.Services.AddScoped<Application.Interfaces.IFollowRepository, Infrastructure.Repositories.FollowRepository>();
-
-// 🟢 BỔ SUNG: Đăng ký MediaShare Repository
-builder.Services.AddScoped<Application.Interfaces.IMediaShareRepository>(_ => new Infrastructure.Repositories.MediaShareRepository(connectionString));
-
-// 🟢 BỔ SUNG: Đăng ký Cloudinary
+builder.Services.AddScoped<ILibraryRepository>(_ => new Infrastructure.Repositories.LibraryRepository(connectionString));
+builder.Services.AddScoped<IFollowRepository, Infrastructure.Repositories.FollowRepository>();
+builder.Services.AddScoped<IMediaShareRepository>(_ => new Infrastructure.Repositories.MediaShareRepository(connectionString));
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-
-// 🟢 BỔ SUNG: Đăng ký MediatR và FluentValidation (CQRS Pipeline)
 builder.Services.AddApplication();
 
 // Authentication
@@ -87,16 +69,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("Chuoi_Bi_Mat_Cuc_Ky_Dai_Va_An_Toan_123456")),
             ValidateIssuer = false,
             ValidateAudience = false,
-            NameClaimType = "id" // Map JWT "id" tới ClaimTypes.NameIdentifier để SignalR hiểu UserIdentifier
+            NameClaimType = "id"
         };
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
+        options.Events = new JwtBearerEvents {
+            OnMessageReceived = context => {
                 var accessToken = context.Request.Query["access_token"];
                 var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notification"))
-                {
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notification")) {
                     context.Token = accessToken;
                 }
                 return Task.CompletedTask;
@@ -106,96 +85,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
-
-// 🟢 BỔ SUNG: Middleware bắt lỗi Validation (từ MediatR Pipeline) và trả về HTTP 400
-app.Use(async (context, next) =>
-{
-    try
-    {
-        await next();
-    }
-    catch (ValidationException ex)
-    {
+// Middleware xử lý lỗi
+app.Use(async (context, next) => {
+    try { await next(); }
+    catch (ValidationException ex) {
         context.Response.StatusCode = 400;
         context.Response.ContentType = "application/json";
-        
-        var errors = ex.Errors.Select(e => new { 
-            Field = e.PropertyName, 
-            Error = e.ErrorMessage 
-        });
-        
-        await context.Response.WriteAsJsonAsync(new { 
-            Success = false, 
-            Message = "Dữ liệu không hợp lệ", 
-            Errors = errors 
-        });
+        await context.Response.WriteAsJsonAsync(new { Success = false, Message = "Dữ liệu không hợp lệ", Errors = ex.Errors.Select(e => new { Field = e.PropertyName, Error = e.ErrorMessage }) });
     }
-    catch (Exception ex)
-    {
-        // Ghi log lỗi tại đây nếu có ILogger
-        Console.WriteLine($"[GLOBAL ERROR HANDLER] {ex.ToString()}");
+    catch (Exception ex) {
         context.Response.StatusCode = 500;
         context.Response.ContentType = "application/json";
-        
-        await context.Response.WriteAsJsonAsync(new { 
-            Success = false, 
-            Message = "Đã xảy ra lỗi hệ thống cục bộ. Vui lòng thử lại sau.", 
-            Detailed = ex.Message // Xóa dòng này ở Production để giấu mã lỗi
-        });
+        await context.Response.WriteAsJsonAsync(new { Success = false, Message = "Lỗi hệ thống", Detailed = ex.Message });
     }
 });
 
-// --- AUTO SEED DATABASE (Đặt ở đây là chuẩn nhất) ---
-var logger = app.Logger;
-int maxRetries = 5;
+if (app.Environment.IsDevelopment()) { app.UseDeveloperExceptionPage(); }
 
-for (int retry = 1; retry <= maxRetries; retry++)
-{
-    try
-    {
-        using var conn = new SqlConnection(connectionString);
-        conn.Open();
-
-        
-
-        
-
-        // Seed user mặc định nếu chưa có
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = @"
-                IF NOT EXISTS(SELECT 1 FROM users WHERE Id=1) BEGIN SET IDENTITY_INSERT users ON; INSERT INTO users (Id, Username, Email, PasswordHash) VALUES (1, 'admin', 'admin@example.com', ''); SET IDENTITY_INSERT users OFF; END";
-            cmd.ExecuteNonQuery();
-        }
-
-        
-
-        
-
-        
-        
-
-        
-
-        
-
-        
-
-        logger.LogInformation("[TuneVault DB] 🟢 Kết nối và khởi tạo bảng thành công!");
-        break;
-    }
-    catch (Exception ex)
-    {
-        logger.LogWarning($"[TuneVault DB] ⚠️ Lần {retry} thất bại: {ex.Message}");
-        Thread.Sleep(3000);
-    }
-}
-
-// --- Middleware & App Run ---
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("AllowReact");
@@ -203,22 +109,39 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
 app.MapControllers();
-app.MapHub<NotificationHub>("/hubs/notification"); // BỔ SUNG endpoint SignalR
+app.MapHub<NotificationHub>("/hubs/notification");
 
-app.Run(); // Chỉ có 1 app.Run() duy nhất ở cuối
-
-public class CustomUserIdProvider : Microsoft.AspNetCore.SignalR.IUserIdProvider
+// --- AUTO SEED DATABASE ---
+// --- AUTO SEED DATABASE ---
+// --- AUTO SEED DATABASE (Sửa lại để luôn tạo hash chuẩn) ---
+using (var scope = app.Services.CreateScope())
 {
-    public string? GetUserId(Microsoft.AspNetCore.SignalR.HubConnectionContext connection)
+    var logger = app.Logger;
+    try {
+        using var conn = new SqlConnection(connectionString);
+        conn.Open();
+        
+        // Tạo hash mật khẩu 123456 ngay khi chạy app
+        string hashed = BCrypt.Net.BCrypt.HashPassword("123456");
+
+        using (var cmd = conn.CreateCommand()) {
+            cmd.CommandText = @"IF NOT EXISTS (SELECT 1 FROM users WHERE Username = 'testuser')
+                                BEGIN
+                                    INSERT INTO users (Username, Email, PasswordHash, CreatedAt)
+                                    VALUES ('testuser', 'testuser@example.com', @pwd, GETDATE());
+                                END";
+            cmd.Parameters.AddWithValue("@pwd", hashed); // Lưu hash chuẩn
+            cmd.ExecuteNonQuery();
+        }
+        logger.LogInformation("[TuneVault DB] 🟢 Seed thành công, password đã được hash!");
+    } catch (Exception ex) { logger.LogWarning($"[TuneVault DB] ⚠️ Seed thất bại: {ex.Message}"); }
+}
+app.Run();
+// 🟢 ĐỊNH NGHĨA CLASS PHẢI NẰM Ở CUỐI FILE, SAU app.Run()
+public class CustomUserIdProvider : IUserIdProvider
+{
+    public string? GetUserId(HubConnectionContext connection)
     {
         return connection.User?.FindFirst("id")?.Value;
     }
 }
-
-
-
-
-
-
-
-

@@ -22,28 +22,38 @@ namespace Application.Features.Auth.Handlers
                 ?? throw new ArgumentNullException("DefaultConnection");
         }
 
-        public async Task<string?> Handle(LoginCommand request, CancellationToken cancellationToken)
-        {
-            using var conn = new SqlConnection(_connectionString);
-            
-            // We can just use dynamic here to avoid importing Domain.Entities if not needed, 
-            // but let's query the specific fields we need.
-            var user = await conn.QuerySingleOrDefaultAsync<UserDtoTemp>(
-                "SELECT Id, Username, PasswordHash FROM users WHERE Username = @Username", 
-                new { request.Username }
-            );
+public async Task<string?> Handle(LoginCommand request, CancellationToken cancellationToken)
+{
+    using var conn = new SqlConnection(_connectionString);
+    
+    var user = await conn.QuerySingleOrDefaultAsync<UserDtoTemp>(
+        "SELECT Id, Username, PasswordHash FROM users WHERE Username = @Username", 
+        new { request.Username }
+    );
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash)) 
-                return null;
-                
-            var claims = new[] { 
-                new Claim(ClaimTypes.Name, user.Username), 
-                new Claim("id", user.Id.ToString()) 
-            };
-            
-            return GenerateJwtToken(claims, TimeSpan.FromDays(7));
-        }
+    // Kiểm tra null an toàn trước khi verify
+    if (user == null) return null;
 
+    try 
+    {
+        // Sử dụng khối try-catch cho hàm Verify để tránh crash hệ thống
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            return null;
+    }
+    catch (Exception ex)
+    {
+        // Ghi log lỗi để bạn biết chuỗi hash bị hỏng ở đâu
+        Console.WriteLine($"[LỖI HASH] User {user.Username} có PasswordHash không hợp lệ: {ex.Message}");
+        return null;
+    }
+            
+    var claims = new[] { 
+        new Claim(ClaimTypes.Name, user.Username), 
+        new Claim("id", user.Id.ToString()) 
+    };
+    
+    return GenerateJwtToken(claims, TimeSpan.FromDays(7));
+}
         private string GenerateJwtToken(IEnumerable<Claim> claims, TimeSpan expiry)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
