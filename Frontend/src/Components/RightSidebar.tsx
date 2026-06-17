@@ -81,10 +81,12 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
       if (isFollowing) {
         await API.delete(`/follow/${currentSong.artistId}`);
         setIsFollowing(false);
+        window.dispatchEvent(new Event('followUpdated'));
         window.dispatchEvent(new CustomEvent('SHOW_LIBRARY_TOAST', { detail: { message: 'Đã bỏ theo dõi nghệ sĩ' } }));
       } else {
         await API.post(`/follow/${currentSong.artistId}`);
         setIsFollowing(true);
+        window.dispatchEvent(new Event('followUpdated'));
         window.dispatchEvent(new CustomEvent('SHOW_LIBRARY_TOAST', { detail: { message: 'Đã theo dõi nghệ sĩ' } }));
       }
     } catch (error) {
