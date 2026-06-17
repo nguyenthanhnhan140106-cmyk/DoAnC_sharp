@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "http://tunevault-backend.somee.com/api/:path*"
+        },
+        {
+            "source": "/hubs/:path*",
+            "destination": "http://tunevault-backend.somee.com/hubs/:path*"
+        }
+    ]
+}
