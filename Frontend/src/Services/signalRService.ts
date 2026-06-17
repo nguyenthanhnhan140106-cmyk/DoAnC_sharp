@@ -5,13 +5,13 @@ let connection: signalR.HubConnection | null = null;
 export const startSignalRConnection = async (token: string, onNotificationReceived: () => void) => {
     if (connection) return; // Prevent multiple connections
 
-    const hubUrl = import.meta.env.VITE_API_URL 
-        ? import.meta.env.VITE_API_URL.replace('/api', '/hubs/notification')
-        : 'http://localhost:5000/hubs/notification';
+    // Sửa trực tiếp thành đường dẫn tương đối, Vite proxy sẽ tự động thêm ngrok host vào
+    const hubUrl = '/hubs/notification';
 
     connection = new signalR.HubConnectionBuilder()
         .withUrl(hubUrl, {
             accessTokenFactory: () => token,
+            // Đảm bảo SignalR sử dụng WebSockets
             transport: signalR.HttpTransportType.WebSockets
         })
         .withAutomaticReconnect()

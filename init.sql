@@ -1,41 +1,24 @@
--- =========================================================
+﻿-- =========================================================
 -- TUNEVAULT - SCRIPT KHỞI TẠO DATABASE VỚI CLOUDINARY LINKS
 -- =========================================================
 
 DROP TABLE IF EXISTS media_shares;
-GO
 DROP TABLE IF EXISTS user_saved_albums;
-GO
 DROP TABLE IF EXISTS user_otps;
-GO
 DROP TABLE IF EXISTS playlist_songs;
-GO
 DROP TABLE IF EXISTS album_songs;
-GO
 DROP TABLE IF EXISTS media_tags;
-GO
 DROP TABLE IF EXISTS play_histories;
-GO
 DROP TABLE IF EXISTS favorites;
-GO
 DROP TABLE IF EXISTS user_follows;
-GO
 DROP TABLE IF EXISTS follows;
-GO
 DROP TABLE IF EXISTS notifications;
-GO
 DROP TABLE IF EXISTS playlists;
-GO
 DROP TABLE IF EXISTS albums;
-GO
 DROP TABLE IF EXISTS songs;
-GO
 DROP TABLE IF EXISTS categories;
-GO
 DROP TABLE IF EXISTS artists;
-GO
 DROP TABLE IF EXISTS users;
-GO
 
 -- ─────────────────────────────────────────────────────────
 -- 1. BẢNG NGHỆ SĨ
@@ -56,7 +39,6 @@ INSERT INTO users (Id, Username, Email, PasswordHash, AvatarUrl) VALUES
 (2, N'johndoe', N'john@example.com', N'hashed', N'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=500&h=500&fit=crop'),
 (3, N'janedoe', N'jane@example.com', N'hashed', N'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&h=500&fit=crop');
 SET IDENTITY_INSERT users OFF;
-GO
 
 
 CREATE TABLE artists (
@@ -68,7 +50,6 @@ CREATE TABLE artists (
     Bio NVARCHAR(MAX) NULL,
     IsVerified BIT DEFAULT 1
 );
-GO
 
 
 SET IDENTITY_INSERT artists ON;
@@ -105,26 +86,25 @@ INSERT INTO artists (Id, Name, WorldRank, Followers, MonthlyListeners, Bio, IsVe
 (30, N'MCK', 125, 2700000, 9100000, N'Nghệ sĩ gen Z tài năng với phong cách mumble rap và autotune đặc trưng.', 1),
 (31, N'Ronboogz', 320, 600000, 2800000, N'Nhà sản xuất âm nhạc kiêm rapper với chất nhạc US-UK mang hơi thở đường phố.', 1);
 SET IDENTITY_INSERT artists OFF;
-GO
 
 
 
 -- ─────────────────────────────────────────────────────────
 
--- 1.5. BẢNG CATEGORIES
+-- 1.5. BẢNG CATE RIES
 -- ─────────────────────────────────────────────────────────
-CREATE TABLE categories (
+CREATE TABLE cate ries (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(255) NOT NULL,
     Slug NVARCHAR(255) NOT NULL UNIQUE,
     Description NVARCHAR(MAX) NULL,
     CoverUrl NVARCHAR(500) NULL
 );
-GO
+ 
 
 
-SET IDENTITY_INSERT categories ON;
-INSERT INTO categories (Id, Name, Slug, Description, CoverUrl) VALUES
+SET IDENTITY_INSERT cate ries ON;
+INSERT INTO cate ries (Id, Name, Slug, Description, CoverUrl) VALUES
 (1, N'It`s New Music Friday!', N'friday', N'Những bản hit mới nhất được cập nhật mỗi thứ 6', N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop'),
 (2, N'V-Sound', N'vsound', N'Nhạc Việt thịnh hành nhất', N'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop'),
 (3, N'Thế Giới Rap', N'rap', N'Nơi hội tụ các Rapper cực chất', N'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500&h=240&fit=crop'),
@@ -132,7 +112,6 @@ INSERT INTO categories (Id, Name, Slug, Description, CoverUrl) VALUES
 (5, N'Podcast', N'podcast', N'Podcast & Trò chuyện', N'https://images.unsplash.com/photo-1478737270239-2f02b85af684?w=500&h=240&fit=crop'),
 (6, N'Other', N'other', N'Các thể loại khác', N'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=240&fit=crop');
 SET IDENTITY_INSERT categories OFF;
-GO
 
 
 -- 2. BẢNG BÀI HÁT (CLOUDINARY LINKS)
@@ -154,7 +133,6 @@ CREATE TABLE songs (
     FOREIGN KEY (CategoryId) REFERENCES categories(Id) ON DELETE SET NULL,
     FOREIGN KEY (UploaderId) REFERENCES users(Id) ON DELETE SET NULL
 );
-GO
 
 
 SET IDENTITY_INSERT songs ON;
@@ -472,7 +450,6 @@ INSERT INTO songs (Id, Title, Artist, CoverUrl, AudioUrl, VideoUrl, CategoryId, 
      N'https://res.cloudinary.com/dawcwuwmm/video/upload/v1780850253/Exit_Sign_zijxdw.mp3',
      NULL, 3, N'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=240&fit=crop', 18, NULL, GETDATE());
 SET IDENTITY_INSERT songs OFF;
-GO
 
 
 
@@ -484,7 +461,6 @@ CREATE TABLE albums (
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ArtistId) REFERENCES artists(Id) ON DELETE SET NULL
 );
-GO
 
 
 SET IDENTITY_INSERT albums ON;
@@ -517,7 +493,6 @@ INSERT INTO albums (Id, Title, CoverUrl, ArtistId, CreatedAt) VALUES
 (12, N'Indie Khám Phá Âm Nhạc Mới',
     N'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=500&fit=crop', NULL, GETDATE());
 SET IDENTITY_INSERT albums OFF;
-GO
 
 
 
@@ -532,7 +507,6 @@ CREATE TABLE album_songs (
     FOREIGN KEY (AlbumId) REFERENCES albums(Id) ON DELETE CASCADE,
     FOREIGN KEY (SongId) REFERENCES songs(Id) ON DELETE CASCADE
 );
-GO
 
 
 INSERT INTO album_songs (AlbumId, SongId, OrderNumber) VALUES
@@ -612,7 +586,6 @@ CREATE TABLE playlists (
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
 );
-GO
 
 
 CREATE TABLE playlist_songs (
@@ -623,7 +596,6 @@ CREATE TABLE playlist_songs (
     FOREIGN KEY (PlaylistId) REFERENCES playlists(Id) ON DELETE CASCADE,
     FOREIGN KEY (SongId) REFERENCES songs(Id) ON DELETE CASCADE
 );
-GO
 
 
 -- ─────────────────────────────────────────────────────────
@@ -647,7 +619,6 @@ CREATE TABLE user_follows (
     FOREIGN KEY (FollowerId) REFERENCES users(Id) ON DELETE CASCADE,
     FOREIGN KEY (FollowedUserId) REFERENCES users(Id) ON DELETE NO ACTION
 );
-GO
 
 
 INSERT INTO user_follows (FollowerId, FollowedUserId) VALUES 
@@ -665,7 +636,6 @@ CREATE TABLE notifications (
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
 );
-GO
 
 
 CREATE TABLE play_histories (
@@ -676,7 +646,6 @@ CREATE TABLE play_histories (
     FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE,
     FOREIGN KEY (SongId) REFERENCES songs(Id) ON DELETE CASCADE
 );
-GO
 
 
 CREATE TABLE favorites (
@@ -686,7 +655,6 @@ CREATE TABLE favorites (
     FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE,
     FOREIGN KEY (SongId) REFERENCES songs(Id) ON DELETE CASCADE
 );
-GO
 
 
 CREATE TABLE media_shares (
@@ -701,7 +669,6 @@ CREATE TABLE media_shares (
     FOREIGN KEY (SongId) REFERENCES songs(Id) ON DELETE NO ACTION,
     FOREIGN KEY (PlaylistId) REFERENCES playlists(Id) ON DELETE NO ACTION
 );
-GO
 
 
 CREATE TABLE user_otps (
@@ -712,7 +679,6 @@ CREATE TABLE user_otps (
     IsUsed BIT DEFAULT 0,
     CreatedAt DATETIME DEFAULT GETDATE()
 );
-GO
 
 CREATE TABLE user_saved_albums (
     UserId INT NOT NULL,
@@ -722,5 +688,4 @@ CREATE TABLE user_saved_albums (
     FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE,
     FOREIGN KEY (AlbumId) REFERENCES albums(Id) ON DELETE CASCADE
 );
-GO
 

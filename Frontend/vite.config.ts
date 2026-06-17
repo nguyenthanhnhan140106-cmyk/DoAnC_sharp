@@ -16,6 +16,8 @@ export default defineConfig({
     },
   },
   server: {
+    host: true,
+    allowedHosts: true, // <-- Mình đã thêm dòng này để cho phép ngrok truy cập
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
