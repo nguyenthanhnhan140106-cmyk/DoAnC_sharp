@@ -20,11 +20,11 @@ export default defineConfig({
     allowedHosts: true, // <-- Mình đã thêm dòng này để cho phép ngrok truy cập
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://tunevault-backend.somee.com',
         changeOrigin: true,
       },
       '/hubs': {
-        target: 'http://localhost:5000',
+        target: 'http://tunevault-backend.somee.com',
         ws: true,
         changeOrigin: true
       }
