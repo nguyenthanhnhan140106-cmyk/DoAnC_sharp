@@ -50,6 +50,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
 
   # 3. Container Frontend
   frontend:
@@ -60,9 +62,19 @@ services:
         - VITE_API_URL=/api
     container_name: tunevault-frontend
     ports:
-      - "5173:80"
+      - "5173:5173"
     depends_on:
       - backend
+
+  adminer:
+    image: adminer
+    container_name: tunevault-adminer
+    ports:
+      - "8088:8080"
+    depends_on:
+      - db
+    networks:
+      - default
 
 volumes:
   mssql_data:

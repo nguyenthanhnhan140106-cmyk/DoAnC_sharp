@@ -33,13 +33,6 @@ CREATE TABLE users (
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-SET IDENTITY_INSERT users ON;
-INSERT INTO users (Id, Username, Email, PasswordHash, AvatarUrl) VALUES 
-(1, N'testuser', N'test@example.com', N'hashed', N'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500&h=500&fit=crop'),
-(2, N'johndoe', N'john@example.com', N'hashed', N'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=500&h=500&fit=crop'),
-(3, N'janedoe', N'jane@example.com', N'hashed', N'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&h=500&fit=crop');
-SET IDENTITY_INSERT users OFF;
-
 
 CREATE TABLE artists (
     Id INT IDENTITY(1,1) PRIMARY KEY,
