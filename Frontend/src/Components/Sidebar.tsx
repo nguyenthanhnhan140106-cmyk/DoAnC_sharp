@@ -376,41 +376,47 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           </div>
         ))}
 
-        {isLoggedIn && followedArtists.length > 0 && followedArtists.map((artist) => (
-          <div
-            key={`artist-${artist.artistId}`}
-            className="playlist-item"
-            title={artist.artistName}
-            onClick={() => {
-              const targetPath = `/artist/${artist.artistId}`;
-              if (location.pathname === targetPath) {
-                navigate("/");
-              } else {
-                navigate(targetPath);
-              }
-            }}
-          >
+        {isLoggedIn && followedArtists.length > 0 && followedArtists.map((artist: any) => {
+          const id = artist.artistId || artist.id;
+          const name = artist.name || artist.artistName || "Unknown Artist";
+          const image = artist.coverUrl || artist.imageUrl;
+          
+          return (
             <div
-              className="playlist-cover default-cover"
-              style={artist.imageUrl
-                ? { backgroundImage: `url(${artist.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '50%' }
-                : { background: 'linear-gradient(135deg, #a03850, #f65c8b)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }
-              }
+              key={`artist-${id}`}
+              className="playlist-item"
+              title={name}
+              onClick={() => {
+                const targetPath = `/artist/${id}`;
+                if (location.pathname === targetPath) {
+                  navigate("/");
+                } else {
+                  navigate(targetPath);
+                }
+              }}
             >
-              {!artist.imageUrl && (
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
+              <div
+                className="playlist-cover default-cover"
+                style={image
+                  ? { backgroundImage: `url(${image})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '50%' }
+                  : { background: 'linear-gradient(135deg, #a03850, #f65c8b)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }
+                }
+              >
+                {!image && (
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  </svg>
+                )}
+              </div>
+              {!isCollapsed && (
+                <div className="playlist-info">
+                  <p className="playlist-title">{name}</p>
+                  <p className="playlist-subtitle">Artist</p>
+                </div>
               )}
             </div>
-            {!isCollapsed && (
-              <div className="playlist-info">
-                <p className="playlist-title">{artist.artistName}</p>
-                <p className="playlist-subtitle">Artist</p>
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
 
         {playlists.map((pl) => (
           <div

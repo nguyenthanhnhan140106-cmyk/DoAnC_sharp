@@ -262,43 +262,60 @@ export default function MainContent({ songs }: Props) {
   const displayCover = hoveredCover || activeCover;
 
   // 🟢 Đã gọt xuống ĐÚNG 5 NGHỆ SĨ để vừa vặn 1 hàng ngang
-  const popularArtists = [
+  const popularArtistsRaw = [
     {
       id: 1,
       name: "Sơn Tùng M-TP",
       followers: 134003,
-      coverImg: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop",
-      featuredSong: { title: "Come My Way", artist: "Sơn Tùng M-TP, Tyga", coverUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=40&h=40&fit=crop" }
+      coverImg: "src/assets/SonTung.jpg",
+      searchQuery: "Sơn Tùng",
+      featuredSong: { title: "Nơi này có anh", artist: "Sơn Tùng M-TP", coverUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=40&h=40&fit=crop" }
     },
     {
       id: 2,
       name: "Binz",
       followers: 20891,
-      coverImg: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=300&h=300&fit=crop",
-      featuredSong: { title: "Em (feat. SOOBIN)", artist: "Binz, SOOBIN", coverUrl: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=40&h=40&fit=crop" }
+      coverImg: "src/assets/BinZ.jpg",
+      searchQuery: "Binz",
+      featuredSong: { title: "Em", artist: "Binz, SOONBIN", coverUrl: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=40&h=40&fit=crop" }
     },
     {
       id: 3,
       name: "VSTRA",
       followers: 11550,
-      coverImg: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop",
+      coverImg: "src/assets/VSTRA.jpg",
+      searchQuery: "VSTRA",
       featuredSong: { title: "Ai Ngoài Anh", artist: "VSTRA, Tyronee", coverUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=40&h=40&fit=crop" }
     },
     {
       id: 4,
       name: "Low G",
       followers: 42797,
-      coverImg: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop",
-      featuredSong: { title: "In Love", artist: "Low G, JustaTee", coverUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=40&h=40&fit=crop" }
+      coverImg: "src/assets/LowG.jpg",
+      searchQuery: "LowG",
+      featuredSong: { title: "Thủ đô Cypher", artist: "Low G", coverUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=40&h=40&fit=crop" }
     },
     {
       id: 5,
       name: "SOOBIN",
       followers: 27506,
-      coverImg: "https://images.unsplash.com/photo-1628157582853-a796fa650a6a?w=300&h=300&fit=crop",
-      featuredSong: { title: "Em (feat. SOOBIN)", artist: "Binz, SOOBIN", coverUrl: "https://images.unsplash.com/photo-1628157582853-a796fa650a6a?w=40&h=40&fit=crop" }
+      coverImg: "src/assets/Soobin.jpg",
+      searchQuery: "SOONBIN",
+      featuredSong: { title: "Em", artist: "Binz, SOONBIN", coverUrl: "https://images.unsplash.com/photo-1628157582853-a796fa650a6a?w=40&h=40&fit=crop" }
     }
   ];
+
+  const popularArtists = popularArtistsRaw.map(artist => {
+    const matchedSong = songs.find(s => s.artist.toLowerCase().includes(artist.searchQuery.toLowerCase()));
+    return {
+      ...artist,
+      featuredSong: matchedSong ? {
+        title: matchedSong.title,
+        artist: matchedSong.artist,
+        coverUrl: matchedSong.coverUrl
+      } : artist.featuredSong
+    };
+  });
 
   return (
     <div className="main-content-container">
@@ -326,10 +343,10 @@ export default function MainContent({ songs }: Props) {
             <div className="home-greeting-section">
               <h1 className="home-greeting">{greeting}</h1>
               <div className="home-banners-wrapper" style={{ overflow: 'visible', position: 'relative' }}>
-                
+
                 {/* Nút lùi (Luôn hiển thị) */}
-                <button 
-                  className="promo-nav-btn left-nav" 
+                <button
+                  className="promo-nav-btn left-nav"
                   onClick={handlePrevPromo}
                 >
                   <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
@@ -338,16 +355,16 @@ export default function MainContent({ songs }: Props) {
                 </button>
 
                 <div style={{ overflow: 'hidden', width: '100%', padding: '4px 0' }}>
-                  <div 
-                    className="promo-cards-track" 
-                    style={{ 
+                  <div
+                    className="promo-cards-track"
+                    style={{
                       transform: `translateX(calc(-${currentBannerIdx} * (33.3333% + 8px)))`
                     }}
                   >
                     {promoItems.map(item => (
-                      <div 
-                        className="promo-card" 
-                        key={item.id} 
+                      <div
+                        className="promo-card"
+                        key={item.id}
                         onClick={() => handleBannerClick(item)}
                         style={{ background: item.bgColor }}
                       >
@@ -363,8 +380,8 @@ export default function MainContent({ songs }: Props) {
                 </div>
 
                 {/* Nút tiến (Luôn hiển thị) */}
-                <button 
-                  className="promo-nav-btn right-nav" 
+                <button
+                  className="promo-nav-btn right-nav"
                   onClick={handleNextPromo}
                 >
                   <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
@@ -423,7 +440,7 @@ export default function MainContent({ songs }: Props) {
             {categories.map((cat) => {
               const catSongs = shuffledSongs.filter(s => s.categoryId === cat.id);
               if (catSongs.length === 0) return null;
-              
+
               return (
                 <div className="playlist-section" key={cat.id}>
                   <div className="section-header">
@@ -451,7 +468,7 @@ export default function MainContent({ songs }: Props) {
                   <div key={artist.id} style={{ backgroundColor: "#181818", borderRadius: "8px", overflow: "hidden", cursor: "pointer", transition: "background-color 0.3s ease, transform 0.2s ease" }}
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#282828"; e.currentTarget.style.transform = "translateY(-4px)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#181818"; e.currentTarget.style.transform = "translateY(0)"; }}
-                    onClick={() => navigate(`/search?q=${encodeURIComponent(artist.name)}`)}
+                    onClick={() => navigate(`/search?q=${encodeURIComponent(artist.searchQuery || artist.name)}`)}
                   >
                     <div style={{ position: "relative", width: "100%", paddingBottom: "100%" }}>
                       <img src={artist.coverImg} alt={artist.name} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
