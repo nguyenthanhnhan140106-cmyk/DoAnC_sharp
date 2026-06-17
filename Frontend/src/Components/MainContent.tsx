@@ -267,7 +267,7 @@ export default function MainContent({ songs }: Props) {
       id: 1,
       name: "Sơn Tùng M-TP",
       followers: 134003,
-      coverImg: "src/assets/SonTung.jpg",
+      coverImg: "https://res.cloudinary.com/dawcwuwmm/image/upload/v1781692765/SonTung_xwknp6.jpg",
       searchQuery: "Sơn Tùng",
       featuredSong: { title: "Nơi này có anh", artist: "Sơn Tùng M-TP", coverUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=40&h=40&fit=crop" }
     },
@@ -275,7 +275,7 @@ export default function MainContent({ songs }: Props) {
       id: 2,
       name: "Binz",
       followers: 20891,
-      coverImg: "src/assets/BinZ.jpg",
+      coverImg: "https://res.cloudinary.com/dawcwuwmm/image/upload/v1781692765/BinZ_kxfp6p.jpg",
       searchQuery: "Binz",
       featuredSong: { title: "Em", artist: "Binz, SOONBIN", coverUrl: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=40&h=40&fit=crop" }
     },
@@ -283,7 +283,7 @@ export default function MainContent({ songs }: Props) {
       id: 3,
       name: "VSTRA",
       followers: 11550,
-      coverImg: "src/assets/VSTRA.jpg",
+      coverImg: "https://res.cloudinary.com/dawcwuwmm/image/upload/v1781692766/Vstra_yubngs.jpg",
       searchQuery: "VSTRA",
       featuredSong: { title: "Ai Ngoài Anh", artist: "VSTRA, Tyronee", coverUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=40&h=40&fit=crop" }
     },
@@ -291,7 +291,7 @@ export default function MainContent({ songs }: Props) {
       id: 4,
       name: "Low G",
       followers: 42797,
-      coverImg: "src/assets/LowG.jpg",
+      coverImg: "https://res.cloudinary.com/dawcwuwmm/image/upload/v1781692765/LowG_gbadpy.jpg",
       searchQuery: "LowG",
       featuredSong: { title: "Thủ đô Cypher", artist: "Low G", coverUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=40&h=40&fit=crop" }
     },
@@ -299,7 +299,7 @@ export default function MainContent({ songs }: Props) {
       id: 5,
       name: "SOOBIN",
       followers: 27506,
-      coverImg: "src/assets/Soobin.jpg",
+      coverImg: "https://res.cloudinary.com/dawcwuwmm/image/upload/v1781692765/SOOBIN_ojiumf.jpg",
       searchQuery: "SOONBIN",
       featuredSong: { title: "Em", artist: "Binz, SOONBIN", coverUrl: "https://images.unsplash.com/photo-1628157582853-a796fa650a6a?w=40&h=40&fit=crop" }
     }
