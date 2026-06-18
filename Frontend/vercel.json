@@ -7,6 +7,10 @@
         {
             "source": "/hubs/:path*",
             "destination": "http://tunevault-backend.somee.com/hubs/:path*"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ]
 }
