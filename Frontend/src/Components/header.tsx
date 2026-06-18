@@ -195,7 +195,6 @@ export default function Header() {
                 <div className="dropdown-menu">
                   <ul className="dropdown-list">
                     <li onClick={() => { setIsMenuOpen(false); navigate('/profile'); }}>Profile</li>
-                    <li>Settings</li>
                     <hr className="dropdown-divider" />
                     <li className="logout-text" onClick={handleLogout}>Logout</li>
                   </ul>

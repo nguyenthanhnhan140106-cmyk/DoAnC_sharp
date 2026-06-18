@@ -460,7 +460,6 @@ export default function MainContent({ songs }: Props) {
             <div className="playlist-section" style={{ marginTop: "40px", paddingBottom: "60px" }}>
               <div className="section-header" style={{ marginBottom: "20px" }}>
                 <h2 className="section-title">Trending Artists</h2>
-                <button className="show-all-btn">More</button>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "24px" }}>
@@ -478,13 +477,6 @@ export default function MainContent({ songs }: Props) {
                         <h3 style={{ margin: "0 0 4px 0", color: "#fff", fontSize: "20px", fontWeight: 700 }}>{artist.name}</h3>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <p style={{ margin: 0, color: "#b3b3b3", fontSize: "12px", fontWeight: 500 }}>{artist.followers.toLocaleString()} followers</p>
-                          <button style={{ backgroundColor: "transparent", color: "#fff", border: "1px solid #727272", borderRadius: "500px", padding: "4px 16px", fontSize: "12px", fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}
-                            onClick={(e) => { e.stopPropagation(); }}
-                            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#fff"; e.currentTarget.style.transform = "scale(1.05)"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#727272"; e.currentTarget.style.transform = "scale(1)"; }}
-                          >
-                            Follow
-                          </button>
                         </div>
                       </div>
                     </div>
