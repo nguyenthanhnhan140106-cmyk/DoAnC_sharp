@@ -620,8 +620,7 @@ export default function AlbumPage() {
                               )}
                             </button>
                           )}
-
-                          {(isHovered || activeSongMenu === index) && (
+                  {(isHovered || activeSongMenu === index) && (
                             <div className="album-more-menu-container" style={{ position: 'relative' }}>
                               <button style={{ background: 'none', border: 'none', color: '#b3b3b3', cursor: 'pointer', padding: 4 }} title="Tùy chọn khác"
                                 onClick={(e) => { e.stopPropagation(); setActiveSongMenu(activeSongMenu === index ? null : index); setSubmenuSearchQuery(''); }}
@@ -629,16 +628,12 @@ export default function AlbumPage() {
                                 <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M3 8a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm6.5 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM16 8a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" /></svg>
                               </button>
                               {activeSongMenu === index && (
-                                <ul className="album-dropdown-menu" style={{ bottom: '100%', right: 0, left: 'auto', top: 'auto', marginBottom: 8, zIndex: 1000 }} onClick={(e) => e.stopPropagation()}>
-                                  <li>
-                                    <svg viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm8.5-3.5v3h3v1.5h-3v3h-1.5v-3h-3v-1.5h3v-3h1.5z" /></svg>
-                                    Add to Your Library
-                                  </li>
-                                  <li>
-                                    <svg viewBox="0 0 16 16"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 017.187 3H14V1.5H7.187a5.484 5.484 0 01.779-1.5H16v6H7.966zM2 2V.5h3.5v6H2v-1.5H.5V2H2z" /></svg>
-                                    Add to queue
-                                  </li>
-                                  <li className="album-dropdown-divider"></li>
+                                  <ul className="album-dropdown-menu" style={{ bottom: '100%', right: 0, left: 'auto', top: 'auto', marginBottom: 8, zIndex: 1000 }} onClick={(e) => e.stopPropagation()}>
+                                    <li onClick={(e) => { e.stopPropagation(); addToQueue([song]); showToast?.('Đã thêm bài hát vào hàng chờ'); setActiveSongMenu(null); }}>
+                                      <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 017.187 3H14V1.5H7.187a5.484 5.484 0 01.779-1.5H16v6H7.966zM2 2V.5h3.5v6H2v-1.5H.5V2H2z" /></svg>
+                                      Add to queue
+                                    </li>
+                                    <li className="album-dropdown-divider"></li>
                                   <li className="has-submenu" onClick={(e) => e.stopPropagation()}>
                                     <svg viewBox="0 0 16 16"><path d="M15 15H1v-1.5h14V15zm0-4.5H1V9h14v1.5zm-8.034-6A5.484 5.484 0 016.187 3H13V1.5H6.187a5.484 5.484 0 01.779-1.5H15v6H6.966zM1 2V.5h3.5v6H1v-1.5H.5V2H1z" /></svg>
                                     Add to playlist

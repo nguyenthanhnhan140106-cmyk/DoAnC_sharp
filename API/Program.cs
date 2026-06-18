@@ -14,9 +14,9 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cấu hình Kestrel và Form
-builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = 104857600; });
-builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options => { options.MultipartBodyLengthLimit = 104857600; });
+// Cấu hình Kestrel và Form (Tạm thời đóng để tránh làm ngộp tài nguyên Somee Free khi khởi động)
+// builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = 104857600; });
+// builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options => { options.MultipartBodyLengthLimit = 104857600; });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
@@ -111,32 +111,8 @@ app.UseStaticFiles();
 app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notification");
 
-// --- AUTO SEED DATABASE ---
-// --- AUTO SEED DATABASE ---
-// --- AUTO SEED DATABASE (Sửa lại để luôn tạo hash chuẩn) ---
-using (var scope = app.Services.CreateScope())
-{
-    var logger = app.Logger;
-    try {
-        using var conn = new SqlConnection(connectionString);
-        conn.Open();
-        
-        // Tạo hash mật khẩu 123456 ngay khi chạy app
-        string hashed = BCrypt.Net.BCrypt.HashPassword("123456");
-
-        using (var cmd = conn.CreateCommand()) {
-            cmd.CommandText = @"IF NOT EXISTS (SELECT 1 FROM users WHERE Username = 'testuser')
-                                BEGIN
-                                    INSERT INTO users (Username, Email, PasswordHash, CreatedAt)
-                                    VALUES ('testuser', 'testuser@example.com', @pwd, GETDATE());
-                                END";
-            cmd.Parameters.AddWithValue("@pwd", hashed); // Lưu hash chuẩn
-            cmd.ExecuteNonQuery();
-        }
-        logger.LogInformation("[TuneVault DB] 🟢 Seed thành công, password đã được hash!");
-    } catch (Exception ex) { logger.LogWarning($"[TuneVault DB] ⚠️ Seed thất bại: {ex.Message}"); }
-}
 app.Run();
+
 // 🟢 ĐỊNH NGHĨA CLASS PHẢI NẰM Ở CUỐI FILE, SAU app.Run()
 public class CustomUserIdProvider : IUserIdProvider
 {
