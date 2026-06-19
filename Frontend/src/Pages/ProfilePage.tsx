@@ -13,7 +13,7 @@ import { useMusic } from '../Contexts/MusicContext';
 import { songService } from '../Services/songService';
 import '../Components/Styles/ProfilePage.css';
 import '../Components/Styles/HomePage.css';
-import type { Song, UserProfile } from '../types';
+import type { Song, UserProfile, Playlist } from '../types';
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { isLoggedIn, user } = useAuth();
@@ -31,6 +31,7 @@ export default function ProfilePage() {
   const [uploadedSongs, setUploadedSongs] = useState<Song[]>([]);
   const [isUploadedModalOpen, setIsUploadedModalOpen] = useState(false);
   const [contextMenuState, setContextMenuState] = useState<{ songId: number, x: number, y: number } | null>(null);
+  const [myPlaylists, setMyPlaylists] = useState<Playlist[]>([]);
 
   useEffect(() => {
     const closeMenu = () => setContextMenuState(null);
@@ -92,6 +93,7 @@ export default function ProfilePage() {
 
       if (user?.id) {
         API.get(`/Users/${user.id}`).then(res => setFullProfile(res.data)).catch(console.error);
+        API.get(`/playlists/user/${user.id}`).then(res => setMyPlaylists(res.data)).catch(console.error);
       }
       // eslint-disable-next-line
       fetchFollowing();
@@ -104,7 +106,13 @@ export default function ProfilePage() {
         API.get(`/Users/${user.id}`).then(res => setFullProfile(res.data)).catch(console.error);
       }
     };
+    const handlePlaylistUpdate = () => {
+      if (user?.id) {
+        API.get(`/playlists/user/${user.id}`).then(res => setMyPlaylists(res.data)).catch(console.error);
+      }
+    };
     window.addEventListener('followUpdated', handleFollowUpdate);
+    window.addEventListener('playlistUpdated', handlePlaylistUpdate);
     // Lấy danh sách nhạc upload
     if (user?.id) {
       API.get(`/songs/user/${user.id}`)
@@ -116,7 +124,10 @@ export default function ProfilePage() {
         .catch(err => console.error("Lỗi lấy nhạc upload", err));
     }
 
-    return () => window.removeEventListener('followUpdated', handleFollowUpdate);
+    return () => {
+      window.removeEventListener('followUpdated', handleFollowUpdate);
+      window.removeEventListener('playlistUpdated', handlePlaylistUpdate);
+    };
   }, [isLoggedIn, fetchFollowing, user?.id]);
 
   const handleForcePlay = (e: React.MouseEvent, song: Song, index: number) => {
@@ -235,6 +246,36 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
+
+            {/* SECTION YOUR PLAYLISTS */}
+            {myPlaylists.length > 0 && (
+              <div className="profile-section">
+                <div className="profile-section-header">
+                  <h2 className="profile-section-title">Your Playlists</h2>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '24px', paddingTop: '8px' }}>
+                  {myPlaylists.map(playlist => (
+                    <div 
+                      key={playlist.id} 
+                      onClick={() => navigate(`/playlist/${playlist.id}`)}
+                      style={{ backgroundColor: '#181818', padding: '16px', borderRadius: '8px', cursor: 'pointer', transition: 'background-color 0.3s' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#282828'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#181818'}
+                    >
+                      <img 
+                        src={playlist.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop'} 
+                        alt={playlist.name} 
+                        style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '4px', marginBottom: '16px' }} 
+                      />
+                      <h3 style={{ color: 'white', fontSize: '16px', fontWeight: 700, margin: '0 0 8px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{playlist.name}</h3>
+                      <p style={{ color: '#b3b3b3', fontSize: '14px', margin: 0 }}>
+                        {playlist.isPublic ? 'Public Playlist' : 'Private Playlist'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="profile-section">
               <div className="profile-section-header">
