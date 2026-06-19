@@ -38,6 +38,10 @@ export default function SearchPage() {
     const [sortMode, setSortMode] = useState('default');
     const [loading, setLoading] = useState(false);
 
+    // --- STATE PHÂN TRANG ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 8;
+
     const { playSong, currentSong, isPlaying } = useMusic();
     const { isLoggedIn } = useAuth();
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -45,18 +49,23 @@ export default function SearchPage() {
 
     useEffect(() => {
         if (!q) return;
-        // eslint-disable-next-line
         setLoading(true);
         songService.searchSongs(q)
             .then((list: unknown) => {
                 const songList: Song[] = Array.isArray(list) ? list : [];
                 setResults(songList);
+                setCurrentPage(1); // Reset về trang 1 khi có kết quả mới
             })
             .catch((err: unknown) => console.error("Lỗi search:", err))
             .finally(() => setLoading(false));
     }, [q]);
 
-    // Lọc + sắp xếp
+    // Reset về trang 1 khi người dùng thay đổi bộ lọc hoặc chế độ sắp xếp
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterCat, sortMode]);
+
+    // Lọc + sắp xếp danh sách gốc
     const displayed = results
         .filter(s => !filterCat || s.category?.toLowerCase() === filterCat)
         .sort((a, b) => {
@@ -64,6 +73,13 @@ export default function SearchPage() {
             if (sortMode === 'za') return b.title.localeCompare(a.title);
             return 0;
         });
+
+    // --- LOGIC TÍNH TOÁN PHÂN TRANG ---
+    const totalPages = Math.ceil(displayed.length / ITEMS_PER_PAGE);
+    
+    // Cắt dữ liệu chỉ lấy đúng 8 phần tử của trang hiện tại
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedData = displayed.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
     const handlePlay = (song: Song) => {
         playSong(song);
@@ -128,65 +144,115 @@ export default function SearchPage() {
                             <p>Không tìm thấy kết quả nào cho "<strong>{q}</strong>"</p>
                         </div>
                     ) : (
-                        <div className="search-results-list">
-                            {displayed.map((song, idx) => {
-                                const isActive = currentSong?.id === song.id;
-                                return (
-                                    <div
-                                        key={`${song.id}-${idx}`}
-                                        className={`search-result-row ${isActive ? 'active' : ''}`}
-                                        onClick={() => handlePlay(song)}
-                                    >
-                                        {/* Số thứ tự / nút play */}
-                                        <div className="search-result-index">
-                                            {isActive && isPlaying ? (
-                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="#1db954">
-                                                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                        <>
+                            <div className="search-results-list">
+                                {paginatedData.map((song, idx) => {
+                                    const isActive = currentSong?.id === song.id;
+                                    // Tính lại số thứ tự đúng theo vị trí của trang hiện tại
+                                    const displayIndex = startIndex + idx + 1;
+
+                                    return (
+                                        <div
+                                            key={`${song.id}-${idx}`}
+                                            className={`search-result-row ${isActive ? 'active' : ''}`}
+                                            onClick={() => handlePlay(song)}
+                                        >
+                                            {/* Số thứ tự / nút play */}
+                                            <div className="search-result-index">
+                                                {isActive && isPlaying ? (
+                                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="#1db954">
+                                                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                                    </svg>
+                                                ) : (
+                                                    <span className="row-number">{displayIndex}</span>
+                                                )}
+                                                <svg className="row-play-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                                    <path d="M8 5v14l11-7z" />
                                                 </svg>
-                                            ) : (
-                                                <span className="row-number">{idx + 1}</span>
+                                            </div>
+
+                                            {/* Ảnh bìa */}
+                                            <img
+                                                src={getCover(song)}
+                                                alt={song.title}
+                                                className="search-result-cover"
+                                            />
+
+                                            {/* Thông tin bài hát */}
+                                            <div className="search-result-info">
+                                                <span className="search-result-title" style={{ color: isActive ? '#1db954' : '#fff' }}>
+                                                    {song.title}
+                                                </span>
+                                                <span className="search-result-artist">Bài hát • {song.artist}</span>
+                                            </div>
+
+                                            {/* Badge thể loại */}
+                                            {song.category && (
+                                                <span className="search-result-badge">{song.category.toUpperCase()}</span>
                                             )}
-                                            <svg className="row-play-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                                                <path d="M8 5v14l11-7z" />
-                                            </svg>
+
+                                            {/* Nút thêm vào playlist */}
+                                            <button className="search-result-add" title="Thêm vào thư viện" onClick={e => e.stopPropagation()}>
+                                                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                                                </svg>
+                                            </button>
                                         </div>
+                                    );
+                                })}
+                            </div>
 
-                                        {/* Ảnh bìa */}
-                                        <img
-                                            src={getCover(song)}
-                                            alt={song.title}
-                                            className="search-result-cover"
-                                        />
+                            {/* --- CỤM NÚT ĐIỀU HƯỚNG PHÂN TRANG (PAGINATION UI) --- */}
+                            {totalPages > 1 && (
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '30px', marginBottom: '20px' }}>
+                                    {/* Nút lùi về trang trước */}
+                                    <button 
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        style={{
+                                            background: '#242424',
+                                            color: currentPage === 1 ? '#555' : '#fff',
+                                            border: 'none',
+                                            padding: '8px 16px',
+                                            borderRadius: '20px',
+                                            cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                            fontWeight: 'bold',
+                                            transition: '0.2s'
+                                        }}
+                                    >
+                                        Trước
+                                    </button>
 
-                                        {/* Thông tin bài hát */}
-                                        <div className="search-result-info">
-                                            <span className="search-result-title" style={{ color: isActive ? '#1db954' : '#fff' }}>
-                                                {song.title}
-                                            </span>
-                                            <span className="search-result-artist">Bài hát • {song.artist}</span>
-                                        </div>
+                                    {/* Hiển thị số trang (Ví dụ: 1 / 3) */}
+                                    <span style={{ color: '#b3b3b3', fontSize: '14px', fontWeight: 500 }}>
+                                        <strong style={{ color: '#fff' }}>{currentPage}</strong> / {totalPages}
+                                    </span>
 
-                                        {/* Badge thể loại */}
-                                        {song.category && (
-                                            <span className="search-result-badge">{song.category.toUpperCase()}</span>
-                                        )}
-
-                                        {/* Nút thêm vào playlist */}
-                                        <button className="search-result-add" title="Thêm vào thư viện" onClick={e => e.stopPropagation()}>
-                                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    {/* Nút tiến tới trang tiếp theo */}
+                                    <button 
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        style={{
+                                            background: '#242424',
+                                            color: currentPage === totalPages ? '#555' : '#fff',
+                                            border: 'none',
+                                            padding: '8px 16px',
+                                            borderRadius: '20px',
+                                            cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                                            fontWeight: 'bold',
+                                            transition: '0.2s'
+                                        }}
+                                    >
+                                        Tiếp
+                                    </button>
+                                </div>
+                            )}
+                        </>
                     )}
 
                     <Footer />
                 </div>
             </div>
-
 
             {isLoggedIn && <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />}
             {isLoggedIn ? <PlayerBar /> : <AuthBanner />}
