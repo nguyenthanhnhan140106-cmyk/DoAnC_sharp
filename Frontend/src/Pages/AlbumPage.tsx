@@ -73,8 +73,13 @@ export default function AlbumPage() {
 
   const handleAddSongToPlaylist = async (song: Song, playlistId: number) => {
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`/api/playlists/${playlistId}/songs/${song.id}`, {
-        method: 'POST'
+        method: 'POST',
+        headers
       });
       if (res.ok) {
         const targetPlaylist = playlists.find(p => p.id === playlistId);
@@ -104,9 +109,13 @@ export default function AlbumPage() {
     const nextNumber = maxNumber + 1;
 
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`/api/playlists/user/${user.id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           name: `Playlist #${nextNumber}`,
           description: '',
@@ -116,8 +125,12 @@ export default function AlbumPage() {
 
       if (res.ok) {
         const newPlaylist = await res.json();
+        const addHeaders: any = {};
+        if (token) addHeaders['Authorization'] = `Bearer ${token}`;
+
         const addRes = await fetch(`/api/playlists/${newPlaylist.id}/songs/${song.id}`, {
-          method: 'POST'
+          method: 'POST',
+          headers: addHeaders
         });
         if (addRes.ok) {
           showToast(`Added to ${newPlaylist.name}`, song.coverUrl);
