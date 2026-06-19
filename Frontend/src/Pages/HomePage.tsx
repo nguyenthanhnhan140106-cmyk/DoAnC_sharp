@@ -27,11 +27,18 @@ export default function HomePage() {
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
   useEffect(() => {
-    songService.getAllSongs()
-      .then((list: unknown) => {
-        if (Array.isArray(list)) setSongs(list);
-      })
-      .catch((err: unknown) => console.error('❌ Lỗi:', err));
+    const fetchSongs = () => {
+      songService.getAllSongs()
+        .then((list: unknown) => {
+          if (Array.isArray(list)) setSongs(list);
+        })
+        .catch((err: unknown) => console.error('❌ Lỗi:', err));
+    };
+
+    fetchSongs();
+    
+    window.addEventListener('songDeleted', fetchSongs);
+    return () => window.removeEventListener('songDeleted', fetchSongs);
   }, []);
 
   return (

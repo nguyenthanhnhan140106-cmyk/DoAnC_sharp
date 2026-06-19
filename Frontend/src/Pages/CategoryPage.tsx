@@ -34,18 +34,24 @@ const CategoryPage = () => {
       });
     }
 
-    // 2. Lấy danh sách bài hát
-    const fetchSongs = catId === 'all' || !catId 
-      ? songService.getAllSongs() 
-      : songService.getSongsByCategory(catId);
+    const fetchSongs = () => {
+      const fetchReq = catId === 'all' || !catId 
+        ? songService.getAllSongs() 
+        : songService.getSongsByCategory(catId);
 
-    fetchSongs
-      .then((list: unknown) => {
-        if (Array.isArray(list)) {
-          setSongs(list);
-        }
-      })
-      .catch((err) => console.error('❌ Lỗi:', err));
+      fetchReq
+        .then((list: unknown) => {
+          if (Array.isArray(list)) {
+            setSongs(list);
+          }
+        })
+        .catch((err) => console.error('❌ Lỗi:', err));
+    };
+
+    fetchSongs();
+    
+    window.addEventListener('songDeleted', fetchSongs);
+    return () => window.removeEventListener('songDeleted', fetchSongs);
   }, [catId]);
 
   let title = "Tất cả bài hát";

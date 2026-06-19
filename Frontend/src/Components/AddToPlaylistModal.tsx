@@ -54,14 +54,24 @@ export default function AddToPlaylistModal() {
   const togglePlaylist = async (playlistId: number) => {
     const isCurrentlyInPlaylist = songPlaylists.includes(playlistId);
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       if (isCurrentlyInPlaylist) {
-        const res = await fetch(`/api/playlists/${playlistId}/songs/${selectedSongForModal.id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/playlists/${playlistId}/songs/${selectedSongForModal.id}`, { 
+          method: 'DELETE',
+          headers
+        });
         if (res.ok) {
           setSongPlaylists(prev => prev.filter(id => id !== playlistId));
           window.dispatchEvent(new Event('playlistUpdated'));
         }
       } else {
-        const res = await fetch(`/api/playlists/${playlistId}/songs/${selectedSongForModal.id}`, { method: 'POST' });
+        const res = await fetch(`/api/playlists/${playlistId}/songs/${selectedSongForModal.id}`, { 
+          method: 'POST',
+          headers
+        });
         if (res.ok) {
           setSongPlaylists(prev => [...prev, playlistId]);
           window.dispatchEvent(new Event('playlistUpdated'));
@@ -119,7 +129,50 @@ export default function AddToPlaylistModal() {
         </div>
 
         <div className="modal-content-list">
-          <button className="new-playlist-btn">
+          <button className="new-playlist-btn" onClick={async () => {
+            if (!user) return;
+            let maxNumber = 0;
+            playlists.forEach(p => {
+              const match = p.name.match(/#(\d+)$/);
+              if (match) {
+                const num = parseInt(match[1], 10);
+                if (num > maxNumber) maxNumber = num;
+              }
+            });
+            const nextNumber = maxNumber + 1;
+            
+            try {
+              const token = localStorage.getItem('token');
+              const headers: any = { 'Content-Type': 'application/json' };
+              if (token) headers['Authorization'] = `Bearer ${token}`;
+
+              const res = await fetch(`/api/playlists/user/${user.id}`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                  name: `Playlist #${nextNumber}`,
+                  description: '',
+                  coverUrl: ''
+                })
+              });
+              if (res.ok) {
+                const newPlaylist = await res.json();
+                const addHeaders: any = {};
+                if (token) addHeaders['Authorization'] = `Bearer ${token}`;
+                const addRes = await fetch(`/api/playlists/${newPlaylist.id}/songs/${selectedSongForModal.id}`, {
+                  method: 'POST',
+                  headers: addHeaders
+                });
+                if (addRes.ok) {
+                  setPlaylists(prev => [...prev, newPlaylist]);
+                  setSongPlaylists(prev => [...prev, newPlaylist.id]);
+                  window.dispatchEvent(new Event('playlistUpdated'));
+                }
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          }}>
             <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15.25 8a.75.75 0 0 1-.75.75H8.75v5.75a.75.75 0 0 1-1.5 0V8.75H1.5a.75.75 0 0 1 0-1.5h5.75V1.5a.75.75 0 0 1 1.5 0v5.75h5.75a.75.75 0 0 1 .75.75z"/></svg>
             New playlist
           </button>

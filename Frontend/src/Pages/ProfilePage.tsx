@@ -30,6 +30,24 @@ export default function ProfilePage() {
   const [followModalTab, setFollowModalTab] = useState<'followers' | 'following'>('followers');
   const [uploadedSongs, setUploadedSongs] = useState<Song[]>([]);
   const [isUploadedModalOpen, setIsUploadedModalOpen] = useState(false);
+  const [contextMenuState, setContextMenuState] = useState<{ songId: number, x: number, y: number } | null>(null);
+
+  useEffect(() => {
+    const closeMenu = () => setContextMenuState(null);
+    window.addEventListener('click', closeMenu);
+    return () => window.removeEventListener('click', closeMenu);
+  }, []);
+
+  const handleDeleteUploadedSong = async (songId: number) => {
+    if (!window.confirm("Are you sure you want to delete this song?")) return;
+    try {
+      await API.delete(`/songs/${songId}`);
+      setUploadedSongs(prev => prev.filter(s => s.id !== songId));
+      window.dispatchEvent(new Event('songDeleted'));
+    } catch (err) {
+      console.error("Error deleting song", err);
+    }
+  };
 
   const fetchFollowing = React.useCallback(async () => {
     if (!isLoggedIn) return;
@@ -48,13 +66,21 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    songService.getAllSongs()
-      .then((list: unknown) => {
-        //chỗ này vẫn là random để lấy top nhạc
-        if (Array.isArray(list)) setSongs(list.slice(0, 4));
-      })
-      .catch((err: unknown) => console.error('❌ Lỗi:', err));
+    const fetchTopSongs = () => {
+      songService.getAllSongs()
+        .then((list: unknown) => {
+          if (Array.isArray(list)) setSongs(list.slice(0, 4));
+        })
+        .catch((err: unknown) => console.error('❌ Lỗi:', err));
+    };
 
+    fetchTopSongs();
+    
+    window.addEventListener('songDeleted', fetchTopSongs);
+    return () => window.removeEventListener('songDeleted', fetchTopSongs);
+  }, []);
+
+  useEffect(() => {
     if (isLoggedIn) {
       API.get('/history/recent', { params: { limit: 50 } })
         .then((res) => {
@@ -347,6 +373,10 @@ export default function ProfilePage() {
                         key={song.id}
                         className="profile-track-item"
                         onClick={(e) => handleForcePlay(e, song, index)}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          setContextMenuState({ songId: song.id, x: e.clientX, y: e.clientY });
+                        }}
                         style={{ padding: '8px', borderRadius: '4px', display: 'flex', alignItems: 'center' }}
                       >
                         <div className="track-col track-index" style={{ width: '40px', textAlign: 'center' }}>
@@ -386,6 +416,33 @@ export default function ProfilePage() {
                       </div>
                     );
                   })}
+                </div>
+              )}
+              {contextMenuState && (
+                <div 
+                  style={{
+                    position: 'fixed',
+                    top: contextMenuState.y,
+                    left: contextMenuState.x,
+                    background: '#282828',
+                    padding: '8px 0',
+                    borderRadius: '4px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                    zIndex: 100000
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button 
+                    style={{ background: 'none', border: 'none', color: '#ff4d4d', padding: '8px 16px', width: '100%', textAlign: 'left', cursor: 'pointer', fontSize: '14px', fontWeight: 500 }}
+                    onClick={() => {
+                      handleDeleteUploadedSong(contextMenuState.songId);
+                      setContextMenuState(null);
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#3e3e3e'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                  >
+                    Delete Song
+                  </button>
                 </div>
               )}
             </div>
