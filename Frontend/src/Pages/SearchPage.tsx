@@ -100,29 +100,39 @@ export default function SearchPage() {
 
             <div className="main-view">
                 <div className="content-wrapper" style={{ padding: '24px' }}>
-                    <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#b3b3b3', cursor: 'pointer', fontSize: 24, marginBottom: 16 }}>←</button>
+                    
+                    {/* Cụm tiêu đề chứa nút Back sát cạnh chữ */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <button 
+                            onClick={() => navigate(-1)} 
+                            style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                color: '#fff', 
+                                cursor: 'pointer', 
+                                fontSize: '28px', 
+                                padding: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                transition: '0.2s',
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#FF5500'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}
+                            title="Quay lại"
+                        >
+                            ←
+                        </button>
+                        <h1 style={{ color: '#fff', fontSize: '28px', fontWeight: 'bold', margin: 0, padding: 0, lineHeight: '1.2' }}>
+                            Kết quả tìm kiếm: <span style={{ color: '#FF5500' }}>"{q}"</span>
+                        </h1>
+                    </div>
 
-                    <h1 style={{ color: '#fff', fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' }}>
-                        Kết quả tìm kiếm: <span style={{ color: '#FF5500' }}>"{q}"</span>
-                    </h1>
-                    <p style={{ color: '#b3b3b3', marginBottom: '24px' }}>
+                    <p style={{ color: '#b3b3b3', marginBottom: '24px', paddingLeft: '40px' }}>
                         {loading ? 'Đang tìm...' : `${displayed.length} kết quả`}
                     </p>
 
                     {/* Bộ lọc nâng cao */}
                     <div className="search-filters">
-                        <div className="filter-group">
-                            <span className="filter-label">Thể loại:</span>
-                            {CATEGORIES.map(cat => (
-                                <button
-                                    key={cat.value}
-                                    className={`filter-chip ${filterCat === cat.value ? 'active' : ''}`}
-                                    onClick={() => setFilterCat(cat.value)}
-                                >
-                                    {cat.label}
-                                </button>
-                            ))}
-                        </div>
                         <div className="filter-group">
                             <span className="filter-label">Sắp xếp:</span>
                             {SORTS.map(s => (
@@ -148,7 +158,6 @@ export default function SearchPage() {
                             <div className="search-results-list">
                                 {paginatedData.map((song, idx) => {
                                     const isActive = currentSong?.id === song.id;
-                                    // Tính lại số thứ tự đúng theo vị trí của trang hiện tại
                                     const displayIndex = startIndex + idx + 1;
 
                                     return (
@@ -202,10 +211,10 @@ export default function SearchPage() {
                                 })}
                             </div>
 
-                            {/* --- CỤM NÚT ĐIỀU HƯỚNG PHÂN TRANG (PAGINATION UI) --- */}
+                            {/* --- ĐÃ SỬA: ĐỔI CHỮ THÀNH MŨI TÊN PHÂN TRANG --- */}
                             {totalPages > 1 && (
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '30px', marginBottom: '20px' }}>
-                                    {/* Nút lùi về trang trước */}
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginTop: '30px', marginBottom: '20px' }}>
+                                    {/* Nút lùi về trang trước (Dấu ‹) */}
                                     <button 
                                         disabled={currentPage === 1}
                                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -213,22 +222,27 @@ export default function SearchPage() {
                                             background: '#242424',
                                             color: currentPage === 1 ? '#555' : '#fff',
                                             border: 'none',
-                                            padding: '8px 16px',
-                                            borderRadius: '20px',
+                                            padding: '4px 14px',
+                                            borderRadius: '50%',
                                             cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                            fontSize: '20px',
                                             fontWeight: 'bold',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
                                             transition: '0.2s'
                                         }}
+                                        title="Trang trước"
                                     >
-                                        Trước
+                                        ‹
                                     </button>
 
-                                    {/* Hiển thị số trang (Ví dụ: 1 / 3) */}
-                                    <span style={{ color: '#b3b3b3', fontSize: '14px', fontWeight: 500 }}>
+                                    {/* Hiển thị số trang */}
+                                    <span style={{ color: '#b3b3b3', fontSize: '14px', fontWeight: 500, userSelect: 'none' }}>
                                         <strong style={{ color: '#fff' }}>{currentPage}</strong> / {totalPages}
                                     </span>
 
-                                    {/* Nút tiến tới trang tiếp theo */}
+                                    {/* Nút tiến tới trang tiếp theo (Dấu ›) */}
                                     <button 
                                         disabled={currentPage === totalPages}
                                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
@@ -236,14 +250,19 @@ export default function SearchPage() {
                                             background: '#242424',
                                             color: currentPage === totalPages ? '#555' : '#fff',
                                             border: 'none',
-                                            padding: '8px 16px',
-                                            borderRadius: '20px',
+                                            padding: '4px 14px',
+                                            borderRadius: '50%',
                                             cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                                            fontSize: '20px',
                                             fontWeight: 'bold',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
                                             transition: '0.2s'
                                         }}
+                                        title="Trang tiếp theo"
                                     >
-                                        Tiếp
+                                        ›
                                     </button>
                                 </div>
                             )}
