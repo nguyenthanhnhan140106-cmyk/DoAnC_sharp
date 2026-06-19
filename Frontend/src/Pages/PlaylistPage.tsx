@@ -152,10 +152,14 @@ export default function PlaylistPage() {
   const handleTogglePrivacy = async () => {
     if (!playlist || playlist.id === ('liked' as any) || !user) return;
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const newIsPublic = !playlist.isPublic;
       const res = await fetch(`/api/playlists/${playlist.id}/privacy`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(newIsPublic)
       });
       if (res.ok) {
@@ -187,7 +191,11 @@ export default function PlaylistPage() {
     }
 
     if (id) {
-      fetch(`/api/playlists/${id}`)
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      fetch(`/api/playlists/${id}`, { headers })
         .then(res => {
           if (!res.ok) throw new Error("Not found");
           return res.json();

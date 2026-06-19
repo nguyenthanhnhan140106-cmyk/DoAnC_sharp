@@ -13,11 +13,12 @@ import FollowListModal from '../Components/FollowListModal';
 import { useMusic } from "../Contexts/MusicContext";
 import "../Components/Styles/HomePage.css";
 import "../Components/Styles/ProfilePage.css";
-import type { UserProfile } from '../types';
+import type { UserProfile, Playlist } from '../types';
 
 export default function UserProfilePage() {
   const { id } = useParams<{ id: string }>();
   const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
+  const [publicPlaylists, setPublicPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const { isLoggedIn, user, openAuthModal } = useAuth();
@@ -41,6 +42,13 @@ export default function UserProfilePage() {
         if (isLoggedIn) {
           const followRes = await API.get(`/follow/user/${id}/status`);
           setIsFollowing(followRes.data.isFollowing);
+        }
+
+        // Fetch public playlists
+        const playlistsRes = await API.get(`/playlists/user/${id}`);
+        if (Array.isArray(playlistsRes.data)) {
+          const isSelf = user?.id === parseInt(id || "0", 10);
+          setPublicPlaylists(playlistsRes.data.filter((p: Playlist) => p.isPublic || isSelf));
         }
       } catch (err) {
         console.error("Lỗi lấy thông tin user:", err);
@@ -173,7 +181,31 @@ export default function UserProfilePage() {
               </div>
 
               <h2 style={{ fontSize: "24px", fontWeight: 700, color: "white", marginBottom: "16px" }}>Public Playlists</h2>
-              <p style={{ color: "#b3b3b3", fontSize: "14px" }}>Feature coming soon...</p>
+              {publicPlaylists.length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '24px' }}>
+                  {publicPlaylists.map(playlist => (
+                    <div 
+                      key={playlist.id} 
+                      onClick={() => window.location.href = `/playlist/${playlist.id}`}
+                      style={{ backgroundColor: '#181818', padding: '16px', borderRadius: '8px', cursor: 'pointer', transition: 'background-color 0.3s' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#282828'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#181818'}
+                    >
+                      <img 
+                        src={playlist.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&h=500&fit=crop'} 
+                        alt={playlist.name} 
+                        style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '4px', marginBottom: '16px' }} 
+                      />
+                      <h3 style={{ color: 'white', fontSize: '16px', fontWeight: 700, margin: '0 0 8px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{playlist.name}</h3>
+                      <p style={{ color: '#b3b3b3', fontSize: '14px', margin: 0 }}>
+                        {playlist.isPublic ? 'Public Playlist' : 'Private Playlist'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: "#b3b3b3", fontSize: "14px" }}>Người dùng này chưa có playlist công khai nào.</p>
+              )}
             </div>
             <Footer />
           </div>

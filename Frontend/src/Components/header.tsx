@@ -55,8 +55,12 @@ export default function Header() {
   }, [query]);
 
   const handleHomeClick = () => {
-    navigate('/');
-    window.dispatchEvent(new CustomEvent('RESET_HOME_TAB'));
+    if (location.pathname === '/') {
+      window.location.reload();
+    } else {
+      navigate('/');
+      window.dispatchEvent(new CustomEvent('RESET_HOME_TAB'));
+    }
   };
 
   const handleSearch = (searchQuery?: string) => {
