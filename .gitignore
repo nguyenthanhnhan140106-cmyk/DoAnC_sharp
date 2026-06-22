@@ -25,3 +25,6 @@ Frontend/*.local
 # OS
 .DS_Store
 Thumbs.db
+
+# Ignore API settings
+API/appsettings.json

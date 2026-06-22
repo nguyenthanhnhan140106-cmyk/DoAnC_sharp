@@ -56,26 +56,74 @@ export default function useTuneBot() {
     const now = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
     const userMsg: Message = { role: "user", text, time: now };
 
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMsg, { role: "bot", text: "", time: now }]);
     setLoading(true);
     setError(null);
 
     try {
-      const res = await API.post("/ai/chat", {
-        message: text,
-        history: messages.map((m) => ({ role: m.role, text: m.text })),
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          message: text,
+          history: messages.map((m) => ({ role: m.role, text: m.text })),
+        }),
       });
 
-      // Lấy câu trả lời từ API
-      const reply = res.data.reply || "Xin lỗi, tôi chưa hiểu câu hỏi.";
-      const botMsg: Message = { role: "bot", text: reply, time: now };
-      setMessages((prev) => [...prev, botMsg]);
+      if (!res.ok) throw new Error("API lỗi");
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      if (!reader) throw new Error("No reader available");
+
+      let done = false;
+      let buffer = "";
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+          
+          const lines = buffer.split("\n\n");
+          // Giữ lại phần chưa hoàn chỉnh (không có \n\n) ở cuối buffer
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith("data: ")) {
+              const dataStr = trimmedLine.substring(6);
+              if (dataStr === "[DONE]") {
+                done = true;
+                break;
+              }
+              const textChunk = dataStr.replace(/\\n/g, "\n");
+              setMessages((prev) => {
+                const newMessages = [...prev];
+                const lastMsg = newMessages[newMessages.length - 1];
+                lastMsg.text += textChunk;
+                return newMessages;
+              });
+            }
+          }
+        }
+      }
     } catch (e: unknown) {
       console.error("Backend lỗi, chuyển sang fallback:", e);
-      // Fallback khi gọi API thất bại
+      // Thay thế tin nhắn bot trống bằng fallback
       const mockReply = getClientFallback(text);
-      const botMsg: Message = { role: "bot", text: mockReply, time: now };
-      setMessages((prev) => [...prev, botMsg]);
+      setMessages((prev) => {
+        const newMessages = [...prev];
+        const lastMsg = newMessages[newMessages.length - 1];
+        lastMsg.text = mockReply;
+        return newMessages;
+      });
     } finally {
       setLoading(false);
     }

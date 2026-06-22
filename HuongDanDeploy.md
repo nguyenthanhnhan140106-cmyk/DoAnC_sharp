@@ -17,9 +17,11 @@ Tài liệu này hướng dẫn chi tiết quy trình triển khai (deploy) toà
 
 ---
 
-## 1. 🌍 Tổng Quan Kiến Trúc Sau Khi Triển Khai
-
-Hệ thống được cấu hình theo mô hình Cloud tách biệt (Decoupled Architecture) giúp tối ưu bộ nhớ cho gói miễn phí và đảm bảo tốc độ truy cập:
+## 1. 🌍 Tổng Quan Kiến Trúc & CI/CD
+    
+Dự án được tích hợp **Pipeline CI/CD tự động bằng GitHub Actions** (`.github/workflows/ci.yml`). Mỗi khi có thay đổi được Push lên GitHub, hệ thống sẽ tự động chạy lệnh Build cho cả Backend (.NET) và Frontend (React) để đảm bảo không có lỗi biên dịch trước khi triển khai.
+    
+Về kiến trúc triển khai, hệ thống được cấu hình theo mô hình Cloud tách biệt (Decoupled Architecture) giúp tối ưu bộ nhớ cho gói miễn phí và đảm bảo tốc độ truy cập:
 
 | Thành phần | Nền tảng Cloud | URL trực tuyến công khai | Cơ chế hoạt động |
 | :--- | :--- | :--- | :--- |

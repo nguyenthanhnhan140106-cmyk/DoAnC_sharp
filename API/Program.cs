@@ -42,7 +42,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IArtistService>(_ => new ArtistService(connectionString));
 builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connectionString));
 builder.Services.AddScoped<AlbumService>(_ => new AlbumService(connectionString));
-builder.Services.AddHttpClient<Application.Services.AiService>();
+builder.Services.AddHttpClient<IAiService, LocalAiService>();
 builder.Services.AddHttpClient(); // Thêm cấu hình HttpClient dùng chung
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
