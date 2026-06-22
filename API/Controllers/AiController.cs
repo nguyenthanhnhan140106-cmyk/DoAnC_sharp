@@ -1,7 +1,9 @@
-using Application.Services;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Application.DTOs;
+using Application.Features.AI.Queries;
+using Application.Features.AI.Commands;
 
 namespace API.Controllers
 {
@@ -9,11 +11,11 @@ namespace API.Controllers
     [Route("api/[controller]")] // → POST http://localhost:5000/api/ai/chat
     public class AiController : ControllerBase
     {
-        private readonly AiService _aiService;
+        private readonly IMediator _mediator;
 
-        public AiController(AiService aiService)
+        public AiController(IMediator mediator)
         {
-            _aiService = aiService;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -21,13 +23,31 @@ namespace API.Controllers
         /// Body: { "message": "...", "history": [ { "role": "user"|"bot", "text": "..." } ] }
         /// </summary>
         [HttpPost("chat")]
-        public async Task<IActionResult> Chat([FromBody] ChatRequestDTO request)
+        public async Task Chat([FromBody] ChatRequestDTO request)
         {
             if (string.IsNullOrWhiteSpace(request.Message))
-                return BadRequest(new { error = "Tin nhắn không được để trống." });
+            {
+                Response.StatusCode = 400;
+                await Response.WriteAsJsonAsync(new { error = "Tin nhắn không được để trống." });
+                return;
+            }
 
-            var result = await _aiService.ChatAsync(request);
-            return Ok(result);
+            Response.ContentType = "text/event-stream";
+            
+            var query = new ChatQuery(request.History ?? new System.Collections.Generic.List<MessageDTO>(), request.Message);
+            var stream = _mediator.CreateStream(query);
+
+            await foreach (var chunk in stream)
+            {
+                // Format thành SSE payload: "data: ....\n\n"
+                var dataStr = chunk.Replace("\n", "\\n"); // Thoát ký tự xuống dòng nếu cần
+                await Response.WriteAsync($"data: {dataStr}\n\n");
+                await Response.Body.FlushAsync();
+            }
+
+            // Gửi cờ kết thúc
+            await Response.WriteAsync("data: [DONE]\n\n");
+            await Response.Body.FlushAsync();
         }
 
         /// <summary>
@@ -39,7 +59,8 @@ namespace API.Controllers
         {
             try
             {
-                var tags = await _aiService.AutoTagSongAsync(songId);
+                var command = new AutoTagCommand(songId);
+                var tags = await _mediator.Send(command);
                 return Ok(new { success = true, tags });
             }
             catch (System.Exception ex)

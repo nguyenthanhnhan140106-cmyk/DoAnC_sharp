@@ -22,7 +22,7 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const { isLoggedIn, user, openAuthModal } = useAuth();
-  const { isLyricsViewOpen } = useMusic();
+  const { isLyricsViewOpen, showToast } = useMusic();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
@@ -81,7 +81,7 @@ export default function UserProfilePage() {
     } catch (err: any) {
       console.error("Lỗi follow user:", err);
       if (err.response?.status === 400) {
-        alert(err.response.data);
+        showToast(err.response.data);
       }
     }
   };

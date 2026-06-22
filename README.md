@@ -2,6 +2,7 @@
 [![.NET Version](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/)
 [![React Version](https://img.shields.io/badge/React-18-61dafb.svg)](https://reactjs.org/)
 [![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC292B.svg)](https://www.microsoft.com/en-us/sql-server)
+[![CI Pipeline](https://github.com/nguyenthanhnhan140106-cmyk/DoAnC_sharp/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenthanhnhan140106-cmyk/DoAnC_sharp/actions/workflows/ci.yml)
 [![Status](https://img.shields.io/badge/Status-Hoàn%20thiện-success.svg)]()
 
 ## 📋 Mục lục
@@ -46,6 +47,7 @@
 | **ORM** | Dapper | Micro-ORM tối ưu hóa tốc độ truy vấn SQL |
 | **Real-time**| SignalR | Đẩy thông báo thời gian thực từ Server xuống Client |
 | **Bảo mật** | JWT, BCrypt.Net | Mã hóa mật khẩu và xác thực người dùng |
+| **CI/CD** | GitHub Actions | Tự động hóa kiểm tra lỗi biên dịch (Build & Test) khi Push code |
 
 ---
 

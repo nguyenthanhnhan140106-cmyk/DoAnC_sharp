@@ -27,9 +27,21 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterCommand request)
         {
-            var result = await _mediator.Send(request);
-            if (!result.Success) return BadRequest(new { Message = result.Message }); 
-            return Ok(new { Message = result.Message });
+            try 
+            {
+                var result = await _mediator.Send(request);
+                if (!result.Success) return BadRequest(new { Message = result.Message }); 
+                return Ok(new { Message = result.Message });
+            }
+            catch (FluentValidation.ValidationException ex)
+            {
+                var errors = ex.Errors.Select(e => new { error = e.ErrorMessage }).ToList();
+                return BadRequest(new { errors = errors });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Đã xảy ra lỗi hệ thống: " + ex.Message });
+            }
         }
 
         [HttpPost("login")]

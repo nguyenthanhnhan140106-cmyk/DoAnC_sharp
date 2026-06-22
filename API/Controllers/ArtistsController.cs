@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Application.Interfaces;
 using Application.DTOs;
-using MediatR;
+using Application.Features.Artists.Queries;
 using Application.Features.Songs.Queries;
+using MediatR;
 
 namespace API.Controllers
 {
@@ -10,33 +10,33 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ArtistsController : ControllerBase
     {
-        private readonly IArtistService _artistService;
+        private readonly IMediator _mediator;
 
-        public ArtistsController(IArtistService artistService)
+        public ArtistsController(IMediator mediator)
         {
-            _artistService = artistService;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetArtists()
         {
-            var artists = await _artistService.GetAllArtistsAsync();
+            var artists = await _mediator.Send(new GetAllArtistsQuery());
             return Ok(artists);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetArtist(int id)
         {
-            var artist = await _artistService.GetArtistByIdAsync(id);
+            var artist = await _mediator.Send(new GetArtistByIdQuery(id));
             if (artist == null) return NotFound("Không tìm thấy nghệ sĩ này");
             return Ok(artist);
         }
 
         [HttpGet("{id}/songs")]
-        public async Task<IActionResult> GetSongsByArtist(int id, [FromServices] IMediator mediator)
+        public async Task<IActionResult> GetSongsByArtist(int id)
         {
-            var songs = await mediator.Send(new GetSongsByArtistQuery(id));
+            var songs = await _mediator.Send(new GetSongsByArtistQuery(id));
             return Ok(songs);
         }
     }
-}
+}

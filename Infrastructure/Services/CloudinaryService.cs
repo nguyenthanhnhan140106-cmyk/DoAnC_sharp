@@ -11,7 +11,7 @@ namespace Infrastructure.Services
 {
     public class CloudinaryService : ICloudinaryService
     {
-        private readonly Cloudinary _cloudinary;
+        private readonly Cloudinary _cloudinary = null!;
 
         public CloudinaryService(IOptions<CloudinarySettings> config)
         {
@@ -40,7 +40,7 @@ namespace Infrastructure.Services
         public async Task<string> UploadAudioAsync(Stream fileStream, string fileName)
         {
             EnsureCloudinaryIsConfigured();
-            if (fileStream == null || fileStream.Length == 0) return null;
+            if (fileStream == null || fileStream.Length == 0) return string.Empty;
 
             var uploadParams = new VideoUploadParams
             {
@@ -58,7 +58,7 @@ namespace Infrastructure.Services
         public async Task<string> UploadVideoAsync(Stream fileStream, string fileName)
         {
             EnsureCloudinaryIsConfigured();
-            if (fileStream == null || fileStream.Length == 0) return null;
+            if (fileStream == null || fileStream.Length == 0) return string.Empty;
 
             var uploadParams = new VideoUploadParams
             {
@@ -76,7 +76,7 @@ namespace Infrastructure.Services
         public async Task<string> UploadImageAsync(Stream fileStream, string fileName)
         {
             EnsureCloudinaryIsConfigured();
-            if (fileStream == null || fileStream.Length == 0) return null;
+            if (fileStream == null || fileStream.Length == 0) return string.Empty;
 
             var uploadParams = new ImageUploadParams
             {

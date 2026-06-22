@@ -105,5 +105,17 @@ namespace API.Controllers
             var shares = await _mediator.Send(new GetSharedWithMeQuery(currentUserId));
             return Ok(shares);
         }
+
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        [HttpGet("shared-by-me")]
+        public async Task<IActionResult> GetSharedByMe()
+        {
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+                return Unauthorized(new { Message = "Vui lòng đăng nhập." });
+
+            var shares = await _mediator.Send(new GetSharedByMeQuery(currentUserId));
+            return Ok(shares);
+        }
     }
 }

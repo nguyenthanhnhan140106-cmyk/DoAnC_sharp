@@ -19,7 +19,7 @@ export default function VideoPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
-  const { pauseSong } = useMusic();
+  const { pauseSong, showToast } = useMusic();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [song, setSong] = useState<SongDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,13 +30,14 @@ export default function VideoPage() {
 
     API.get(`/songs/${id}`)
       .then(res => {
-        setSong(res.data);
+        const songData = res.data?.data || res.data;
+        setSong(songData);
         setLoading(false);
       })
       .catch(err => {
         console.error(err);
         setLoading(false);
-        alert('Không tìm thấy video này!');
+        showToast('Không tìm thấy video này!');
         navigate('/');
       });
       

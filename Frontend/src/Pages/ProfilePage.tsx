@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const [followModalTab, setFollowModalTab] = useState<'followers' | 'following'>('followers');
   const [uploadedSongs, setUploadedSongs] = useState<Song[]>([]);
   const [isUploadedModalOpen, setIsUploadedModalOpen] = useState(false);
-  const [contextMenuState, setContextMenuState] = useState<{ songId: number, x: number, y: number } | null>(null);
+  const [contextMenuState, setContextMenuState] = useState<{ song: Song, x: number, y: number } | null>(null);
   const [myPlaylists, setMyPlaylists] = useState<Playlist[]>([]);
 
   useEffect(() => {
@@ -416,7 +416,7 @@ export default function ProfilePage() {
                         onClick={(e) => handleForcePlay(e, song, index)}
                         onContextMenu={(e) => {
                           e.preventDefault();
-                          setContextMenuState({ songId: song.id, x: e.clientX, y: e.clientY });
+                          setContextMenuState({ song, x: e.clientX, y: e.clientY });
                         }}
                         style={{ padding: '8px', borderRadius: '4px', display: 'flex', alignItems: 'center' }}
                       >
@@ -451,43 +451,51 @@ export default function ProfilePage() {
                         <div className="track-col" style={{ width: '120px', color: '#b3b3b3', fontSize: '14px' }}>
                           {song.categoryName || 'Unknown Category'}
                         </div>
-                        <div className="track-col" style={{ width: '100px', textAlign: 'right', color: '#b3b3b3', fontSize: '14px' }}>
-                          {song.createdAt ? new Date(song.createdAt).toLocaleDateString() : 'N/A'}
+                        <div className="track-col" style={{ width: '100px', textAlign: 'right', color: '#b3b3b3', fontSize: '14px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px' }}>
+                          <span>{song.createdAt ? new Date(song.createdAt).toLocaleDateString() : 'N/A'}</span>
+                          {/* Nút xóa cũ bị thay thế bởi context menu */}
                         </div>
                       </div>
                     );
                   })}
                 </div>
               )}
-              {contextMenuState && (
-                <div 
-                  style={{
-                    position: 'fixed',
-                    top: contextMenuState.y,
-                    left: contextMenuState.x,
-                    background: '#282828',
-                    padding: '8px 0',
-                    borderRadius: '4px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                    zIndex: 100000
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button 
-                    style={{ background: 'none', border: 'none', color: '#ff4d4d', padding: '8px 16px', width: '100%', textAlign: 'left', cursor: 'pointer', fontSize: '14px', fontWeight: 500 }}
-                    onClick={() => {
-                      handleDeleteUploadedSong(contextMenuState.songId);
-                      setContextMenuState(null);
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#3e3e3e'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                  >
-                    Delete Song
-                  </button>
-                </div>
-              )}
             </div>
           </div>
+        </div>
+      )}
+
+      {contextMenuState && (
+        <div 
+          style={{ 
+            position: 'fixed', top: contextMenuState.y, left: contextMenuState.x, 
+            background: '#282828', borderRadius: '4px', padding: '4px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', zIndex: 11000 
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button 
+            style={{ display: 'block', width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: '#fff', textAlign: 'left', cursor: 'pointer', fontSize: '14px' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#3e3e3e'}
+            onMouseLeave={e => e.currentTarget.style.background = 'none'}
+            onClick={() => {
+              setContextMenuState(null);
+              setIsUploadedModalOpen(false);
+              navigate('/upload', { state: { editSong: contextMenuState.song } });
+            }}
+          >
+            Sửa bài hát
+          </button>
+          <button 
+            style={{ display: 'block', width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: '#ff4d4d', textAlign: 'left', cursor: 'pointer', fontSize: '14px' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#3e3e3e'}
+            onMouseLeave={e => e.currentTarget.style.background = 'none'}
+            onClick={() => {
+              handleDeleteUploadedSong(contextMenuState.song.id);
+              setContextMenuState(null);
+            }}
+          >
+            Xóa bài hát
+          </button>
         </div>
       )}
     </div>

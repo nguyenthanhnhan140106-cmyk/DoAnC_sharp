@@ -253,7 +253,7 @@ export default function PlaylistPage() {
         window.dispatchEvent(new Event('playlistUpdated'));
       } else {
         const error = await res.text();
-        alert(error || "Không thể thêm bài hát");
+        showToast(error || "Không thể thêm bài hát");
       }
     } catch (err) {
       console.error(err);
@@ -526,7 +526,8 @@ export default function PlaylistPage() {
                       // Tính toán khoảng thời gian đã thêm
                       let dateAddedText = "Just now";
                       if (song.addedAt) {
-                        const diff = Math.floor((new Date().getTime() - new Date(song.addedAt).getTime()) / 1000);
+                        const dateStr = song.addedAt.endsWith('Z') ? song.addedAt : song.addedAt + 'Z';
+                        const diff = Math.floor((new Date().getTime() - new Date(dateStr).getTime()) / 1000);
                         if (diff < 60) dateAddedText = "Just now";
                         else if (diff < 3600) dateAddedText = `${Math.floor(diff / 60)} minutes ago`;
                         else if (diff < 86400) dateAddedText = `${Math.floor(diff / 3600)} hours ago`;

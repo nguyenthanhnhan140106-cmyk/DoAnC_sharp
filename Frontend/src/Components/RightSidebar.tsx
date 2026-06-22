@@ -33,6 +33,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
+  const [artistDetails, setArtistDetails] = useState<{ followers: number, monthlyListeners: number } | null>(null);
 
   const { isLoggedIn, user, openAuthModal } = useAuth();
   const moreMenuRef = useRef<HTMLDivElement>(null);
@@ -65,6 +66,31 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     };
     checkFollowStatus();
   }, [currentSong?.artistId, isLoggedIn]);
+
+  useEffect(() => {
+    const fetchArtistData = async () => {
+      if (!currentSong?.artistId) {
+        setArtistDetails(null);
+        return;
+      }
+      try {
+        const res = await API.get(`/artists/${currentSong.artistId}`);
+        setArtistDetails({
+          followers: res.data.followers,
+          monthlyListeners: res.data.monthlyListeners || 0
+        });
+      } catch (err) {
+        console.error("Error fetching artist details in RightSidebar:", err);
+      }
+    };
+    fetchArtistData();
+
+    const handleFollowUpdated = () => {
+      fetchArtistData();
+    };
+    window.addEventListener('followUpdated', handleFollowUpdated);
+    return () => window.removeEventListener('followUpdated', handleFollowUpdated);
+  }, [currentSong?.artistId]);
 
   // 🟢 Xử lý Follow/Unfollow
   const handleFollow = async (e: React.MouseEvent) => {
@@ -535,7 +561,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
           <div className="about-artist-body">
             <h4 className="about-artist-name">{songData.artist}</h4>
             <p className="about-monthly-listeners">
-              {songData.monthlyListeners ? `${songData.monthlyListeners.toLocaleString()} monthly listeners` : 'Click để xem chi tiết'}
+              {(artistDetails?.monthlyListeners || songData.monthlyListeners) ? `${(artistDetails?.monthlyListeners || songData.monthlyListeners || 0).toLocaleString()} monthly listeners` : 'Click để xem chi tiết'}
             </p>
           </div>
         </div>
@@ -838,7 +864,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
               <div style={{ flex: "0 0 160px", display: "flex", flexDirection: "column", gap: "24px" }}>
                 <div>
                   <p style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: "#fff", letterSpacing: "-1px" }}>
-                    {songData.followers?.toLocaleString() || "0"}
+                    {(artistDetails?.followers || songData.followers || 0).toLocaleString()}
                   </p>
                   <p style={{ color: "#a7a7a7", fontSize: "11px", margin: "4px 0 0 0", textTransform: "uppercase", letterSpacing: "1px" }}>
                     Followers
@@ -847,7 +873,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
 
                 <div>
                   <p style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: "#fff", letterSpacing: "-1px" }}>
-                    {songData.monthlyListeners?.toLocaleString() || "0"}
+                    {(artistDetails?.monthlyListeners || songData.monthlyListeners || 0).toLocaleString()}
                   </p>
                   <p style={{ color: "#a7a7a7", fontSize: "11px", margin: "4px 0 0 0", textTransform: "uppercase", letterSpacing: "1px" }}>
                     Monthly Listeners

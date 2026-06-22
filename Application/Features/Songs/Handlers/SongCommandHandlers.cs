@@ -10,15 +10,19 @@ namespace Application.Features.Songs.Handlers
 {
     public class SongCommandHandlers : 
         IRequestHandler<CreateSongCommand, SongDTO>,
+        IRequestHandler<UploadSongCommand, SongDTO>,
         IRequestHandler<UpdateSongCommand, SongDTO?>,
         IRequestHandler<DeleteSongCommand, bool>
     {
         private readonly ISongRepository _songRepository;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public SongCommandHandlers(ISongRepository songRepository)
+        public SongCommandHandlers(ISongRepository songRepository, ICloudinaryService cloudinaryService)
         {
             _songRepository = songRepository;
+            _cloudinaryService = cloudinaryService;
         }
+
 
         public async Task<SongDTO> Handle(CreateSongCommand request, CancellationToken cancellationToken)
         {
@@ -34,6 +38,53 @@ namespace Application.Features.Songs.Handlers
                 LyricsUrl = dto.LyricsUrl,
                 ArtistId = dto.ArtistId,
                 UploaderId = dto.UploaderId,
+                CreatedAt = System.DateTime.UtcNow
+            };
+
+            song.Id = await _songRepository.CreateAsync(song);
+            return ToDTO(song);
+        }
+
+        public async Task<SongDTO> Handle(UploadSongCommand request, CancellationToken cancellationToken)
+        {
+            // Validate file extensions (whitelist)
+            var allowedAudio = new[] { ".mp3", ".wav", ".flac", ".aac", ".ogg" };
+            var allowedVideo = new[] { ".mp4", ".webm", ".mov", ".avi", ".mkv" };
+            var allowedImage = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+
+            if (request.AudioFileName != null && !allowedAudio.Contains(System.IO.Path.GetExtension(request.AudioFileName).ToLower()))
+                throw new System.InvalidOperationException($"Định dạng file audio không hợp lệ. Chỉ chấp nhận: {string.Join(", ", allowedAudio)}");
+
+            if (request.VideoFileName != null && !allowedVideo.Contains(System.IO.Path.GetExtension(request.VideoFileName).ToLower()))
+                throw new System.InvalidOperationException($"Định dạng file video không hợp lệ. Chỉ chấp nhận: {string.Join(", ", allowedVideo)}");
+
+            if (request.CoverFileName != null && !allowedImage.Contains(System.IO.Path.GetExtension(request.CoverFileName).ToLower()))
+                throw new System.InvalidOperationException($"Định dạng ảnh bìa không hợp lệ. Chỉ chấp nhận: {string.Join(", ", allowedImage)}");
+
+            // Upload files to Cloudinary
+            string? audioUrl = null;
+            if (request.AudioStream != null && request.AudioFileName != null)
+                audioUrl = await _cloudinaryService.UploadAudioAsync(request.AudioStream, request.AudioFileName);
+
+            string? videoUrl = null;
+            if (request.VideoStream != null && request.VideoFileName != null)
+                videoUrl = await _cloudinaryService.UploadVideoAsync(request.VideoStream, request.VideoFileName);
+
+            string? coverUrl = null;
+            if (request.CoverStream != null && request.CoverFileName != null)
+                coverUrl = await _cloudinaryService.UploadImageAsync(request.CoverStream, request.CoverFileName);
+
+            var song = new Song
+            {
+                Title = request.Title,
+                Artist = request.Artist,
+                CategoryId = request.CategoryId,
+                LyricsUrl = request.LyricsUrl,
+                ArtistId = request.ArtistId,
+                UploaderId = request.UploaderId,
+                AudioUrl = audioUrl,
+                VideoUrl = videoUrl,
+                CoverUrl = coverUrl,
                 CreatedAt = System.DateTime.UtcNow
             };
 

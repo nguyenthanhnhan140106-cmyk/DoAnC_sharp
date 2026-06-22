@@ -9,5 +9,7 @@ namespace Application.Interfaces
     {
         Task<bool> InsertMediaShareAsync(MediaShare mediaShare);
         Task<IEnumerable<MediaShareDTO>> GetSharedWithMeAsync(int receiverId);
+        Task<IEnumerable<MediaShareDTO>> GetSharedByMeAsync(int senderId);
+        Task<bool> IsAlreadySharedAsync(int senderId, int receiverId, int mediaId, string mediaType);
     }
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMusic } from '../Contexts/MusicContext';
 import API from '../Services/api';
 import "../Components/Styles/Auth.css";
 
@@ -11,6 +12,7 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { showToast } = useMusic();
 
   const handleSendOtp = async () => {
     if (!email) {
@@ -44,7 +46,7 @@ export default function ForgotPasswordPage() {
         otp,
         newPassword
       });
-      alert("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+      showToast("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
       navigate('/login');
     } catch (err: unknown) {
       const errorResponse = err as { response?: { data?: { message?: string } } };

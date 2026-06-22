@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../Contexts/AuthContext';
 import { songService } from '../Services/songService';
+import API from '../Services/api';
 
 import type { Song } from '../types';
 export type RepeatMode = 'none' | 'all' | 'one';
@@ -54,9 +55,21 @@ export function useAudioPlayer() {
   const repeatModeRef = useRef<RepeatMode>('none');
 
   useEffect(() => {
-    if (currentSong && !audioRef.current.src && currentSong.audioUrl) {
-      audioRef.current.src = currentSong.audioUrl;
+    const audio = audioRef.current;
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const handleLoadedMetadata = () => setDuration(audio.duration);
+    
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+    if (currentSong && !audio.src) {
+      audio.src = currentSong.audioUrl ? currentSong.audioUrl : `${API.defaults.baseURL}/songs/${currentSong.id}/stream`;
     }
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
   }, [currentSong]);
 
   useEffect(() => {
@@ -79,7 +92,7 @@ export function useAudioPlayer() {
 
     // Dừng bài đang phát trước khi đổi src, tránh AbortError
     audio.pause();
-    audio.src = song.audioUrl || '';
+    audio.src = song.audioUrl ? song.audioUrl : (song.id ? `${API.defaults.baseURL}/songs/${song.id}/stream` : '');
     audio.load(); // Reset trạng thái buffer
     
     setCurrentSong(song);
@@ -114,9 +127,6 @@ export function useAudioPlayer() {
       }
     });
     setIsPlaying(true);
-
-    audio.ontimeupdate = () => setCurrentTime(audio.currentTime);
-    audio.onloadedmetadata = () => setDuration(audio.duration);
     
     audio.onended = () => {
       const repeat = repeatModeRef.current;

@@ -14,9 +14,10 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cấu hình Kestrel và Form (Tạm thời đóng để tránh làm ngộp tài nguyên Somee Free khi khởi động)
-// builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = 104857600; });
-// builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options => { options.MultipartBodyLengthLimit = 104857600; });
+// Cấu hình Kestrel và Form - giới hạn kích thước upload tối đa 100MB
+builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = 104857600; });
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options => { options.MultipartBodyLengthLimit = 104857600; });
+
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
@@ -41,7 +42,8 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IArtistService>(_ => new ArtistService(connectionString));
 builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connectionString));
 builder.Services.AddScoped<AlbumService>(_ => new AlbumService(connectionString));
-builder.Services.AddHttpClient<Application.Services.AiService>();
+builder.Services.AddHttpClient<IAiService, LocalAiService>();
+builder.Services.AddHttpClient(); // Thêm cấu hình HttpClient dùng chung
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService>(provider => 

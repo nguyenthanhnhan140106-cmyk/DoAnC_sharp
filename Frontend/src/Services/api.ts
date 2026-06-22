@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API = axios.create({
   baseURL: '/api',
-  timeout: 0, // Disable timeout for uploads
+  timeout: 0,
 });
 
 API.interceptors.request.use(
@@ -18,4 +18,4 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export default API; // Xuất khẩu mặc định
+export default API; 

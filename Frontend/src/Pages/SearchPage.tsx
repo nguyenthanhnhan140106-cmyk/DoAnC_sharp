@@ -12,19 +12,6 @@ import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
 
 import type { Song } from '../types';
-const CATEGORIES = [
-    { value: '', label: 'Tất cả' },
-    { value: 'vsound', label: 'V-Sound' },
-    { value: 'friday', label: 'Friday' },
-    { value: 'rap', label: 'Rap' },
-];
-
-const SORTS = [
-    { value: 'default', label: 'Mặc định' },
-    { value: 'az', label: 'A → Z' },
-    { value: 'za', label: 'Z → A' },
-];
-
 const getCover = (song: Song) =>
     song.coverUrl || `https://loremflickr.com/160/160/music?lock=${song.id}`;
 
@@ -34,11 +21,7 @@ export default function SearchPage() {
     const q = searchParams.get('q') || '';
 
     const [results, setResults] = useState<Song[]>([]);
-    const [filterCat, setFilterCat] = useState('');
-    const [sortMode, setSortMode] = useState('default');
     const [loading, setLoading] = useState(false);
-
-    // --- STATE PHÂN TRANG ---
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 8;
 
@@ -50,6 +33,7 @@ export default function SearchPage() {
     useEffect(() => {
         if (!q) return;
         setLoading(true);
+        setCurrentPage(1); // Reset page on new search
         songService.searchSongs(q)
             .then((list: unknown) => {
                 const songList: Song[] = Array.isArray(list) ? list : [];
@@ -60,37 +44,12 @@ export default function SearchPage() {
             .finally(() => setLoading(false));
     }, [q]);
 
-    // Reset về trang 1 khi người dùng thay đổi bộ lọc hoặc chế độ sắp xếp
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [filterCat, sortMode]);
-
-    // Lọc + sắp xếp danh sách gốc
-    const displayed = results
-        .filter(s => !filterCat || s.category?.toLowerCase() === filterCat)
-        .sort((a, b) => {
-            if (sortMode === 'az') return a.title.localeCompare(b.title);
-            if (sortMode === 'za') return b.title.localeCompare(a.title);
-            return 0;
-        });
-
-    // --- LOGIC TÍNH TOÁN PHÂN TRANG ---
-    const totalPages = Math.ceil(displayed.length / ITEMS_PER_PAGE);
-    
-    // Cắt dữ liệu chỉ lấy đúng 8 phần tử của trang hiện tại
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const paginatedData = displayed.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    // Phân trang
+    const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE);
+    const displayed = results.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     const handlePlay = (song: Song) => {
         playSong(song);
-        setTimeout(() => {
-            const audios = document.getElementsByTagName('audio');
-            if (audios.length > 0 && song.audioUrl) {
-                audios[0].src = song.audioUrl;
-                audios[0].load();
-                audios[0].play().catch(() => { });
-            }
-        }, 100);
     };
 
     return (
@@ -127,25 +86,10 @@ export default function SearchPage() {
                         </h1>
                     </div>
 
-                    <p style={{ color: '#b3b3b3', marginBottom: '24px', paddingLeft: '40px' }}>
-                        {loading ? 'Đang tìm...' : `${displayed.length} kết quả`}
-                    </p>
 
-                    {/* Bộ lọc nâng cao */}
-                    <div className="search-filters">
-                        <div className="filter-group">
-                            <span className="filter-label">Sắp xếp:</span>
-                            {SORTS.map(s => (
-                                <button
-                                    key={s.value}
-                                    className={`filter-chip ${sortMode === s.value ? 'active' : ''}`}
-                                    onClick={() => setSortMode(s.value)}
-                                >
-                                    {s.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                    <p style={{ color: '#b3b3b3', marginBottom: '24px' }}>
+                        {loading ? 'Đang tìm...' : `${results.length} kết quả`}
+                    </p>
 
                     {/* Kết quả dạng danh sách */}
                     {!loading && displayed.length === 0 ? (
@@ -156,9 +100,9 @@ export default function SearchPage() {
                     ) : (
                         <>
                             <div className="search-results-list">
-                                {paginatedData.map((song, idx) => {
+                                {displayed.map((song, idx) => {
                                     const isActive = currentSong?.id === song.id;
-                                    const displayIndex = startIndex + idx + 1;
+                                    const displayIndex = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
 
                                     return (
                                         <div
@@ -268,6 +212,8 @@ export default function SearchPage() {
                             )}
                         </>
                     )}
+
+
 
                     <Footer />
                 </div>
