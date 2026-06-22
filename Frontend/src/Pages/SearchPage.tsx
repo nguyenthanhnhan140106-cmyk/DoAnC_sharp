@@ -25,10 +25,6 @@ export default function SearchPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 8;
 
-    // --- STATE PHÂN TRANG ---
-    const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 8;
-
     const { playSong, currentSong, isPlaying } = useMusic();
     const { isLoggedIn } = useAuth();
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -51,13 +47,6 @@ export default function SearchPage() {
     // Phân trang
     const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE);
     const displayed = results.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-
-    // --- LOGIC TÍNH TOÁN PHÂN TRANG ---
-    const totalPages = Math.ceil(displayed.length / ITEMS_PER_PAGE);
-    
-    // Cắt dữ liệu chỉ lấy đúng 8 phần tử của trang hiện tại
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const paginatedData = displayed.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
     const handlePlay = (song: Song) => {
         playSong(song);
@@ -97,9 +86,7 @@ export default function SearchPage() {
                         </h1>
                     </div>
 
-                    <h1 style={{ color: '#fff', fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' }}>
-                        Kết quả tìm kiếm: <span style={{ color: '#FF5500' }}>"{q}"</span>
-                    </h1>
+
                     <p style={{ color: '#b3b3b3', marginBottom: '24px' }}>
                         {loading ? 'Đang tìm...' : `${results.length} kết quả`}
                     </p>
@@ -113,9 +100,9 @@ export default function SearchPage() {
                     ) : (
                         <>
                             <div className="search-results-list">
-                                {paginatedData.map((song, idx) => {
+                                {displayed.map((song, idx) => {
                                     const isActive = currentSong?.id === song.id;
-                                    const displayIndex = startIndex + idx + 1;
+                                    const displayIndex = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
 
                                     return (
                                         <div
@@ -135,8 +122,26 @@ export default function SearchPage() {
                                                 <svg className="row-play-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                                                     <path d="M8 5v14l11-7z" />
                                                 </svg>
-                                            ) : (
-                                                <span className="row-number">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</span>
+                                            </div>
+
+                                            {/* Ảnh bìa */}
+                                            <img
+                                                src={getCover(song)}
+                                                alt={song.title}
+                                                className="search-result-cover"
+                                            />
+
+                                            {/* Thông tin bài hát */}
+                                            <div className="search-result-info">
+                                                <span className="search-result-title" style={{ color: isActive ? '#1db954' : '#fff' }}>
+                                                    {song.title}
+                                                </span>
+                                                <span className="search-result-artist">Bài hát • {song.artist}</span>
+                                            </div>
+
+                                            {/* Badge thể loại */}
+                                            {song.category && (
+                                                <span className="search-result-badge">{song.category.toUpperCase()}</span>
                                             )}
 
                                             {/* Nút thêm vào playlist */}
@@ -208,44 +213,7 @@ export default function SearchPage() {
                         </>
                     )}
 
-                    {/* Phân trang */}
-                    {!loading && totalPages > 1 && (
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '24px', paddingBottom: '24px' }}>
-                            <button 
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                style={{
-                                    background: currentPage === 1 ? '#333' : '#1db954',
-                                    color: currentPage === 1 ? '#666' : '#fff',
-                                    border: 'none',
-                                    padding: '8px 16px',
-                                    borderRadius: '20px',
-                                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                                    fontWeight: 'bold',
-                                    transition: 'background 0.2s'
-                                }}
-                            >
-                                Trước
-                            </button>
-                            <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>{currentPage} / {totalPages}</span>
-                            <button 
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                style={{
-                                    background: currentPage === totalPages ? '#333' : '#1db954',
-                                    color: currentPage === totalPages ? '#666' : '#fff',
-                                    border: 'none',
-                                    padding: '8px 16px',
-                                    borderRadius: '20px',
-                                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                                    fontWeight: 'bold',
-                                    transition: 'background 0.2s'
-                                }}
-                            >
-                                Sau
-                            </button>
-                        </div>
-                    )}
+
 
                     <Footer />
                 </div>
