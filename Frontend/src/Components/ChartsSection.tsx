@@ -21,7 +21,7 @@ interface Props {
 }
 
 export default function ChartsSection({ songs }: Props) {
-    const { playSong, currentSong, setQueue } = useMusic();
+    const { playSong, currentSong, setQueue, isPlaying, togglePlay } = useMusic();
 
     // Chia songs thành các cột chart
     const charts: ChartColumn[] = [
@@ -69,15 +69,24 @@ export default function ChartsSection({ songs }: Props) {
                                 className="chart-play-btn"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    if (chart.songs.length > 0) {
+                                    const isCurrentChart = chart.songs.some(s => s.id === currentSong?.id);
+                                    if (isCurrentChart) {
+                                        togglePlay();
+                                    } else if (chart.songs.length > 0) {
                                         setQueue(chart.songs);
                                         playSong(chart.songs[0]);
                                     }
                                 }}
                             >
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                                    <path d="M8 5v14l11-7z" />
-                                </svg>
+                                {isPlaying && chart.songs.some(s => s.id === currentSong?.id) ? (
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                    </svg>
+                                ) : (
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                )}
                             </button>
                         </div>
 

@@ -45,5 +45,34 @@ namespace Infrastructure.Repositories
             
             return await conn.QueryAsync<MediaShareDTO>(sql, new { ReceiverId = receiverId });
         }
+
+        public async Task<IEnumerable<MediaShareDTO>> GetSharedByMeAsync(int senderId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            var sql = @"
+                SELECT ms.Id, ms.SenderId, ms.ReceiverId, ms.SongId, ms.PlaylistId, ms.SharedAt,
+                       u.Username as ReceiverName,
+                       s.Title as MediaTitle,
+                       s.CoverUrl as MediaCover,
+                       'song' as MediaType
+                FROM media_shares ms
+                JOIN users u ON ms.ReceiverId = u.Id
+                LEFT JOIN songs s ON ms.SongId = s.Id
+                WHERE ms.SenderId = @SenderId
+                ORDER BY ms.SharedAt DESC";
+            
+            return await conn.QueryAsync<MediaShareDTO>(sql, new { SenderId = senderId });
+        }
+
+        public async Task<bool> IsAlreadySharedAsync(int senderId, int receiverId, int mediaId, string mediaType)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            var sql = mediaType == "song"
+                ? "SELECT COUNT(1) FROM media_shares WHERE SenderId=@SenderId AND ReceiverId=@ReceiverId AND SongId=@MediaId"
+                : "SELECT COUNT(1) FROM media_shares WHERE SenderId=@SenderId AND ReceiverId=@ReceiverId AND PlaylistId=@MediaId";
+            
+            var count = await conn.ExecuteScalarAsync<int>(sql, new { SenderId = senderId, ReceiverId = receiverId, MediaId = mediaId });
+            return count > 0;
+        }
     }
 }

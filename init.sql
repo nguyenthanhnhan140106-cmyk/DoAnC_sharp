@@ -1,4 +1,4 @@
--- =========================================================
+﻿-- =========================================================
 -- TUNEVAULT - SCRIPT KHỞI TẠO DATABASE VỚI CLOUDINARY LINKS
 -- =========================================================
 
@@ -32,6 +32,17 @@ CREATE TABLE users (
     AvatarUrl NVARCHAR(255) NULL,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Seed 2 users mẫu (Password: Password123! -- BCrypt hash)
+SET IDENTITY_INSERT users ON;
+INSERT INTO users (Id, Username, Email, PasswordHash, AvatarUrl, CreatedAt) VALUES
+(1, N'admin', N'admin@tunevault.com',
+   N'123456',
+   N'https://api.dicebear.com/7.x/avataaars/svg?seed=admin', GETDATE()),
+(2, N'tunevault_user', N'user@tunevault.com',
+   N'123456',
+   N'https://api.dicebear.com/7.x/avataaars/svg?seed=user', GETDATE());
+SET IDENTITY_INSERT users OFF;
 
 
 CREATE TABLE artists (
@@ -564,7 +575,23 @@ CREATE TABLE playlist_songs (
 );
 
 
--- ─────────────────────────────────────────────────────────
+-- Seed 2 playlist mẫu
+SET IDENTITY_INSERT playlists ON;
+INSERT INTO playlists (Id, Name, UserId, Description, CoverUrl, IsPublic, CreatedAt) VALUES
+(1, N'Playlist Nhạc V-Pop Yêu Thích', 1,
+   N'Tuyển tập những bài V-Pop hay nhất mọi thời đại',
+   N'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop', 1, GETDATE()),
+(2, N'Nhạc Chill Cuối Tuần', 2,
+   N'Những bản nhạc nhẹ nhàng thư giãn dành cho cuối tuần',
+   N'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=300&h=300&fit=crop', 1, GETDATE());
+SET IDENTITY_INSERT playlists OFF;
+
+-- Thêm bài hát vào playlist mẫu
+INSERT INTO playlist_songs (PlaylistId, SongId, AddedAt) VALUES
+(1, 4, GETDATE()), (1, 2, GETDATE()), (1, 6, GETDATE()), (1, 9, GETDATE()), (1, 11, GETDATE()),
+(2, 1, GETDATE()), (2, 5, GETDATE()), (2, 14, GETDATE()), (2, 15, GETDATE()), (2, 8, GETDATE());
+
+
 -- 6. BẢNG FOLLOWS (User follow Artist)
 -- ─────────────────────────────────────────────────────────
 CREATE TABLE follows (

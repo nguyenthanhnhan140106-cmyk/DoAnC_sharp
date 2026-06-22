@@ -15,7 +15,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const { isLoggedIn, user } = useAuth();
-  const { likedSongs, setQueue, playSong } = useMusic();
+  const { likedSongs, setQueue, playSong, showToast } = useMusic();
   const navigate = useNavigate();
   const [playlists, setPlaylists] = useState<Playlist[]>(() => {
     if (user && user.id) {
@@ -119,7 +119,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
   const handleCreatePlaylist = async () => {
     if (!isLoggedIn || !user) {
-      alert("Vui lòng đăng nhập để tạo danh sách phát!");
+      showToast("Vui lòng đăng nhập để tạo danh sách phát!");
       return;
     }
 
@@ -150,7 +150,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       navigate(`/playlist/${newPlaylist.id}`);
     } catch (err) {
       console.error("Có lỗi khi tạo danh sách phát:", err);
-      alert("Có lỗi khi tạo danh sách phát.");
+      showToast("Có lỗi khi tạo danh sách phát.");
     }
   };
 
@@ -164,13 +164,14 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         localStorage.setItem(`sidebar_playlists_${user.id}`, JSON.stringify(updated));
       }
       setContextMenu(null);
+      showToast("Đã xóa danh sách phát thành công");
       window.dispatchEvent(new Event('playlistUpdated'));
       if (window.location.pathname === `/playlist/${contextMenu.playlistId}`) {
         navigate('/');
       }
     } catch (err) {
       console.error(err);
-      alert("Có lỗi khi xóa danh sách phát.");
+      showToast("Có lỗi khi xóa danh sách phát.");
     }
   };
 
@@ -452,11 +453,11 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           }}
         >
           <ul className="album-dropdown-menu" style={{ position: 'static', padding: 0, margin: 0, border: 'none', boxShadow: 'none' }}>
-            <li onClick={() => { alert('Add playlist to queue functionality is under development'); setContextMenu(null); }}>
+            <li onClick={() => { showToast('Add playlist to queue functionality is under development'); setContextMenu(null); }}>
               <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 017.187 3H14V1.5H7.187a5.484 5.484 0 01.779-1.5H16v6H7.966zM2 2V.5h3.5v6H2v-1.5H.5V2H2z" /></svg>
               Add to queue
             </li>
-            <li onClick={() => { alert('Add to playlist functionality is under development'); setContextMenu(null); }}>
+            <li onClick={() => { showToast('Add to playlist functionality is under development'); setContextMenu(null); }}>
               <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M15 15H1v-1.5h14V15zm0-4.5H1V9h14v1.5zm-8.034-6A5.484 5.484 0 016.187 3H13V1.5H6.187a5.484 5.484 0 01.779-1.5H15v6H6.966zM1 2V.5h3.5v6H1v-1.5H.5V2H1z" /></svg>
               Add to playlist
             </li>

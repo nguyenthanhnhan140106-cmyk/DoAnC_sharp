@@ -58,6 +58,7 @@ export default function Header() {
     if (location.pathname === '/') {
       window.location.reload();
     } else {
+      localStorage.setItem('homeActiveTab', 'all');
       navigate('/');
       window.dispatchEvent(new CustomEvent('RESET_HOME_TAB'));
     }

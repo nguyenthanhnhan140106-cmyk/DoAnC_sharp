@@ -18,7 +18,7 @@ namespace Application.Services
         {
             using var conn = new SqlConnection(_connectionString);
             return await conn.QueryAsync<ArtistDTO>(
-                "SELECT Id, Name, Bio, WorldRank, Followers, MonthlyListeners, IsVerified, BannerUrl FROM artists"
+                "SELECT Id, Name, Bio, WorldRank, Followers, MonthlyListeners, IsVerified, NULL as BannerUrl FROM artists"
             );
         }
 
@@ -26,7 +26,7 @@ namespace Application.Services
         {
             using var conn = new SqlConnection(_connectionString);
             return await conn.QueryFirstOrDefaultAsync<ArtistDTO>(
-                "SELECT Id, Name, Bio, WorldRank, Followers, MonthlyListeners, IsVerified, BannerUrl FROM artists WHERE Id = @Id",
+                "SELECT Id, Name, Bio, WorldRank, Followers, MonthlyListeners, IsVerified, NULL as BannerUrl FROM artists WHERE Id = @Id",
                 new { Id = id }
             );
         }

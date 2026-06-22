@@ -12,19 +12,6 @@ import AuthBanner from '../Components/AuthBanner';
 import '../Components/Styles/HomePage.css';
 
 import type { Song } from '../types';
-const CATEGORIES = [
-    { value: '', label: 'Tất cả' },
-    { value: 'vsound', label: 'V-Sound' },
-    { value: 'friday', label: 'Friday' },
-    { value: 'rap', label: 'Rap' },
-];
-
-const SORTS = [
-    { value: 'default', label: 'Mặc định' },
-    { value: 'az', label: 'A → Z' },
-    { value: 'za', label: 'Z → A' },
-];
-
 const getCover = (song: Song) =>
     song.coverUrl || `https://loremflickr.com/160/160/music?lock=${song.id}`;
 
@@ -34,9 +21,9 @@ export default function SearchPage() {
     const q = searchParams.get('q') || '';
 
     const [results, setResults] = useState<Song[]>([]);
-    const [filterCat, setFilterCat] = useState('');
-    const [sortMode, setSortMode] = useState('default');
     const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 8;
 
     const { playSong, currentSong, isPlaying } = useMusic();
     const { isLoggedIn } = useAuth();
@@ -47,6 +34,7 @@ export default function SearchPage() {
         if (!q) return;
         // eslint-disable-next-line
         setLoading(true);
+        setCurrentPage(1); // Reset page on new search
         songService.searchSongs(q)
             .then((list: unknown) => {
                 const songList: Song[] = Array.isArray(list) ? list : [];
@@ -56,25 +44,12 @@ export default function SearchPage() {
             .finally(() => setLoading(false));
     }, [q]);
 
-    // Lọc + sắp xếp
-    const displayed = results
-        .filter(s => !filterCat || s.category?.toLowerCase() === filterCat)
-        .sort((a, b) => {
-            if (sortMode === 'az') return a.title.localeCompare(b.title);
-            if (sortMode === 'za') return b.title.localeCompare(a.title);
-            return 0;
-        });
+    // Phân trang
+    const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE);
+    const displayed = results.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     const handlePlay = (song: Song) => {
         playSong(song);
-        setTimeout(() => {
-            const audios = document.getElementsByTagName('audio');
-            if (audios.length > 0 && song.audioUrl) {
-                audios[0].src = song.audioUrl;
-                audios[0].load();
-                audios[0].play().catch(() => { });
-            }
-        }, 100);
     };
 
     return (
@@ -90,36 +65,8 @@ export default function SearchPage() {
                         Kết quả tìm kiếm: <span style={{ color: '#FF5500' }}>"{q}"</span>
                     </h1>
                     <p style={{ color: '#b3b3b3', marginBottom: '24px' }}>
-                        {loading ? 'Đang tìm...' : `${displayed.length} kết quả`}
+                        {loading ? 'Đang tìm...' : `${results.length} kết quả`}
                     </p>
-
-                    {/* Bộ lọc nâng cao */}
-                    <div className="search-filters">
-                        <div className="filter-group">
-                            <span className="filter-label">Thể loại:</span>
-                            {CATEGORIES.map(cat => (
-                                <button
-                                    key={cat.value}
-                                    className={`filter-chip ${filterCat === cat.value ? 'active' : ''}`}
-                                    onClick={() => setFilterCat(cat.value)}
-                                >
-                                    {cat.label}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="filter-group">
-                            <span className="filter-label">Sắp xếp:</span>
-                            {SORTS.map(s => (
-                                <button
-                                    key={s.value}
-                                    className={`filter-chip ${sortMode === s.value ? 'active' : ''}`}
-                                    onClick={() => setSortMode(s.value)}
-                                >
-                                    {s.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
 
                     {/* Kết quả dạng danh sách */}
                     {!loading && displayed.length === 0 ? (
@@ -144,7 +91,7 @@ export default function SearchPage() {
                                                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
                                                 </svg>
                                             ) : (
-                                                <span className="row-number">{idx + 1}</span>
+                                                <span className="row-number">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</span>
                                             )}
                                             <svg className="row-play-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                                                 <path d="M8 5v14l11-7z" />
@@ -180,6 +127,45 @@ export default function SearchPage() {
                                     </div>
                                 );
                             })}
+                        </div>
+                    )}
+
+                    {/* Phân trang */}
+                    {!loading && totalPages > 1 && (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '24px', paddingBottom: '24px' }}>
+                            <button 
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                style={{
+                                    background: currentPage === 1 ? '#333' : '#1db954',
+                                    color: currentPage === 1 ? '#666' : '#fff',
+                                    border: 'none',
+                                    padding: '8px 16px',
+                                    borderRadius: '20px',
+                                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                    fontWeight: 'bold',
+                                    transition: 'background 0.2s'
+                                }}
+                            >
+                                Trước
+                            </button>
+                            <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>{currentPage} / {totalPages}</span>
+                            <button 
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                                style={{
+                                    background: currentPage === totalPages ? '#333' : '#1db954',
+                                    color: currentPage === totalPages ? '#666' : '#fff',
+                                    border: 'none',
+                                    padding: '8px 16px',
+                                    borderRadius: '20px',
+                                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                                    fontWeight: 'bold',
+                                    transition: 'background 0.2s'
+                                }}
+                            >
+                                Sau
+                            </button>
                         </div>
                     )}
 

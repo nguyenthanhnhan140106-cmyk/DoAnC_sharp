@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMusic } from '../Contexts/MusicContext';
 import API from '../Services/api';
 import "../Components/Styles/Auth.css";
 
@@ -12,6 +13,7 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { showToast } = useMusic();
 
   const handleSendOtp = async () => {
     setLoading(true);
@@ -30,6 +32,16 @@ export default function SignupPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (username.length < 3) {
+      setError("Tên đăng nhập phải có ít nhất 3 ký tự.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự.");
+      return;
+    }
+    
     setLoading(true);
     setError('');
     try {
@@ -39,7 +51,7 @@ export default function SignupPage() {
       // 2. Đăng ký tài khoản nếu OTP đúng
       await API.post('/auth/register', { Username: username, Email: email, Password: password });
       
-      alert("Đăng ký thành công!");
+      showToast("Đăng ký thành công!");
       navigate('/login');
     } catch (err: unknown) {
       const errorResponse = err as { response?: { data?: { message?: string, errors?: { error: string }[] } } };

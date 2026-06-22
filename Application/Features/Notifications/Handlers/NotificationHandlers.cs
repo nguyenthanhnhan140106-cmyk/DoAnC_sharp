@@ -17,7 +17,8 @@ namespace Application.Features.Notifications.Handlers
         IRequestHandler<MarkNotificationAsReadCommand, bool>,
         IRequestHandler<MarkAllNotificationsAsReadCommand, int>,
         IRequestHandler<GetMyNotificationsQuery, IEnumerable<Notification>>,
-        IRequestHandler<GetSharedWithMeQuery, IEnumerable<MediaShareDTO>>
+        IRequestHandler<GetSharedWithMeQuery, IEnumerable<MediaShareDTO>>,
+        IRequestHandler<GetSharedByMeQuery, IEnumerable<MediaShareDTO>>
     {
         private readonly INotificationRepository _notificationRepository;
         private readonly IMediaShareRepository _mediaShareRepository;
@@ -31,6 +32,10 @@ namespace Application.Features.Notifications.Handlers
         public async Task<bool> Handle(ShareMediaCommand requestCmd, CancellationToken cancellationToken)
         {
             var request = requestCmd.Request;
+            // --- Idempotent check: không share trùng ---
+            if (await _mediaShareRepository.IsAlreadySharedAsync(request.SenderId, request.ReceiverId, request.MediaId, request.MediaType))
+                return true; // đã share rồi, bỏ qua lặp lại
+
             var payloadData = new
             {
                 MediaType = request.MediaType,
@@ -113,6 +118,11 @@ namespace Application.Features.Notifications.Handlers
         public async Task<IEnumerable<MediaShareDTO>> Handle(GetSharedWithMeQuery request, CancellationToken cancellationToken)
         {
             return await _mediaShareRepository.GetSharedWithMeAsync(request.ReceiverId);
+        }
+
+        public async Task<IEnumerable<MediaShareDTO>> Handle(GetSharedByMeQuery request, CancellationToken cancellationToken)
+        {
+            return await _mediaShareRepository.GetSharedByMeAsync(request.SenderId);
         }
     }
 }

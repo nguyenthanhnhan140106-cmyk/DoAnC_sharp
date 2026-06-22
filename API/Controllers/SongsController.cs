@@ -13,25 +13,29 @@ namespace API.Controllers
     public class SongsController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly Application.Interfaces.ICloudinaryService _cloudinaryService;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public SongsController(IMediator mediator, Application.Interfaces.ICloudinaryService cloudinaryService)
+        public SongsController(IMediator mediator, IHttpClientFactory httpClientFactory)
         {
             _mediator = mediator;
-            _cloudinaryService = cloudinaryService;
+            _httpClientFactory = httpClientFactory;
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAll() =>
-            Ok(await _mediator.Send(new GetAllSongsQuery()));
+        public async Task<IActionResult> GetAll()
+        {
+            var songs = await _mediator.Send(new GetAllSongsQuery());
+            return Ok(ApiResponse<IEnumerable<SongDTO>>.Ok(songs));
+        }
 
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var song = await _mediator.Send(new GetSongByIdQuery(id));
-            return song == null ? NotFound() : Ok(song);
+            if (song == null) return NotFound(ApiResponse.Fail("Không tìm thấy bài hát"));
+            return Ok(ApiResponse<SongDTO>.Ok(song));
         }
 
         [HttpGet("search")]
@@ -52,60 +56,67 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] CreateSongFormRequest request)
         {
+            // Validate file size (max 100MB per file)
+            const long maxFileSize = 100 * 1024 * 1024;
+            if (request.AudioFile?.Length > maxFileSize)
+                return BadRequest(new { success = false, message = "File audio vượt quá giới hạn 100MB." });
+            if (request.VideoFile?.Length > maxFileSize)
+                return BadRequest(new { success = false, message = "File video vượt quá giới hạn 100MB." });
+            if (request.CoverFile?.Length > maxFileSize)
+                return BadRequest(new { success = false, message = "Ảnh bìa vượt quá giới hạn 100MB." });
+
             var userIdClaim = User.FindFirst("id")?.Value;
             int? userId = null;
             if (int.TryParse(userIdClaim, out int uid)) userId = uid;
 
-            // Upload files to Cloudinary
-            string? audioUrl = null;
-            if (request.AudioFile != null)
-            {
-                using var stream = request.AudioFile.OpenReadStream();
-                audioUrl = await _cloudinaryService.UploadAudioAsync(stream, request.AudioFile.FileName);
-            }
+            var command = new Application.Features.Songs.Commands.UploadSongCommand(
+                Title: request.Title,
+                Artist: request.Artist,
+                CategoryId: request.CategoryId,
+                CategoryName: request.CategoryName,
+                LyricsUrl: request.LyricsUrl,
+                ArtistId: request.ArtistId,
+                UploaderId: userId,
+                AudioStream: request.AudioFile?.OpenReadStream(),
+                AudioFileName: request.AudioFile?.FileName,
+                VideoStream: request.VideoFile?.OpenReadStream(),
+                VideoFileName: request.VideoFile?.FileName,
+                CoverStream: request.CoverFile?.OpenReadStream(),
+                CoverFileName: request.CoverFile?.FileName
+            );
 
-            string? videoUrl = null;
-            if (request.VideoFile != null)
-            {
-                using var stream = request.VideoFile.OpenReadStream();
-                videoUrl = await _cloudinaryService.UploadVideoAsync(stream, request.VideoFile.FileName);
-            }
-
-            string? coverUrl = null;
-            if (request.CoverFile != null)
-            {
-                using var stream = request.CoverFile.OpenReadStream();
-                coverUrl = await _cloudinaryService.UploadImageAsync(stream, request.CoverFile.FileName);
-            }
-
-            var dto = new CreateSongDTO
-            {
-                Title = request.Title,
-                Artist = request.Artist,
-                CategoryId = request.CategoryId,
-                CategoryName = request.CategoryName,
-                LyricsUrl = request.LyricsUrl,
-                ArtistId = request.ArtistId,
-                UploaderId = userId,
-                AudioUrl = audioUrl,
-                VideoUrl = videoUrl,
-                CoverUrl = coverUrl
-            };
-
-            var song = await _mediator.Send(new CreateSongCommand(dto));
+            var song = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id = song.Id }, song);
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateSongDTO dto)
         {
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+                return Unauthorized("Vui lòng đăng nhập.");
+
+            var songToUpdate = await _mediator.Send(new GetSongByIdQuery(id));
+            if (songToUpdate == null) return NotFound();
+            if (songToUpdate.UploaderId != currentUserId) return Unauthorized("Bạn không có quyền sửa bài hát này.");
+
             var song = await _mediator.Send(new UpdateSongCommand(id, dto));
             return song == null ? NotFound() : Ok(song);
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+                return Unauthorized("Vui lòng đăng nhập.");
+
+            var songToDelete = await _mediator.Send(new GetSongByIdQuery(id));
+            if (songToDelete == null) return NotFound();
+            if (songToDelete.UploaderId != currentUserId) return Unauthorized("Bạn không có quyền xóa bài hát này.");
+
             var result = await _mediator.Send(new DeleteSongCommand(id));
             return result ? NoContent() : NotFound();
         }
@@ -115,6 +126,40 @@ namespace API.Controllers
         {
             var songs = await _mediator.Send(new GetSongsByUploaderQuery(uploaderId));
             return Ok(songs);
+        }
+
+        [HttpGet("{id}/stream")]
+        [AllowAnonymous]
+        public async Task<IActionResult> StreamAudio(int id)
+        {
+            var song = await _mediator.Send(new GetSongByIdQuery(id));
+            if (song == null || string.IsNullOrEmpty(song.AudioUrl)) return NotFound(ApiResponse.Fail("Không tìm thấy luồng âm thanh."));
+
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync(song.AudioUrl, HttpCompletionOption.ResponseHeadersRead);
+            if (!response.IsSuccessStatusCode) return NotFound();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            var contentType = response.Content.Headers.ContentType?.MediaType ?? "audio/mpeg";
+
+            return File(stream, contentType, enableRangeProcessing: true);
+        }
+
+        [HttpGet("{id}/video-stream")]
+        [AllowAnonymous]
+        public async Task<IActionResult> StreamVideo(int id)
+        {
+            var song = await _mediator.Send(new GetSongByIdQuery(id));
+            if (song == null || string.IsNullOrEmpty(song.VideoUrl)) return NotFound(ApiResponse.Fail("Không tìm thấy luồng video."));
+
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync(song.VideoUrl, HttpCompletionOption.ResponseHeadersRead);
+            if (!response.IsSuccessStatusCode) return NotFound();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            var contentType = response.Content.Headers.ContentType?.MediaType ?? "video/mp4";
+
+            return File(stream, contentType, enableRangeProcessing: true);
         }
     }
 

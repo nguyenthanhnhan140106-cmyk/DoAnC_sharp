@@ -104,18 +104,23 @@ namespace Application.Services
         public async Task<bool> DeletePlaylistAsync(int id)
         {
             using var conn = new SqlConnection(_connectionString);
-            
+            await conn.OpenAsync();
+            using var transaction = conn.BeginTransaction();
+
             try 
             {
-                await conn.ExecuteAsync("DELETE FROM playlist_songs WHERE PlaylistId = @Id", new { Id = id });
-                var rows = await conn.ExecuteAsync("DELETE FROM playlists WHERE Id = @Id", new { Id = id });
+                await conn.ExecuteAsync("DELETE FROM playlist_songs WHERE PlaylistId = @Id", new { Id = id }, transaction);
+                var rows = await conn.ExecuteAsync("DELETE FROM playlists WHERE Id = @Id", new { Id = id }, transaction);
+                transaction.Commit();
                 return rows > 0;
             }
             catch
             {
+                transaction.Rollback();
                 return false;
             }
         }
+
 
         public async Task<bool> RemoveSongFromPlaylistAsync(int playlistId, int songId)
         {

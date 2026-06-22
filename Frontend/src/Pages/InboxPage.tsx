@@ -23,7 +23,7 @@ interface MediaShare {
 
 export default function InboxPage() {
   const { isLoggedIn } = useAuth();
-  const { playSong } = useMusic();
+  const { playSong, showToast } = useMusic();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(true);
   const [shares, setShares] = useState<MediaShare[]>([]);
@@ -52,10 +52,10 @@ export default function InboxPage() {
         playSong(res.data);
       } catch (err) {
         console.error("Failed to load song", err);
-        alert("Không thể tải bài hát này.");
+        showToast("Không thể tải bài hát này.");
       }
     } else {
-      alert('Playlist/Album playback in Inbox is under development.');
+      showToast('Playlist/Album playback in Inbox is under development.');
     }
   };
 

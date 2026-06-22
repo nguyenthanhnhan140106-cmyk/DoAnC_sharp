@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import API from "../Services/api";
 import { useMusic } from "../Contexts/MusicContext";
 import { useAuth } from "../Contexts/AuthContext";
@@ -16,11 +16,13 @@ import type { Song } from '../types';
 
 export default function ArtistPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [artist, setArtist] = useState<{ id: number, name: string, bannerUrl?: string, followers: number } | null>(null);
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
-  const { playSong, setQueue, isLyricsViewOpen } = useMusic();
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const { playSong, setQueue, isLyricsViewOpen, isPlaying, currentSong, togglePlay } = useMusic();
   const { isLoggedIn, user, openAuthModal } = useAuth();
   
   // Trạng thái thu gọn Sidebar
@@ -180,34 +182,78 @@ export default function ArtistPage() {
                     const mins = 3 + (song.id % 2);
                     const secs = (song.id * 13) % 60;
                     const durationStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+                    const isActive = currentSong?.id === song.id;
+                    const isHovered = hoveredIndex === idx;
 
                     return (
                       <div 
                         className="song-item" 
                         key={song.id} 
                         onClick={() => { setQueue(songs); playSong(song); }}
+                        onMouseEnter={() => setHoveredIndex(idx)}
+                        onMouseLeave={() => setHoveredIndex(null)}
                         style={{ 
                           padding: "8px 16px", 
                           display: "grid", 
-                          gridTemplateColumns: "32px 1fr 100px 50px", 
+                          gridTemplateColumns: "32px 1fr 100px 50px 80px", 
                           gap: "16px", 
                           alignItems: "center", 
                           borderRadius: "4px", 
-                          cursor: "pointer" 
+                          cursor: "pointer",
+                          backgroundColor: isHovered ? "rgba(255,255,255,0.1)" : "transparent"
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                       >
-                        <div style={{ color: "#b3b3b3", fontSize: "16px", textAlign: "right", fontWeight: 500 }}>{idx + 1}</div>
+                        <div style={{ color: isActive ? "#1db954" : "#b3b3b3", fontSize: "16px", textAlign: "right", fontWeight: 500 }}>
+                          {isHovered ? (
+                            <span style={{ color: '#fff', fontSize: 15, lineHeight: 1 }}>
+                              {isActive && isPlaying ? '⏸' : '▶'}
+                            </span>
+                          ) : isActive && isPlaying ? (
+                            <div className="equalizer" style={{ display: 'inline-flex', gap: 2, height: 12, alignItems: 'flex-end' }}>
+                              <span style={{ width: 3, height: '100%', background: '#1db954', animation: 'eq 1s ease-in-out infinite' }}></span>
+                              <span style={{ width: 3, height: '60%', background: '#1db954', animation: 'eq 1.2s ease-in-out infinite alternate' }}></span>
+                              <span style={{ width: 3, height: '80%', background: '#1db954', animation: 'eq 0.8s ease-in-out infinite alternate-reverse' }}></span>
+                            </div>
+                          ) : (
+                            idx + 1
+                          )}
+                        </div>
                         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                           <img src={song.coverUrl || '/placeholder.png'} alt="cover" style={{ width: "40px", height: "40px", borderRadius: "4px", objectFit: "cover" }} />
-                          <p style={{ margin: 0, fontSize: "16px", fontWeight: 500, color: "white" }}>{song.title}</p>
+                          <p style={{ margin: 0, fontSize: "16px", fontWeight: 500, color: isActive ? "#1db954" : "white" }}>{song.title}</p>
                         </div>
                         <div style={{ color: "#b3b3b3", fontSize: "14px", textAlign: "right" }}>
                           {streams.toLocaleString()}
                         </div>
                         <div style={{ color: "#b3b3b3", fontSize: "14px", textAlign: "right" }}>
                           {durationStr}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16 }}>
+                          {song.videoUrl && (
+                            <button 
+                              style={{ background: 'none', border: '1px solid #b3b3b3', borderRadius: '4px', color: '#b3b3b3', cursor: 'pointer', padding: '2px 6px', fontSize: '10px', fontWeight: 'bold' }}
+                              title="Xem MV"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/video/${song.id}`);
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#fff'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.color = '#b3b3b3'; e.currentTarget.style.borderColor = '#b3b3b3'; }}
+                            >
+                              MV
+                            </button>
+                          )}
+                          {isHovered && (
+                            <button style={{ background: 'none', border: 'none', color: '#b3b3b3', cursor: 'pointer', padding: 4 }} title="Thêm vào danh sách phát"
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#b3b3b3'}>
+                              <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                                <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm8.5-3.5v3h3v1.5h-3v3h-1.5v-3h-3v-1.5h3v-3h1.5z"/>
+                              </svg>
+                            </button>
+                          )}
                         </div>
                       </div>
                     );

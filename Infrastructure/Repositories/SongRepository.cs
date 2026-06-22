@@ -98,6 +98,9 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Song>> GetByArtistIdAsync(int artistId)
         {
+            using var connection = CreateConnection();
+            var artistName = await connection.QueryFirstOrDefaultAsync<string>("SELECT Name FROM artists WHERE Id = @Id", new { Id = artistId });
+
             const string query = @"
                 SELECT s.*, 
                        c.Name as CategoryName,
@@ -109,10 +112,9 @@ namespace Infrastructure.Repositories
                 FROM songs s
                 LEFT JOIN artists a ON s.ArtistId = a.Id
                 LEFT JOIN categories c ON s.CategoryId = c.Id
-                WHERE s.ArtistId = @ArtistId";
+                WHERE s.ArtistId = @ArtistId OR (s.Artist LIKE CONCAT('%', @ArtistName, '%') AND @ArtistName IS NOT NULL AND @ArtistName <> '')";
 
-            using var connection = CreateConnection();
-            return await connection.QueryAsync<Song>(query, new { ArtistId = artistId });
+            return await connection.QueryAsync<Song>(query, new { ArtistId = artistId, ArtistName = artistName });
         }
 
         public async Task<IEnumerable<Song>> GetByUploaderIdAsync(int uploaderId)
