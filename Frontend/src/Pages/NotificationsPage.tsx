@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../Components/header';
 import Sidebar from '../Components/Sidebar';
 import PlayerBar from '../Components/PlayerBar';
@@ -14,12 +14,18 @@ import '../Components/Styles/NotificationsPage.css';
 
 export default function NotificationsPage() {
   const { isLoggedIn } = useAuth();
-  const { playSong, showToast } = useMusic();
+  const { playSong, showToast, isQueueViewOpen, isLyricsViewOpen, isFriendActivityViewOpen } = useMusic();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(true);
   const [activeFilter, setActiveFilter] = useState('Music');
   const [loadingSongId, setLoadingSongId] = useState<number | null>(null);
   const { notifications, unreadCount, markNotificationAsRead, markAllNotificationsAsRead } = useNotification();
+
+  useEffect(() => {
+    if (isQueueViewOpen || isLyricsViewOpen || isFriendActivityViewOpen) {
+      setIsRightCollapsed(false);
+    }
+  }, [isQueueViewOpen, isLyricsViewOpen, isFriendActivityViewOpen]);
 
   const handleNotificationClick = async (notification: NotificationModel) => {
     // Đánh dấu đã đọc

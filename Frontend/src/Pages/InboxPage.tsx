@@ -23,11 +23,17 @@ interface MediaShare {
 
 export default function InboxPage() {
   const { isLoggedIn } = useAuth();
-  const { playSong, showToast } = useMusic();
+  const { playSong, showToast, setQueue, isQueueViewOpen, isLyricsViewOpen, isFriendActivityViewOpen } = useMusic();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(true);
   const [shares, setShares] = useState<MediaShare[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isQueueViewOpen || isLyricsViewOpen || isFriendActivityViewOpen) {
+      setIsRightCollapsed(false);
+    }
+  }, [isQueueViewOpen, isLyricsViewOpen, isFriendActivityViewOpen]);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -49,13 +55,28 @@ export default function InboxPage() {
     if (share.mediaType === 'song' && share.songId) {
       try {
         const res = await API.get(`/songs/${share.songId}`);
-        playSong(res.data);
+        const songData = res.data?.data || res.data;
+        playSong(songData);
       } catch (err) {
         console.error("Failed to load song", err);
         showToast("Không thể tải bài hát này.");
       }
+    } else if (share.mediaType === 'playlist' && share.playlistId) {
+      try {
+        const res = await API.get(`/playlists/${share.playlistId}`);
+        const playlistData = res.data;
+        if (playlistData && playlistData.songs && playlistData.songs.length > 0) {
+           setQueue(playlistData.songs, 0);
+           playSong(playlistData.songs[0]);
+        } else {
+           showToast("Playlist này chưa có bài hát nào.");
+        }
+      } catch (err) {
+        console.error("Failed to load playlist", err);
+        showToast("Không thể tải playlist này.");
+      }
     } else {
-      showToast('Playlist/Album playback in Inbox is under development.');
+      showToast('Tính năng này đang được phát triển.');
     }
   };
 
