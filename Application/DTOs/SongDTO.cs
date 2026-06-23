@@ -1,4 +1,3 @@
-// Application/DTOs/SongDTO.cs
 using System;
 
 namespace Application.DTOs
@@ -15,10 +14,8 @@ namespace Application.DTOs
         public string? LyricsUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? AddedAt { get; set; }
-        // Duration field removed — not used by API responses anymore.
         public DateTime? PlayedAt { get; set; }
 
-        // 🟢 BỔ SUNG CÁC TRƯỜNG THÔNG TIN NGHỆ SĨ THẬT ĐỂ TRẢ VỀ FRONTEND DIALOG
         public int? ArtistId { get; set; }
         public int? UploaderId { get; set; }
         public int? AlbumId { get; set; }
@@ -42,7 +39,7 @@ namespace Application.DTOs
         public int? CategoryId { get; set; }
         public string? CategoryName { get; set; }
         public string? LyricsUrl { get; set; }
-        public int? ArtistId { get; set; } // Thêm nếu sau này làm giao diện Admin tạo bài hát gắn với Ca sĩ
+        public int? ArtistId { get; set; }
         public int? UploaderId { get; set; }
     }
 

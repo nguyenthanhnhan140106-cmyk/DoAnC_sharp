@@ -15,7 +15,6 @@ namespace Application.Services
             _connectionString = connectionString;
         }
 
-        // Lấy toàn bộ danh sách Album
         public async Task<IEnumerable<AlbumDTO>> GetAllAlbumsAsync()
         {
             using var conn = new SqlConnection(_connectionString);
@@ -30,7 +29,6 @@ namespace Application.Services
             return await conn.QueryAsync<AlbumDTO>(sql);
         }
 
-        // Lấy chi tiết 1 album kèm danh sách bài hát
         public async Task<AlbumDTO?> GetAlbumDetailsAsync(int albumId)
         {
             using var conn = new SqlConnection(_connectionString);

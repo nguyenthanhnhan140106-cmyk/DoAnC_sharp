@@ -32,6 +32,35 @@ export default function ProfilePage() {
   const [isUploadedModalOpen, setIsUploadedModalOpen] = useState(false);
   const [contextMenuState, setContextMenuState] = useState<{ song: Song, x: number, y: number } | null>(null);
   const [myPlaylists, setMyPlaylists] = useState<Playlist[]>([]);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  const handleOpenEditProfile = () => {
+    setEditDisplayName(fullProfile?.displayName || user?.username || '');
+    setEditBio(fullProfile?.bio || '');
+    setIsEditProfileOpen(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user?.id) return;
+    setIsSavingProfile(true);
+    try {
+      await API.put(`/users/${user.id}`, {
+        displayName: editDisplayName.trim() || null,
+        bio: editBio.trim() || null,
+      });
+      const res = await API.get(`/Users/${user.id}`);
+      setFullProfile(res.data);
+      setIsEditProfileOpen(false);
+    } catch (err: any) {
+      const msg = err?.response?.data?.Message || 'Cập nhật thất bại. Vui lòng thử lại.';
+      alert(msg);
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   useEffect(() => {
     const closeMenu = () => setContextMenuState(null);
@@ -58,13 +87,45 @@ export default function ProfilePage() {
     } catch { /* no-op */ }
   }, [isLoggedIn]);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setAvatarPreview(url);
+    if (!file || !user?.id) return;
+
+    // 1. Preview ngay lập tức (ảnh tạm trong RAM)
+    const localUrl = URL.createObjectURL(file);
+    setAvatarPreview(localUrl);
+    setIsUploadingAvatar(true);
+
+    try {
+      // 2. Upload ảnh thẳng lên endpoint avatar (POST /api/users/{id}/avatar)
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadRes = await API.post(`/users/${user.id}/avatar`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const cloudinaryUrl: string = uploadRes.data?.avatarUrl ?? '';
+
+      if (!cloudinaryUrl) throw new Error('Không nhận được URL ảnh từ server.');
+
+      // 3. Cập nhật preview bằng URL Cloudinary thật
+      setAvatarPreview(cloudinaryUrl);
+      alert('Ảnh đại diện đã được cập nhật!');
+
+    } catch (err) {
+      console.error('Lỗi upload avatar:', err);
+      // Nếu lỗi, reset về ảnh cũ
+      setAvatarPreview(null);
+      alert('Cập nhật ảnh thất bại. Vui lòng thử lại.');
+    } finally {
+      setIsUploadingAvatar(false);
+      // Reset input để có thể chọn lại cùng file
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
+
 
   useEffect(() => {
     const fetchTopSongs = () => {
@@ -167,11 +228,23 @@ export default function ProfilePage() {
                   </svg>
                 )}
                 <div className="profile-avatar-overlay">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 48, height: 48, marginBottom: 8 }}>
-                    <path d="M12 20h9"></path>
-                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                  </svg>
-                  <span>Choose photo</span>
+                  {isUploadingAvatar ? (
+                    <>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 48, height: 48, marginBottom: 8, animation: 'spin 1s linear infinite' }}>
+                        <circle cx="12" cy="12" r="10" strokeOpacity="0.3" />
+                        <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                      </svg>
+                      <span>Đang lưu...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 48, height: 48, marginBottom: 8 }}>
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                      </svg>
+                      <span>Choose photo</span>
+                    </>
+                  )}
                 </div>
                 <input 
                   type="file" 
@@ -183,7 +256,31 @@ export default function ProfilePage() {
               </div>
               <div className="profile-info">
                 <span className="profile-badge">Profile</span>
-                <h1 className="profile-name">{user?.username || 'User'}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                  <h1 className="profile-name">{fullProfile?.displayName || fullProfile?.username || user?.username || 'User'}</h1>
+                  <button
+                    onClick={handleOpenEditProfile}
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      color: '#fff',
+                      borderRadius: '500px',
+                      padding: '6px 18px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      letterSpacing: '0.5px',
+                      transition: 'border-color 0.2s, transform 0.1s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#fff'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.transform = 'scale(1)'; }}
+                  >
+                    Edit profile
+                  </button>
+                </div>
+                {fullProfile?.bio && (
+                  <p style={{ color: '#b3b3b3', fontSize: '14px', margin: '6px 0 0 0', maxWidth: '400px' }}>{fullProfile.bio}</p>
+                )}
                 <div style={{ display: 'flex', gap: '8px', color: '#fff', fontSize: '14px', fontWeight: 500, marginTop: '8px' }}>
                   <span 
                     style={{ cursor: 'pointer', transition: 'text-decoration 0.2s' }}
@@ -496,6 +593,129 @@ export default function ProfilePage() {
           >
             Xóa bài hát
           </button>
+        </div>
+      )}
+
+      {/* ===== MODAL EDIT PROFILE ===== */}
+      {isEditProfileOpen && (
+        <div
+          onClick={() => setIsEditProfileOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 20000,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#282828', borderRadius: '12px',
+              padding: '32px', width: '440px', maxWidth: '90vw',
+              boxShadow: '0 24px 64px rgba(0,0,0,0.8)',
+              display: 'flex', flexDirection: 'column', gap: '24px',
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, color: '#fff', fontSize: '24px', fontWeight: 700 }}>Edit profile</h2>
+              <button
+                onClick={() => setIsEditProfileOpen(false)}
+                style={{ background: 'none', border: 'none', color: '#b3b3b3', cursor: 'pointer', padding: '4px' }}
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Form */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', color: '#b3b3b3', fontSize: '13px', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={editDisplayName}
+                  onChange={e => setEditDisplayName(e.target.value)}
+                  maxLength={50}
+                  placeholder="Tên hiển thị..."
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    background: '#3e3e3e', border: '1px solid #535353',
+                    borderRadius: '6px', padding: '12px 16px',
+                    color: '#fff', fontSize: '15px', outline: 'none',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onFocus={e => e.currentTarget.style.borderColor = '#fff'}
+                  onBlur={e => e.currentTarget.style.borderColor = '#535353'}
+                />
+                <p style={{ margin: '6px 0 0 0', color: '#b3b3b3', fontSize: '12px' }}>
+                  {editDisplayName.length}/50
+                </p>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', color: '#b3b3b3', fontSize: '13px', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Bio
+                </label>
+                <textarea
+                  value={editBio}
+                  onChange={e => setEditBio(e.target.value)}
+                  maxLength={200}
+                  placeholder="Giới thiệu bản thân..."
+                  rows={3}
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    background: '#3e3e3e', border: '1px solid #535353',
+                    borderRadius: '6px', padding: '12px 16px',
+                    color: '#fff', fontSize: '15px', outline: 'none',
+                    resize: 'vertical', fontFamily: 'inherit',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onFocus={e => e.currentTarget.style.borderColor = '#fff'}
+                  onBlur={e => e.currentTarget.style.borderColor = '#535353'}
+                />
+                <p style={{ margin: '6px 0 0 0', color: '#b3b3b3', fontSize: '12px' }}>
+                  {editBio.length}/200
+                </p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button
+                onClick={() => setIsEditProfileOpen(false)}
+                style={{
+                  background: 'none', border: 'none', color: '#fff',
+                  padding: '12px 24px', borderRadius: '500px',
+                  fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+                  transition: 'background 0.2s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#3e3e3e'}
+                onMouseLeave={e => e.currentTarget.style.background = 'none'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveProfile}
+                disabled={isSavingProfile || !editDisplayName.trim()}
+                style={{
+                  background: isSavingProfile ? '#535353' : '#1db954',
+                  border: 'none', color: '#000',
+                  padding: '12px 32px', borderRadius: '500px',
+                  fontSize: '14px', fontWeight: 700, cursor: isSavingProfile ? 'not-allowed' : 'pointer',
+                  transition: 'background 0.2s, transform 0.1s',
+                  opacity: !editDisplayName.trim() ? 0.5 : 1,
+                }}
+                onMouseEnter={e => { if (!isSavingProfile && editDisplayName.trim()) e.currentTarget.style.transform = 'scale(1.04)'; }}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                {isSavingProfile ? 'Đang lưu...' : 'Save'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

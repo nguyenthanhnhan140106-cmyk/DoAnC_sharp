@@ -24,7 +24,7 @@ namespace Application.Features.Users.Handlers
             
             var query = @"
                 SELECT 
-                    u.Id, u.Username, u.Email, u.PasswordHash, u.AvatarUrl, u.CreatedAt,
+                    u.Id, u.Username, u.DisplayName, u.Email, u.PasswordHash, u.AvatarUrl, u.Bio, u.CreatedAt,
                     (SELECT COUNT(*) FROM user_follows WHERE FollowedUserId = u.Id) as FollowersCount,
                     ((SELECT COUNT(*) FROM user_follows WHERE FollowerId = u.Id) + (SELECT COUNT(*) FROM follows WHERE UserId = u.Id)) as FollowingCount
                 FROM users u

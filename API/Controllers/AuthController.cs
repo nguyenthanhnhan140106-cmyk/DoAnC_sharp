@@ -11,7 +11,7 @@ namespace API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly IAuthService _authService; // Giữ lại tạm thời cho các API OTP
+        private readonly IAuthService _authService;
         private readonly IOtpService _otpService;
         private readonly IEmailService _emailService;
 
@@ -23,7 +23,6 @@ namespace API.Controllers
             _emailService = emailService;
         }
 
-        // --- CÁC API ĐÃ CÓ (Refactored to CQRS MediatR) ---
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterCommand request)
         {
@@ -52,11 +51,9 @@ namespace API.Controllers
             return Ok(new { Token = token });
         }
 
-        // --- CÁC API MỚI CHO OTP ---
         [HttpPost("send-otp")]
         public async Task<IActionResult> SendOtp([FromBody] OtpRequest request)
         {
-    // Đã sửa: Truyền request.Email thay vì biến email không tồn tại
             var success = await _authService.SendOtpAsync(request.Email);
             if (!success) return BadRequest(new { Message = "Không thể gửi mã OTP." });
             return Ok(new { Message = "Mã đã được gửi đến email của bạn." });
@@ -113,5 +110,4 @@ namespace API.Controllers
         }
     }
 
-    // Các DTO hỗ trợ (Bạn có thể để trong file riêng hoặc để ở đây nếu muốn gọn)
 }
