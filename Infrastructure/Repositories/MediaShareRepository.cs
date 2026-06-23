@@ -33,13 +33,23 @@ namespace Infrastructure.Repositories
             using var conn = new SqlConnection(_connectionString);
             var sql = @"
                 SELECT ms.Id, ms.SenderId, ms.ReceiverId, ms.SongId, ms.PlaylistId, ms.SharedAt,
-                       u.Username as SenderName,
-                       s.Title as MediaTitle,
-                       s.CoverUrl as MediaCover,
-                       'song' as MediaType
+                       COALESCE(u.DisplayName, u.Username) as SenderName,
+                       CASE 
+                           WHEN ms.SongId IS NOT NULL THEN s.Title 
+                           WHEN ms.PlaylistId IS NOT NULL THEN p.Name 
+                       END as MediaTitle,
+                       CASE 
+                           WHEN ms.SongId IS NOT NULL THEN s.CoverUrl 
+                           WHEN ms.PlaylistId IS NOT NULL THEN p.CoverUrl 
+                       END as MediaCover,
+                       CASE 
+                           WHEN ms.SongId IS NOT NULL THEN 'song'
+                           WHEN ms.PlaylistId IS NOT NULL THEN 'playlist'
+                       END as MediaType
                 FROM media_shares ms
                 JOIN users u ON ms.SenderId = u.Id
                 LEFT JOIN songs s ON ms.SongId = s.Id
+                LEFT JOIN playlists p ON ms.PlaylistId = p.Id
                 WHERE ms.ReceiverId = @ReceiverId
                 ORDER BY ms.SharedAt DESC";
             
@@ -51,13 +61,23 @@ namespace Infrastructure.Repositories
             using var conn = new SqlConnection(_connectionString);
             var sql = @"
                 SELECT ms.Id, ms.SenderId, ms.ReceiverId, ms.SongId, ms.PlaylistId, ms.SharedAt,
-                       u.Username as ReceiverName,
-                       s.Title as MediaTitle,
-                       s.CoverUrl as MediaCover,
-                       'song' as MediaType
+                       COALESCE(u.DisplayName, u.Username) as ReceiverName,
+                       CASE 
+                           WHEN ms.SongId IS NOT NULL THEN s.Title 
+                           WHEN ms.PlaylistId IS NOT NULL THEN p.Name 
+                       END as MediaTitle,
+                       CASE 
+                           WHEN ms.SongId IS NOT NULL THEN s.CoverUrl 
+                           WHEN ms.PlaylistId IS NOT NULL THEN p.CoverUrl 
+                       END as MediaCover,
+                       CASE 
+                           WHEN ms.SongId IS NOT NULL THEN 'song'
+                           WHEN ms.PlaylistId IS NOT NULL THEN 'playlist'
+                       END as MediaType
                 FROM media_shares ms
                 JOIN users u ON ms.ReceiverId = u.Id
                 LEFT JOIN songs s ON ms.SongId = s.Id
+                LEFT JOIN playlists p ON ms.PlaylistId = p.Id
                 WHERE ms.SenderId = @SenderId
                 ORDER BY ms.SharedAt DESC";
             
