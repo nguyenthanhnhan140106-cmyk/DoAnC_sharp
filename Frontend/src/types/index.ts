@@ -8,8 +8,10 @@ export interface User {
 export interface UserProfile {
   id: number;
   username: string;
+  displayName?: string;
   email: string;
   avatarUrl?: string;
+  bio?: string;
   role: string;
   createdAt: string;
   isVerified: boolean;

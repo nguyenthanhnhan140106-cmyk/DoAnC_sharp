@@ -91,9 +91,9 @@ namespace Application.Services
         {
             using var conn = new SqlConnection(_connectionString);
             string sql = @"
-                SELECT TOP 20 Id, Username, Email 
+                SELECT TOP 20 Id, Username, Email, DisplayName, AvatarUrl, Bio 
                 FROM users 
-                WHERE (Username LIKE @Keyword OR Email LIKE @Keyword)
+                WHERE (Username LIKE @Keyword OR Email LIKE @Keyword OR DisplayName LIKE @Keyword)
                   AND Id != @CurrentUserId
                 ";
             

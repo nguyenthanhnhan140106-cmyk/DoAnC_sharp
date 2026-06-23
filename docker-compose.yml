@@ -18,7 +18,7 @@ services:
       retries: 10
       interval: 5s
 
-  # 1.5. Container chạy script khởi tạo CSDL
+  # 1.5. Container chạy script khởi tạo CSDL (chỉ chạy lần đầu nếu chưa có bảng)
   db-init:
     image: mcr.microsoft.com/mssql-tools:latest
     container_name: tunevault-db-init
@@ -27,10 +27,16 @@ services:
         condition: service_healthy
     command: >
       /bin/bash -c "
-        echo 'Waiting for SQL Server to be ready...';
+        echo 'Checking if DB already initialized...';
         sleep 5;
-        /opt/mssql-tools/bin/sqlcmd -S db -U sa -P 'Aa123456' -d master -i /scripts/init.sql;
-        echo 'Database initialized successfully!';
+        RESULT=$(/opt/mssql-tools/bin/sqlcmd -S db -U sa -P 'Aa123456' -d master -Q 'SET NOCOUNT ON; SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME=''users''' -h -1 2>/dev/null | tr -d '[:space:]');
+        if [ \"$$RESULT\" = \"0\" ] || [ -z \"$$RESULT\" ]; then
+          echo 'First run: initializing database...';
+          /opt/mssql-tools/bin/sqlcmd -S db -U sa -P 'Aa123456' -d master -i /scripts/init.sql;
+          echo 'Database initialized successfully!';
+        else
+          echo 'Database already initialized, skipping init.sql';
+        fi
       "
     volumes:
       - ./init.sql:/scripts/init.sql

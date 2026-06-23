@@ -1,4 +1,4 @@
-﻿-- =========================================================
+-- =========================================================
 -- TUNEVAULT - SCRIPT KHỞI TẠO DATABASE VỚI CLOUDINARY LINKS
 -- =========================================================
 
@@ -30,18 +30,20 @@ CREATE TABLE users (
     Email NVARCHAR(100) NOT NULL UNIQUE,
     PasswordHash NVARCHAR(255) NOT NULL,
     AvatarUrl NVARCHAR(255) NULL,
+    DisplayName NVARCHAR(100) NULL,
+    Bio NVARCHAR(500) NULL,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Seed 2 users mẫu (Password: Password123! -- BCrypt hash)
 SET IDENTITY_INSERT users ON;
-INSERT INTO users (Id, Username, Email, PasswordHash, AvatarUrl, CreatedAt) VALUES
+INSERT INTO users (Id, Username, Email, PasswordHash, AvatarUrl, DisplayName, Bio, CreatedAt) VALUES
 (1, N'admin', N'admin@tunevault.com',
-   N'123456',
-   N'https://api.dicebear.com/7.x/avataaars/svg?seed=admin', GETDATE()),
+   N'$2a$12$R9h/cIPz0gi.URNNX3kh2OFST9/iLteXXPxFZ1LQ48BywI.SQr7i',
+   N'https://api.dicebear.com/7.x/avataaars/svg?seed=admin', N'Admin', N'Quản trị viên TuneVault', GETDATE()),
 (2, N'tunevault_user', N'user@tunevault.com',
-   N'123456',
-   N'https://api.dicebear.com/7.x/avataaars/svg?seed=user', GETDATE());
+   N'$2a$12$R9h/cIPz0gi.URNNX3kh2OFST9/iLteXXPxFZ1LQ48BywI.SQr7i',
+   N'https://api.dicebear.com/7.x/avataaars/svg?seed=user', NULL, NULL, GETDATE());
 SET IDENTITY_INSERT users OFF;
 
 
@@ -616,7 +618,6 @@ CREATE TABLE user_follows (
 
 INSERT INTO user_follows (FollowerId, FollowedUserId) VALUES 
 (1, 2),
-(1, 3),
 (2, 1);
 
 

@@ -12,7 +12,6 @@ export default function Header() {
   const music = useMusic();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
-  // Giả sử bạn có các state này cho logic search
   const [suggestions, setSuggestions] = useState<Song[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const { unreadCount } = useNotification();
@@ -32,12 +31,9 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Bỏ useEffect getMyNotifications ở đây vì đã chuyển vào NotificationContext
-
-  // Logic Search (Debounce)
+  // Logic Search
   useEffect(() => {
     if (!query.trim()) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions([]);
       return;
     }

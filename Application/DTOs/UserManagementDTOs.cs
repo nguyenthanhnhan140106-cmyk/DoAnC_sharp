@@ -7,6 +7,8 @@ namespace Application.DTOs
         public string Email { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
         public string? AvatarUrl { get; set; }
+        public string? DisplayName { get; set; }
+        public string? Bio { get; set; }
         public DateTime CreatedAt { get; set; }
         public int FollowersCount { get; set; }
         public int FollowingCount { get; set; }
@@ -16,10 +18,19 @@ namespace Application.DTOs
     {
         public int Id { get; set; }
         public string Username { get; set; } = string.Empty;
+        public string? DisplayName { get; set; }
         public string Email { get; set; } = string.Empty;
         public string? AvatarUrl { get; set; }
+        public string? Bio { get; set; }
         public int FollowersCount { get; set; }
         public int FollowingCount { get; set; }
+    }
+
+    public class UpdateProfileDTO
+    {
+        public string? DisplayName { get; set; }  // Tên hiển thị (không ảnh hưởng đăng nhập)
+        public string? Bio { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 
     public static class UserMapper
@@ -30,8 +41,10 @@ namespace Application.DTOs
             {
                 Id = entity.Id,
                 Username = entity.Username,
+                DisplayName = entity.DisplayName,
                 Email = entity.Email,
                 AvatarUrl = entity.AvatarUrl,
+                Bio = entity.Bio,
                 FollowersCount = entity.FollowersCount,
                 FollowingCount = entity.FollowingCount
             };
