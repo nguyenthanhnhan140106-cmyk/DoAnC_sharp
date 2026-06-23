@@ -129,6 +129,11 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   // 🟢 Lắng nghe sự kiện bật Video từ các nơi khác (như trang chủ)
   useEffect(() => {
     const handleOpenVideoModal = () => {
+      if (!isLoggedIn) {
+        if (openAuthModal) openAuthModal();
+        else alert("Vui lòng đăng nhập để xem video MV!");
+        return;
+      }
       wasPlayingBeforeVideo.current = true; // Lưu cờ
       setIsVideoOpen(true);
       // Tạm dừng nhạc bằng hàm stable
@@ -138,7 +143,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     };
     window.addEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
     return () => window.removeEventListener('OPEN_VIDEO_MODAL', handleOpenVideoModal);
-  }, [pauseSong]);
+  }, [pauseSong, isLoggedIn, openAuthModal]);
 
 
 
@@ -513,6 +518,11 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
             <button
               className="view-video-btn available"
               onClick={() => {
+                if (!isLoggedIn) {
+                  if (openAuthModal) openAuthModal();
+                  else alert("Vui lòng đăng nhập để xem video MV!");
+                  return;
+                }
                 // 1. Ghi nhớ trạng thái phát nhạc trước đó
                 wasPlayingBeforeVideo.current = isPlaying;
 

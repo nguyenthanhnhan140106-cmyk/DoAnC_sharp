@@ -20,11 +20,11 @@ export default defineConfig({
     allowedHosts: true, // <-- Mình đã thêm dòng này để cho phép ngrok truy cập
     proxy: {
       '/api': {
-        target: 'http://localhost:5000', // Docker local — đổi sang http://tunevault-backend.somee.com khi deploy
+        target: 'http://tunevault-backend.somee.com', // Docker local — đổi sang http://tunevault-backend.somee.com khi deploy
         changeOrigin: true,
       },
       '/hubs': {
-        target: 'http://localhost:5000', // Docker local
+        target: 'http://tunevault-backend.somee.com', // Docker local
         ws: true,
         changeOrigin: true
       }

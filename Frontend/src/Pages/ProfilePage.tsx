@@ -220,8 +220,8 @@ export default function ProfilePage() {
             <div className="profile-header-bg"></div>
             <div className="profile-header-content">
               <div className="profile-avatar" onClick={() => fileInputRef.current?.click()} style={{ cursor: 'pointer' }}>
-                {avatarPreview ? (
-                  <img src={avatarPreview} alt="User Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                {avatarPreview || fullProfile?.avatarUrl ? (
+                  <img src={avatarPreview || fullProfile?.avatarUrl} alt="User Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                 ) : (
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
