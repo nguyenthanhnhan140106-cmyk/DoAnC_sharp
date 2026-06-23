@@ -15,18 +15,14 @@ namespace Infrastructure.Services
 
         public CloudinaryService(IOptions<CloudinarySettings> config)
         {
-            if (!string.IsNullOrEmpty(config.Value?.CloudName) && 
-                !string.IsNullOrEmpty(config.Value?.ApiKey) && 
-                !string.IsNullOrEmpty(config.Value?.ApiSecret))
-            {
-                var acc = new Account(
-                    config.Value.CloudName,
-                    config.Value.ApiKey,
-                    config.Value.ApiSecret
-                );
-                _cloudinary = new Cloudinary(acc);
-                _cloudinary.Api.Secure = true;
-            }
+            var settings = config.Value;
+            var cloudName = string.IsNullOrEmpty(settings?.CloudName) ? "dawcwuwmm" : settings.CloudName;
+            var apiKey = string.IsNullOrEmpty(settings?.ApiKey) ? "811443711198311" : settings.ApiKey;
+            var apiSecret = string.IsNullOrEmpty(settings?.ApiSecret) ? "I6TUr3BrQr1vlizpbvQY1Pioawg" : settings.ApiSecret;
+
+            var account = new Account(cloudName, apiKey, apiSecret);
+            _cloudinary = new Cloudinary(account);
+            _cloudinary.Api.Secure = true;
         }
 
         private void EnsureCloudinaryIsConfigured()
