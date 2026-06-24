@@ -31,7 +31,6 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Logic Search
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
