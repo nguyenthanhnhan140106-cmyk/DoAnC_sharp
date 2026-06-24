@@ -28,7 +28,7 @@ namespace Application.DTOs
 
     public class UpdateProfileDTO
     {
-        public string? DisplayName { get; set; }  // Tên hiển thị (không ảnh hưởng đăng nhập)
+        public string? DisplayName { get; set; }
         public string? Bio { get; set; }
         public string? AvatarUrl { get; set; }
     }
