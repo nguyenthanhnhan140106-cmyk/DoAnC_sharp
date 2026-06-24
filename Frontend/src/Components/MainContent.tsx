@@ -79,11 +79,16 @@ const SongCard = ({ song, onHover }: { song: Song; onHover?: (url: string | null
 
 const VideoCard = ({ song, onHover }: { song: Song; onHover?: (url: string | null) => void }) => {
   const { currentSong, isPlaying } = useMusic();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const isActive = currentSong?.id === song.id;
 
   const handleForcePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!token) {
+      navigate('/login');
+      return;
+    }
     navigate(`/video/${song.id}`);
   };
 
