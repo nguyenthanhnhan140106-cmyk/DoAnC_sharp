@@ -51,7 +51,7 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<FollowedArtistDTO>> GetFollowedArtistsAsync(int userId)
         {
             using var conn = CreateConnection();
-            // Lấy ảnh CoverUrl từ bài hát mới nhất của Artist đó
+            
             const string sql = @"
                 SELECT 
                     a.Id AS ArtistId,

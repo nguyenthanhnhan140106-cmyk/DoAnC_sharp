@@ -83,7 +83,7 @@ namespace API.Controllers
             }
         }
 
-        // Upload avatar trực tiếp lên Cloudinary, không qua songs
+        
         [Authorize]
         [HttpPost("{id}/avatar")]
         public async Task<IActionResult> UploadAvatar(int id, IFormFile file)
@@ -124,4 +124,4 @@ namespace API.Controllers
         }
     }
 }
-
+

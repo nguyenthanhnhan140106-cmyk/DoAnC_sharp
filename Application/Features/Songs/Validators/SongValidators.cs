@@ -9,7 +9,7 @@ namespace Application.Features.Songs.Validators
         {
             RuleFor(x => x.Dto.Title).NotEmpty().WithMessage("Tên bài hát không được để trống.");
             RuleFor(x => x.Dto.Artist).NotEmpty().WithMessage("Tên nghệ sĩ không được để trống.");
-            // Add more rules if needed
+            
         }
     }
 

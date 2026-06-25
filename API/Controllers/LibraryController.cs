@@ -24,7 +24,7 @@ namespace API.Controllers
             return int.TryParse(idClaim, out var id) ? id : 0;
         }
 
-        // GET /api/library/albums — lấy danh sách album đã lưu
+        
         [HttpGet("albums")]
         public async Task<IActionResult> GetSavedAlbums()
         {
@@ -35,7 +35,7 @@ namespace API.Controllers
             return Ok(albums);
         }
 
-        // GET /api/library/albums/{albumId}/status — kiểm tra đã lưu chưa
+        
         [HttpGet("albums/{albumId}/status")]
         public async Task<IActionResult> GetAlbumStatus(int albumId)
         {
@@ -46,7 +46,7 @@ namespace API.Controllers
             return Ok(new { isSaved });
         }
 
-        // POST /api/library/albums/{albumId} — lưu album vào thư viện
+        
         [HttpPost("albums/{albumId}")]
         public async Task<IActionResult> SaveAlbum(int albumId)
         {
@@ -57,7 +57,7 @@ namespace API.Controllers
             return Ok(new { message = "Album đã được thêm vào thư viện." });
         }
 
-        // DELETE /api/library/albums/{albumId} — xóa album khỏi thư viện
+        
         [HttpDelete("albums/{albumId}")]
         public async Task<IActionResult> RemoveAlbum(int albumId)
         {

@@ -47,7 +47,7 @@ namespace Application.Features.Songs.Handlers
 
         public async Task<SongDTO> Handle(UploadSongCommand request, CancellationToken cancellationToken)
         {
-            // Validate file extensions (whitelist)
+            
             var allowedAudio = new[] { ".mp3", ".wav", ".flac", ".aac", ".ogg" };
             var allowedVideo = new[] { ".mp4", ".webm", ".mov", ".avi", ".mkv" };
             var allowedImage = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
@@ -61,7 +61,7 @@ namespace Application.Features.Songs.Handlers
             if (request.CoverFileName != null && !allowedImage.Contains(System.IO.Path.GetExtension(request.CoverFileName).ToLower()))
                 throw new System.InvalidOperationException($"Định dạng ảnh bìa không hợp lệ. Chỉ chấp nhận: {string.Join(", ", allowedImage)}");
 
-            // Upload files to Cloudinary
+            
             string? audioUrl = null;
             if (request.AudioStream != null && request.AudioFileName != null)
                 audioUrl = await _cloudinaryService.UploadAudioAsync(request.AudioStream, request.AudioFileName);

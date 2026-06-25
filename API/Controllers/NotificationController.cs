@@ -6,6 +6,7 @@ using Application.Features.Notifications.Queries;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using API.Hubs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -22,8 +23,7 @@ namespace API.Controllers
             _hubContext = hubContext;
         }
 
-        // 🟢 Endpoint đón nhận yêu cầu share nhạc/album/playlist: POST /api/notification/share-media
-        [Microsoft.AspNetCore.Authorization.Authorize]
+        [Authorize]
         [HttpPost("share-media")]
         public async Task<IActionResult> ShareMedia([FromBody] ShareMediaRequest request)
         {
@@ -42,7 +42,7 @@ namespace API.Controllers
             
             if (result)
             {
-                // Bắn SignalR event để Frontend fetch lại notifications
+                
                 await _hubContext.Clients.User(request.ReceiverId.ToString()).SendAsync("ReceiveNotification");
                 if (request.SenderId > 0)
                 {
@@ -55,7 +55,7 @@ namespace API.Controllers
             return StatusCode(500, new { Message = "Có lỗi xảy ra khi lưu thông báo vào database." });
         }
 
-        [Microsoft.AspNetCore.Authorization.Authorize]
+        [Authorize]
         [HttpGet("my-notifications")]
         public async Task<IActionResult> GetMyNotifications()
         {
@@ -67,7 +67,7 @@ namespace API.Controllers
             return Ok(notifications);
         }
 
-        [Microsoft.AspNetCore.Authorization.Authorize]
+        [Authorize]
         [HttpPut("{id}/read")]
         public async Task<IActionResult> MarkAsRead(int id)
         {
@@ -81,7 +81,7 @@ namespace API.Controllers
             return BadRequest(new { Message = "Không thể cập nhật thông báo." });
         }
 
-        [Microsoft.AspNetCore.Authorization.Authorize]
+        [Authorize]
         [HttpPut("read-all")]
         public async Task<IActionResult> MarkAllAsRead()
         {
@@ -93,8 +93,8 @@ namespace API.Controllers
             return Ok(new { Message = $"Đã đánh dấu {updatedCount} thông báo là đã đọc." });
         }
 
-        // 🟢 BỔ SUNG: Lấy danh sách MediaShare (Inbox)
-        [Microsoft.AspNetCore.Authorization.Authorize]
+        
+        [Authorize]
         [HttpGet("shared")]
         public async Task<IActionResult> GetSharedMedia()
         {
@@ -106,7 +106,7 @@ namespace API.Controllers
             return Ok(shares);
         }
 
-        [Microsoft.AspNetCore.Authorization.Authorize]
+        [Authorize]
         [HttpGet("shared-by-me")]
         public async Task<IActionResult> GetSharedByMe()
         {

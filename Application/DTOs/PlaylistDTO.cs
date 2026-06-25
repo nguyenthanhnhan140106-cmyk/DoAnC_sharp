@@ -6,8 +6,8 @@ namespace Application.DTOs
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? CoverUrl { get; set; }
-        public int UserId { get; set; } // ID của người tạo playlist
-        public string CreatorName { get; set; } = string.Empty; // Tên người tạo để hiện lên giao diện
+        public int UserId { get; set; } 
+        public string CreatorName { get; set; } = string.Empty; 
         public DateTime CreatedAt { get; set; }
         public bool IsPublic { get; set; }
         public List<SongDTO> Songs { get; set; } = new();

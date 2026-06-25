@@ -697,6 +697,43 @@ export default function PlaylistPage() {
                                       </svg>
                                       Share
                                     </li>
+
+                                    {(id === 'liked' || playlist?.userId === user?.id) && (
+                                      <>
+                                        <li className="album-dropdown-divider"></li>
+                                        <li onClick={async (e) => { 
+                                          e.stopPropagation();
+                                          if (id === 'liked') {
+                                            toggleLikeSong(song);
+                                            showToast?.('Đã xóa khỏi bài hát yêu thích');
+                                            // Xóa khỏi danh sách hiển thị
+                                            setPlaylist(prev => prev ? { ...prev, songs: prev.songs?.filter(s => s.id !== song.id) } : null);
+                                          } else {
+                                            try {
+                                              const token = localStorage.getItem('token');
+                                              const headers: any = {};
+                                              if (token) headers['Authorization'] = `Bearer ${token}`;
+                                              const res = await fetch(`/api/playlists/${id}/songs/${song.id}`, { method: 'DELETE', headers });
+                                              if (res.ok) {
+                                                showToast?.('Đã xóa bài hát khỏi danh sách phát');
+                                                window.dispatchEvent(new Event('playlistUpdated'));
+                                                setPlaylist(prev => prev ? { ...prev, songs: prev.songs?.filter(s => s.id !== song.id) } : null);
+                                              } else {
+                                                showToast?.('Bạn không có quyền xóa bài hát này');
+                                              }
+                                            } catch (err) {
+                                              console.error(err);
+                                            }
+                                          }
+                                          setActiveSongMenu(null); 
+                                        }}>
+                                          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                                            <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/>
+                                          </svg>
+                                          Delete
+                                        </li>
+                                      </>
+                                    )}
                                   </ul>
                                 )}
                               </div>

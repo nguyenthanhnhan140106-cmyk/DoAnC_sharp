@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cấu hình Kestrel và Form - giới hạn kích thước upload tối đa 100MB
+
 builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = 104857600; });
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options => { options.MultipartBodyLengthLimit = 104857600; });
 
@@ -35,7 +35,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
-// Services Registration
+
 builder.Services.AddScoped<IOtpRepository>(_ => new OtpRepository(connectionString));
 builder.Services.AddScoped<ISongRepository, SongRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -43,7 +43,7 @@ builder.Services.AddScoped<IArtistService>(_ => new ArtistService(connectionStri
 builder.Services.AddScoped<IPlaylistService>(_ => new PlaylistService(connectionString));
 builder.Services.AddScoped<AlbumService>(_ => new AlbumService(connectionString));
 builder.Services.AddHttpClient<IAiService, LocalAiService>();
-builder.Services.AddHttpClient(); // Thêm cấu hình HttpClient dùng chung
+builder.Services.AddHttpClient(); 
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService>(provider => 
@@ -63,7 +63,7 @@ builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddApplication();
 
-// Authentication
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
         options.TokenValidationParameters = new TokenValidationParameters {
@@ -87,7 +87,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// Middleware xử lý lỗi
+
 app.Use(async (context, next) => {
     try { await next(); }
     catch (ValidationException ex) {
@@ -115,7 +115,7 @@ app.MapHub<NotificationHub>("/hubs/notification");
 
 app.Run();
 
-// 🟢 ĐỊNH NGHĨA CLASS PHẢI NẰM Ở CUỐI FILE, SAU app.Run()
+
 public class CustomUserIdProvider : IUserIdProvider
 {
     public string? GetUserId(HubConnectionContext connection)

@@ -1,8 +1,5 @@
 namespace Application.DTOs
 {
-    /// <summary>
-    /// Khung response thống nhất cho toàn bộ API: { success, data, message, errors }
-    /// </summary>
     public class ApiResponse<T>
     {
         public bool Success { get; set; }
@@ -17,9 +14,6 @@ namespace Application.DTOs
             new() { Success = false, Message = message, Errors = errors };
     }
 
-    /// <summary>
-    /// Khung response không có data
-    /// </summary>
     public class ApiResponse
     {
         public bool Success { get; set; }

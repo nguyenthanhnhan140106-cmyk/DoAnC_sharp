@@ -1,6 +1,6 @@
 namespace Application.DTOs
 {
-    // Đảm bảo tên class là ChatRequest
+    
     public class ChatRequestDTO
     {
         public string Message { get; set; } = string.Empty;
@@ -13,7 +13,7 @@ namespace Application.DTOs
         public string Text { get; set; } = string.Empty;
     }
 
-    // Đảm bảo có cả class ChatResponse để AiService không lỗi
+    
     public class ChatResponse
     {
         public string Reply { get; set; } = string.Empty;

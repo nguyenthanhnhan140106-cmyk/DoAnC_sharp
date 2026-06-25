@@ -21,7 +21,7 @@ namespace Application.Features.Playlists.Handlers
         IRequestHandler<RemoveSongFromPlaylistCommand, bool>,
         IRequestHandler<TogglePlaylistPrivacyCommand, bool>
     {
-        private readonly IPlaylistService _playlistService; // temporarily wrapping Service since it has complex raw SQL logic
+        private readonly IPlaylistService _playlistService; 
 
         public PlaylistHandlers(IPlaylistService playlistService)
         {

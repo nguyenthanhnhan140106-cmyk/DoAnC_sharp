@@ -13,7 +13,6 @@ namespace API.Hubs
             var userId = Context.UserIdentifier;
             if (!string.IsNullOrEmpty(userId))
             {
-                // SignalR tự động map Connection với UserIdentifier
                 Console.WriteLine($"[SignalR] User {userId} connected: {Context.ConnectionId}");
             }
             await base.OnConnectedAsync();

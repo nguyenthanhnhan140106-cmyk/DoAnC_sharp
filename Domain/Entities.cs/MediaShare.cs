@@ -8,7 +8,6 @@ namespace Domain.Entities
         public int? SongId { get; set; }
         public int? PlaylistId { get; set; }
         public DateTime SharedAt { get; set; }
-
         public User? Sender { get; set; }
         public User? Receiver { get; set; }
         public Song? Song { get; set; }

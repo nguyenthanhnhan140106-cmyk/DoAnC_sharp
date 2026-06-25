@@ -4,8 +4,10 @@ using Application.Features.Follows.Commands;
 using Application.Features.Follows.Queries;
 using Application.Interfaces;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Domain.Entities;
 
 namespace Application.Features.Follows.Handlers
 {
@@ -21,10 +23,12 @@ namespace Application.Features.Follows.Handlers
         IRequestHandler<GetUserFollowersQuery, IEnumerable<UserFollowDTO>>
     {
         private readonly IFollowRepository _followRepo;
+        private readonly INotificationRepository _notificationRepo;
 
-        public FollowHandlers(IFollowRepository followRepo)
+        public FollowHandlers(IFollowRepository followRepo, INotificationRepository notificationRepo)
         {
             _followRepo = followRepo;
+            _notificationRepo = notificationRepo;
         }
 
         public async Task<bool> Handle(FollowArtistCommand request, CancellationToken cancellationToken)
@@ -42,6 +46,22 @@ namespace Application.Features.Follows.Handlers
         public async Task<bool> Handle(FollowUserCommand request, CancellationToken cancellationToken)
         {
             await _followRepo.FollowUserAsync(request.UserId, request.TargetUserId);
+
+            var payloadData = new
+            {
+                Message = $"{request.FollowerName} đã bắt đầu theo dõi bạn.",
+                CreatedAt = System.DateTime.UtcNow
+            };
+
+            var notification = new Notification
+            {
+                UserId = request.TargetUserId,
+                Type = "NewFollower",
+                Payload = JsonSerializer.Serialize(payloadData),
+                IsRead = false
+            };
+            await _notificationRepo.InsertNotificationAsync(notification);
+
             return true;
         }
 

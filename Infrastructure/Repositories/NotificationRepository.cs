@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 using Domain.Entities;
 using Dapper;
 using Microsoft.Data.SqlClient;
-using Application.Interfaces; // 🟢 Dòng khai báo sống còn để tìm thấy Interface
+using Application.Interfaces; 
 
 namespace Infrastructure.Repositories
 {
-    public class NotificationRepository : INotificationRepository // Kế thừa Interface
+    public class NotificationRepository : INotificationRepository
     {
         private readonly string _connectionString;
 
@@ -20,7 +20,6 @@ namespace Infrastructure.Repositories
         {
             using var conn = new SqlConnection(_connectionString);
             
-            // 🟢 Lưu ý: Cập nhật chữ 'notifications' (có chữ s) cho khớp với bảng tạo tự động trong Program.cs
             var sql = @"
                 INSERT INTO notifications (UserId, Type, Payload, IsRead) 
                 VALUES (@UserId, @Type, @Payload, @IsRead);";

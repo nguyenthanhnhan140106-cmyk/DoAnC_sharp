@@ -22,7 +22,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Song>> GetAllSongsAsync()
         {
-            // Sử dụng s.* đã tự động bốc được VideoUrl từ database lên Entity
+            
             const string query = @"
                 SELECT s.*, 
                        c.Name as CategoryName,
@@ -150,7 +150,7 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> UpdateAsync(Song song)
         {
-            // 自由 🟢 BỔ SUNG: Thêm việc cập nhật VideoUrl = @VideoUrl vào câu lệnh UPDATE
+            
             const string query = @"
                 UPDATE songs 
                 SET Title = @Title, 
