@@ -23,7 +23,7 @@ namespace Infrastructure.Services
         public LocalAiService(HttpClient http, IConfiguration config)
         {
             _http = http;
-            _aiServerUrl = config["AiSettings:BaseUrl"] ?? "https://stitch-pronounce-frisk.ngrok-free.dev/v1/chat/completions";
+            _aiServerUrl = config["AiSettings:BaseUrl"];
         }
 
         public async IAsyncEnumerable<string> ChatStreamAsync(IEnumerable<MessageDTO> history, string message, [EnumeratorCancellation] CancellationToken ct = default)
