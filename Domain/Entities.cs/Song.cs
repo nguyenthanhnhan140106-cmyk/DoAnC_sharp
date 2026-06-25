@@ -15,7 +15,6 @@ namespace Domain.Entities
         public string? CategoryName { get; set; }
         public string? LyricsUrl { get; set; }
         public DateTime CreatedAt { get; set; }
-
         public int? ArtistId { get; set; }
         public int? UploaderId { get; set; }
         public int WorldRank { get; set; }

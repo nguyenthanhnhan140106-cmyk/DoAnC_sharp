@@ -32,9 +32,8 @@ namespace Application.Features.Notifications.Handlers
         public async Task<bool> Handle(ShareMediaCommand requestCmd, CancellationToken cancellationToken)
         {
             var request = requestCmd.Request;
-            // --- Idempotent check: không share trùng ---
             if (await _mediaShareRepository.IsAlreadySharedAsync(request.SenderId, request.ReceiverId, request.MediaId, request.MediaType))
-                return true; // đã share rồi, bỏ qua lặp lại
+                return true; 
 
             var payloadData = new
             {
@@ -83,7 +82,7 @@ namespace Application.Features.Notifications.Handlers
                 await _notificationRepository.InsertNotificationAsync(senderNotification);
             }
 
-            // 🟢 BỔ SUNG: Lưu lịch sử chia sẻ vào bảng MediaShare
+            
             if (success)
             {
                 var mediaShare = new MediaShare

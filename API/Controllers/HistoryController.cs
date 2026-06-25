@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Yêu cầu phải đăng nhập
+    [Authorize] 
     public class HistoryController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -31,7 +31,7 @@ namespace API.Controllers
             }
         }
 
-        // POST: api/history/played/5
+        
         [HttpPost("played/{songId}")]
         public async Task<IActionResult> AddToHistory(int songId)
         {
@@ -39,7 +39,7 @@ namespace API.Controllers
             return Ok(new { message = "Đã thêm vào lịch sử nghe", songId });
         }
 
-        // GET: api/history/recent?limit=10
+        
         [HttpGet("recent")]
         public async Task<IActionResult> GetRecent([FromQuery] int limit = 10)
         {

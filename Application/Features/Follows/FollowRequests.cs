@@ -6,7 +6,7 @@ namespace Application.Features.Follows.Commands
 {
     public record FollowArtistCommand(int UserId, int ArtistId) : IRequest<bool>;
     public record UnfollowArtistCommand(int UserId, int ArtistId) : IRequest<bool>;
-    public record FollowUserCommand(int UserId, int TargetUserId) : IRequest<bool>;
+    public record FollowUserCommand(int UserId, int TargetUserId, string FollowerName) : IRequest<bool>;
     public record UnfollowUserCommand(int UserId, int TargetUserId) : IRequest<bool>;
 }
 

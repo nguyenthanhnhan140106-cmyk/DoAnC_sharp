@@ -8,7 +8,6 @@ namespace Domain.Entities
         public string Payload { get; set; } = string.Empty;
         public bool IsRead { get; set; }
         public DateTime CreatedAt { get; set; }
-
         public User? User { get; set; }
     }
 }

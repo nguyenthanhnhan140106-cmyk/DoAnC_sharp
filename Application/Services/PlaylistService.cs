@@ -130,7 +130,7 @@ namespace Application.Services
                 var sql = "DELETE FROM playlist_songs WHERE PlaylistId = @PlaylistId AND SongId = @SongId";
                 var rows = await conn.ExecuteAsync(sql, new { PlaylistId = playlistId, SongId = songId });
                 
-                // Cập nhật lại CoverUrl nếu cần
+                
                 var remainingSongs = await conn.QueryAsync<int>("SELECT TOP 1 SongId FROM playlist_songs WHERE PlaylistId = @PlaylistId ", new { PlaylistId = playlistId });
                 if (!remainingSongs.Any()) {
                     await conn.ExecuteAsync("UPDATE playlists SET CoverUrl = NULL WHERE Id = @PlaylistId", new { PlaylistId = playlistId });

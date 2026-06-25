@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Application.DTOs;
 using Application.Features.Users.Queries;
-using Domain.Entities; // Needed for UserEntity temporarily or we can map directly
+using Domain.Entities; 
 
 namespace Application.Features.Users.Handlers
 {

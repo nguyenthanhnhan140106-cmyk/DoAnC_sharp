@@ -15,7 +15,6 @@ namespace Application.DTOs
         public DateTime CreatedAt { get; set; }
         public DateTime? AddedAt { get; set; }
         public DateTime? PlayedAt { get; set; }
-
         public int? ArtistId { get; set; }
         public int? UploaderId { get; set; }
         public int? AlbumId { get; set; }

@@ -31,18 +31,18 @@ public async Task<string?> Handle(LoginCommand request, CancellationToken cancel
         new { request.Username }
     );
 
-    // Kiểm tra null an toàn trước khi verify
+    
     if (user == null) return null;
 
     try 
     {
-        // Sử dụng khối try-catch cho hàm Verify để tránh crash hệ thống
+        
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return null;
     }
     catch (Exception ex)
     {
-        // Ghi log lỗi để bạn biết chuỗi hash bị hỏng ở đâu
+        
         Console.WriteLine($"[LỖI HASH] User {user.Username} có PasswordHash không hợp lệ: {ex.Message}");
         return null;
     }

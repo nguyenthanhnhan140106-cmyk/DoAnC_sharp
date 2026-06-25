@@ -21,7 +21,7 @@ namespace Application.Features.Users.Handlers
         {
             using var conn = new SqlConnection(_connectionString);
 
-            // Chỉ cập nhật các trường được truyền lên (không null)
+            
             var setClauses = new List<string>();
             if (!string.IsNullOrWhiteSpace(request.DisplayName)) setClauses.Add("DisplayName = @DisplayName");
             if (request.Bio != null)       setClauses.Add("Bio = @Bio");
@@ -39,7 +39,7 @@ namespace Application.Features.Users.Handlers
                 request.AvatarUrl
             });
 
-            // Trả về profile đã cập nhật
+            
             var query = @"
                 SELECT 
                     u.Id, u.Username, u.DisplayName, u.Email, u.AvatarUrl, u.Bio, u.CreatedAt,

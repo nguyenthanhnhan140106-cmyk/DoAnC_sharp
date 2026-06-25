@@ -8,7 +8,7 @@ using Application.Features.AI.Commands;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] // → POST http://localhost:5000/api/ai/chat
+    [Route("api/[controller]")] 
     public class AiController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -18,10 +18,10 @@ namespace API.Controllers
             _mediator = mediator;
         }
 
-        /// <summary>
-        /// POST /api/ai/chat
-        /// Body: { "message": "...", "history": [ { "role": "user"|"bot", "text": "..." } ] }
-        /// </summary>
+        
+        
+        
+        
         [HttpPost("chat")]
         public async Task Chat([FromBody] ChatRequestDTO request)
         {
@@ -39,7 +39,7 @@ namespace API.Controllers
 
             await foreach (var chunk in stream)
             {
-                // Format thành SSE payload: "data: ....\n\n"
+                
                 var dataStr = chunk.Replace("\n", "\\n"); // Thoát ký tự xuống dòng nếu cần
                 await Response.WriteAsync($"data: {dataStr}\n\n");
                 await Response.Body.FlushAsync();

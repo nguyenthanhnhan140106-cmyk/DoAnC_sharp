@@ -1,4 +1,4 @@
-// API/Controllers/SongsController.cs
+
 using Application.DTOs;
 using Application.Features.Songs.Queries;
 using Application.Features.Songs.Commands;
@@ -56,7 +56,7 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] CreateSongFormRequest request)
         {
-            // Validate file size (max 100MB per file)
+            
             const long maxFileSize = 100 * 1024 * 1024;
             if (request.AudioFile?.Length > maxFileSize)
                 return BadRequest(new { success = false, message = "File audio vượt quá giới hạn 100MB." });

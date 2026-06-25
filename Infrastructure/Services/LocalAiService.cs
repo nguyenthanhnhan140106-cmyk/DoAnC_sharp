@@ -75,7 +75,7 @@ namespace Infrastructure.Services
                     }
                     catch
                     {
-                        // Ignore parse errors on partial chunks
+                        
                     }
 
                     if (!string.IsNullOrEmpty(chunkText))
@@ -100,7 +100,7 @@ namespace Infrastructure.Services
             var data = await res.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: ct);
             var reply = data.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "[]";
 
-            // Làm sạch chuỗi JSON nếu AI trả về markdown
+            
             reply = reply.Replace("```json", "").Replace("```", "").Trim();
             
             var tags = new List<string>();
@@ -110,7 +110,7 @@ namespace Infrastructure.Services
             } 
             catch 
             {
-                // Fallback nếu AI không tuân thủ JSON
+                
                 foreach (var t in reply.Split(','))
                 {
                     var tag = t.Trim().Replace("\"", "").Replace("[", "").Replace("]", "");

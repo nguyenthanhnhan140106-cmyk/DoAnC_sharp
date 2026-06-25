@@ -4,6 +4,8 @@ using MediatR;
 using Application.Features.Follows.Commands;
 using Application.Features.Follows.Queries;
 using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
+using API.Hubs;
 
 namespace API.Controllers
 {
@@ -13,10 +15,12 @@ namespace API.Controllers
     public class FollowController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public FollowController(IMediator mediator)
+        public FollowController(IMediator mediator, IHubContext<NotificationHub> hubContext)
         {
             _mediator = mediator;
+            _hubContext = hubContext;
         }
 
         private int GetUserId()
@@ -25,7 +29,7 @@ namespace API.Controllers
             return idClaim != null ? int.Parse(idClaim.Value) : 0;
         }
 
-        // POST /api/follow/{artistId} — Follow một Artist
+        
         [HttpPost("{artistId:int}")]
         public async Task<IActionResult> Follow(int artistId)
         {
@@ -35,7 +39,7 @@ namespace API.Controllers
             return Ok(new { message = "Added to your library" });
         }
 
-        // DELETE /api/follow/{artistId} — Unfollow
+        
         [HttpDelete("{artistId:int}")]
         public async Task<IActionResult> Unfollow(int artistId)
         {
@@ -45,7 +49,7 @@ namespace API.Controllers
             return Ok(new { message = "Removed from your library" });
         }
 
-        // GET /api/follow/check/{artistId} — Kiểm tra đang follow chưa
+        
         [HttpGet("check/{artistId:int}")]
         public async Task<IActionResult> Check(int artistId)
         {
@@ -55,7 +59,7 @@ namespace API.Controllers
             return Ok(new { isFollowing });
         }
 
-        // GET /api/follow/following — Lấy danh sách Artist đang follow
+        
         [HttpGet("following")]
         public async Task<IActionResult> GetFollowing()
         {
@@ -66,7 +70,7 @@ namespace API.Controllers
             return Ok(artists);
         }
 
-        // POST /api/follow/user/{targetUserId} — Follow một User khác
+        
         [HttpPost("user/{targetUserId:int}")]
         public async Task<IActionResult> FollowUser(int targetUserId)
         {
@@ -74,11 +78,18 @@ namespace API.Controllers
             if (userId == 0) return Unauthorized();
             if (userId == targetUserId) return BadRequest("Cannot follow yourself.");
 
-            await _mediator.Send(new FollowUserCommand(userId, targetUserId));
+            var followerName = User.FindFirst("name")?.Value ?? User.FindFirst(ClaimTypes.Name)?.Value ?? "Một người dùng";
+
+            var result = await _mediator.Send(new FollowUserCommand(userId, targetUserId, followerName));
+            if (result)
+            {
+                await _hubContext.Clients.User(targetUserId.ToString()).SendAsync("ReceiveNotification");
+            }
+
             return Ok(new { Message = "Followed user successfully" });
         }
 
-        // DELETE /api/follow/user/{targetUserId} — Unfollow một User khác
+        
         [HttpDelete("user/{targetUserId:int}")]
         public async Task<IActionResult> UnfollowUser(int targetUserId)
         {
@@ -89,7 +100,7 @@ namespace API.Controllers
             return Ok(new { Message = "Unfollowed user successfully" });
         }
 
-        // GET /api/follow/user/{targetUserId}/status
+        
         [HttpGet("user/{targetUserId:int}/status")]
         public async Task<IActionResult> CheckUserFollowStatus(int targetUserId)
         {
@@ -100,7 +111,7 @@ namespace API.Controllers
             return Ok(new { IsFollowing = isFollowing });
         }
 
-        // GET /api/follow/user/following — Lấy danh sách user đang theo dõi (Của tôi)
+        
         [HttpGet("user/following")]
         public async Task<IActionResult> GetFollowingUsers()
         {
@@ -111,7 +122,7 @@ namespace API.Controllers
             return Ok(users);
         }
 
-        // GET /api/follow/user/{targetUserId}/followers — Lấy danh sách người theo dõi của 1 user
+        
         [HttpGet("user/{targetUserId:int}/followers")]
         [AllowAnonymous]
         public async Task<IActionResult> GetUserFollowers(int targetUserId)
@@ -120,7 +131,7 @@ namespace API.Controllers
             return Ok(users);
         }
 
-        // GET /api/follow/user/{targetUserId}/following — Lấy danh sách user mà targetUserId đang theo dõi
+        
         [HttpGet("user/{targetUserId:int}/following")]
         [AllowAnonymous]
         public async Task<IActionResult> GetUserFollowing(int targetUserId)
@@ -129,7 +140,7 @@ namespace API.Controllers
             return Ok(users);
         }
 
-        // GET /api/follow/user/{targetUserId}/following-artists — Lấy danh sách artist mà targetUserId đang theo dõi
+        
         [HttpGet("user/{targetUserId:int}/following-artists")]
         [AllowAnonymous]
         public async Task<IActionResult> GetUserFollowingArtists(int targetUserId)
