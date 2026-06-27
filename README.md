@@ -5,6 +5,13 @@
 [![CI Pipeline](https://github.com/nguyenthanhnhan140106-cmyk/DoAnC_sharp/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenthanhnhan140106-cmyk/DoAnC_sharp/actions/workflows/ci.yml)
 [![Status](https://img.shields.io/badge/Status-Hoàn%20thiện-success.svg)]()
 
+> **🌐 Live Demo (Đã Deploy lên Cloud):**
+> - **Frontend (Vercel):** [https://do-an-c-sharp-x2jb.vercel.app/](https://do-an-c-sharp-x2jb.vercel.app/)
+> - **Backend API (Somee):** [http://tunevault-backend.somee.com/swagger](http://tunevault-backend.somee.com/swagger)
+>
+> 🔑 **Tài khoản Test nhanh:**
+> - **Tài khoản 1 (Admin):** `admin` | **Mật khẩu:** `123456`
+
 ## 📋 Mục lục
 - [Giới thiệu](#📝-giới-thiệu)
 - [Tính năng chính](#🚀-tính-năng-chính)
@@ -168,6 +175,15 @@ Server=localhost,1433;Database=master;User Id=sa;Password=Aa123456;TrustServerCe
 - **Lỗi không kết nối được Database:** Chắc chắn bạn đã tắt SQL Server nội bộ (port 1433) nếu có và chạy lệnh Docker Compose.
 - **Lỗi CORS khi gọi API:** Đảm bảo Backend đã chạy và URL Frontend đang là `http://localhost:5173`.
 - Gặp lỗi khác? Hãy xem phần xử lý sự cố trong `SETUP_GUIDE.md`.
+
+---
+
+## ☁️ Thực hiện điểm Bonus: Deploy CI/CD lên Cloud
+Nhóm đã hoàn thành xuất sắc yêu cầu Bonus ở Mục 9:
+- **Pipeline CI (GitHub Actions):** Tự động build và test khi push code (File `.github/workflows/ci.yml`).
+- **Deploy Frontend (Vercel):** Hoạt động ổn định tại `https://do-an-c-sharp-x2jb.vercel.app/`
+- **Deploy Backend (Somee Cloud):** Backend Web API (.NET 8) và cơ sở dữ liệu SQL Server được triển khai tại `http://tunevault-backend.somee.com`.
+- **Tài liệu hướng dẫn deploy:** Chi tiết quy trình đã được viết tại file [Deploy.md](./Deploy.md).
 
 ---
 

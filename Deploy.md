@@ -85,14 +85,12 @@ Nhờ có cơ chế điều hướng ngược (Reverse Proxy) của Vercel, các
 Do cơ chế định tuyến đám mây không tự động hỗ trợ chuyển tiếp giao thức WebSockets của SignalR, biến `hubUrl` phải được chỉ định bằng đường dẫn tuyệt đối trực tiếp của Somee:
 
 ```typescript
-// ❌ XÓA DÒNG CŨ: const hubUrl = '/hubs/notification';
-// ✅ THAY BẰNG LINK TUYỆT ĐỐI SOMEE:
 const hubUrl = 'http://tunevault-backend.somee.com/hubs/notification';
 
 connection = new signalR.HubConnectionBuilder()
     .withUrl(hubUrl, {
         accessTokenFactory: () => token,
-        transport: signalR.HttpTransportType.WebSockets // Ép sử dụng WebSockets
+        transport: signalR.HttpTransportType.WebSockets
     })
     .withAutomaticReconnect()
     .build();
