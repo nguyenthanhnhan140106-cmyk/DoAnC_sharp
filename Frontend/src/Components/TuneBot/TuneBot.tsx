@@ -1,29 +1,21 @@
-// src/Components/TuneBot/TuneBot.tsx
 import { useState } from "react";
 import useTuneBot from "./useTuneBot";
 import ChatWindow from "./ChatWindow";
 import styles from "./styles/tuneBot.module.css";
 
 export default function TuneBot() {
-  // State for opening/closing the chat window
   const [isOpen, setIsOpen] = useState(false);
 
-  // Hook to interact with the TuneBot backend, includes setMessages for resetting chat history
   const { messages, loading, error, send, setMessages } = useTuneBot();
 
-
-  // Compute button class name; trim to avoid extra whitespace
   const buttonClass = `${styles?.fab ?? ""} ${isOpen ? styles?.open ?? "" : ""}`.trim();
 
-  // Toggle chat window visibility
   const toggle = () => setIsOpen(prev => !prev);
 
-  // Show badge when there are unread bot messages while the window is closed
   const hasUnread = !isOpen && messages.some(m => m.role === "bot");
 
   return (
     <>
-      {/* Floating Button — style prop removed so CSS module .fab takes full control */}
       <button
         className={buttonClass}
         onClick={toggle}
@@ -41,7 +33,6 @@ export default function TuneBot() {
         {hasUnread && <span className={styles.badge} />}
       </button>
 
-      {/* Chat Window */}
       {isOpen && (
         <ChatWindow
           messages={messages}

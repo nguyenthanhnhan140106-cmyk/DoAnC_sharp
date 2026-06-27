@@ -34,17 +34,14 @@ export default function UserProfilePage() {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        // Fetch public user info
         const res = await API.get(`/users/${id}`);
         setProfileUser(res.data);
 
-        // Check if currently following
         if (isLoggedIn) {
           const followRes = await API.get(`/follow/user/${id}/status`);
           setIsFollowing(followRes.data.isFollowing);
         }
 
-        // Fetch public playlists
         const playlistsRes = await API.get(`/playlists/user/${id}`);
         if (Array.isArray(playlistsRes.data)) {
           const isSelf = user?.id === parseInt(id || "0", 10);

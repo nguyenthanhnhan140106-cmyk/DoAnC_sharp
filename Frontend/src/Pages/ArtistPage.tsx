@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import API from "../Services/api";
 import { useMusic } from "../Contexts/MusicContext";
 import { useAuth } from "../Contexts/AuthContext";
-import "../Components/Styles/HomePage.css"; // Reuse existing styles
-import "../Components/Styles/ProfilePage.css"; // For banner and header styles
+import "../Components/Styles/HomePage.css"; 
+import "../Components/Styles/ProfilePage.css"; 
 import Header from '../Components/header';
 import Sidebar from '../Components/Sidebar';
 import PlayerBar from '../Components/PlayerBar';
@@ -25,7 +25,6 @@ export default function ArtistPage() {
   const { playSong, setQueue, isLyricsViewOpen, isPlaying, currentSong, togglePlay } = useMusic();
   const { isLoggedIn, user, openAuthModal } = useAuth();
   
-  // Trạng thái thu gọn Sidebar
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
@@ -33,15 +32,12 @@ export default function ArtistPage() {
     const fetchArtistData = async () => {
       try {
         setLoading(true);
-        // Fetch artist info
         const artistRes = await API.get(`/artists/${id}`);
         setArtist(artistRes.data);
 
-        // Fetch artist songs
         const songsRes = await API.get(`/artists/${id}/songs`);
         setSongs(songsRes.data);
 
-        // Fetch follow status if logged in
         if (isLoggedIn && user) {
           const followRes = await API.get(`/follow/check/${id}`);
           setIsFollowing(followRes.data.isFollowing);

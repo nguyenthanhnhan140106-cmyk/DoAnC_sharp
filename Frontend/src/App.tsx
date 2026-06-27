@@ -19,7 +19,6 @@ import ArtistPage from './Pages/ArtistPage';
 import UserProfilePage from './Pages/UserProfilePage';
 import InboxPage from './Pages/InboxPage';
 import VideoPage from './Pages/VideoPage';
-
 import AddToPlaylistModal from './Components/AddToPlaylistModal';
 import Toast from './Components/Toast';
 

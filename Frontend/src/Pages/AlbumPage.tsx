@@ -32,7 +32,6 @@ export default function AlbumPage() {
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Viết thêm một hàm useEffect để khi bạn nhấn chuột ra ngoài, cái Menu sẽ tự động biến mất!
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -241,7 +240,6 @@ export default function AlbumPage() {
       albumService.getAlbumById(id)
         .then((res: Album) => setAlbum(res))
         .catch((err: unknown) => console.error(err));
-      // Kiểm tra trạng thái đã lưu vào thư viện chưa
       if (isLoggedIn) {
         libraryService.getAlbumStatus(Number(id))
           .then(saved => setIsInLibrary(saved))
@@ -250,7 +248,6 @@ export default function AlbumPage() {
     }
   }, [id, isLoggedIn]);
 
-  // Xáo trộn và phát album
   const handleShufflePlay = () => {
     if (!album || (album.songs || []).length === 0) return;
     const shuffled = [...(album.songs || [])].sort(() => Math.random() - 0.5);
@@ -258,7 +255,6 @@ export default function AlbumPage() {
     playSong(shuffled[0]);
   };
 
-  // Toggle lưu/xóa album khỏi thư viện
   const handleToggleLibrary = async () => {
     if (!isLoggedIn || !album) return;
     setLibraryLoading(true);
@@ -280,16 +276,13 @@ export default function AlbumPage() {
     }
   };
 
-  // Thêm fl_attachment vào Cloudinary URL để ép trình duyệt tải xuống
   const toDownloadUrl = (url: string) => {
-    // Chèn fl_attachment sau /upload/ trong URL Cloudinary
     if (url.includes('cloudinary.com') && url.includes('/upload/')) {
       return url.replace('/upload/', '/upload/fl_attachment/');
     }
     return url;
   };
 
-  // Tải xuống tất cả bài hát
   const handleDownloadAll = async () => {
     if (!album || (album.songs || []).length === 0) return;
     setIsDownloading(true);
@@ -302,7 +295,6 @@ export default function AlbumPage() {
 
     showToast?.(`Đang tải ${songsWithAudio.length} bài hát...`);
 
-    // Tải từng bài tuần tự: fetch blob → tạo link download → click
     for (let i = 0; i < songsWithAudio.length; i++) {
       const song = songsWithAudio[i];
       try {
@@ -318,10 +310,8 @@ export default function AlbumPage() {
         a.click();
         document.body.removeChild(a);
 
-        // Giải phóng bộ nhớ
         setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 
-        // Delay giữa các bài để trình duyệt không bị overwhelm
         if (i < songsWithAudio.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 800));
         }
@@ -356,7 +346,6 @@ export default function AlbumPage() {
             <div style={{ color: '#b3b3b3', padding: 40, textAlign: 'center' }}>Đang tải...</div>
           ) : (
             <>
-              {/* Dynamic background từ ảnh bìa album */}
               <div style={{
                 position: 'absolute', top: 0, left: 0, right: 0, height: 380,
                 backgroundImage: `url(${album.coverUrl})`,
@@ -371,9 +360,7 @@ export default function AlbumPage() {
                 zIndex: 1, pointerEvents: 'none'
               }} />
 
-              {/* Nội dung album nổi lên trên nền */}
               <div style={{ position: 'relative', zIndex: 2 }}>
-                {/* Header album */}
                 <div style={{ display: 'flex', gap: 24, alignItems: 'flex-end' }}>
                   <button onClick={() => navigate(-1)}
                     style={{ background: 'none', border: 'none', color: '#b3b3b3', cursor: 'pointer', fontSize: 24 }}>
@@ -388,7 +375,6 @@ export default function AlbumPage() {
                   </div>
                 </div>
 
-                {/* Thanh công cụ (Play, Shuffle, ...) */}
                 <div className="album-action-bar">
                   <button
                     className="album-play-btn"
@@ -403,7 +389,6 @@ export default function AlbumPage() {
                     <svg viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z" /></svg>
                   </button>
 
-                  {/* Nút Shuffle - xáo trộn thứ tự bài rồi phát */}
                   <button
                     className="album-action-icon"
                     title="Phát ngẫu nhiên"
@@ -415,7 +400,6 @@ export default function AlbumPage() {
                     <svg viewBox="0 0 16 16" width="32" height="32"><path d="M13.151.922a.75.75 0 10-1.06 1.06L13.109 3H11.16a3.75 3.75 0 00-2.873 1.34l-6.173 7.356A2.25 2.25 0 01.39 12.5H0V14h.391a3.75 3.75 0 002.873-1.34l6.173-7.356a2.25 2.25 0 011.724-.804h1.947l-1.017 1.018a.75.75 0 001.06 1.06L15.98 3.75 13.15.922zM.391 3.5H0V2h.391c1.109 0 2.16.49 2.873 1.34L4.89 5.277l-.979 1.167-1.796-2.14A2.25 2.25 0 00.39 3.5zM11.16 12.5h1.95l-1.017-1.018a.75.75 0 111.06-1.06l2.829 2.828-2.829 2.828a.75.75 0 11-1.06-1.06l1.018-1.018H11.16a3.75 3.75 0 01-2.873-1.34l-1.625-1.936.979-1.167 1.625 1.936a2.25 2.25 0 001.724.804z" /></svg>
                   </button>
 
-                  {/* Nút + Thêm vào thư viện — xanh khi đã lưu */}
                   <button
                     className="album-action-icon"
                     title={isInLibrary ? 'Xóa khỏi thư viện' : 'Thêm vào thư viện'}
@@ -430,7 +414,6 @@ export default function AlbumPage() {
                     onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
                   >
                     {isInLibrary ? (
-                      // Icon ✓ tròn xanh khi đã lưu
                       <svg viewBox="0 0 16 16" width="32" height="32" fill="currentColor">
                         <circle cx="8" cy="8" r="7" fill="#1db954" />
                         <path d="M11.5 5.5l-4.5 4.5-2-2" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
@@ -440,7 +423,6 @@ export default function AlbumPage() {
                     )}
                   </button>
 
-                  {/* Nút Tải xuống */}
                   <button
                     className="album-action-icon"
                     title={isDownloading ? 'Đang tải...' : 'Tải xuống tất cả bài hát'}
@@ -463,7 +445,6 @@ export default function AlbumPage() {
                     </button>
                     {isMenuOpen && (
                       <ul className="album-dropdown-menu">
-                        {/* Add/Remove from Library — đổi giao diện khi đã lưu */}
                         <li
                           onClick={() => { handleToggleLibrary(); setIsMenuOpen(false); }}
                           style={{ color: isInLibrary ? '#1db954' : '#fff' }}
@@ -558,7 +539,6 @@ export default function AlbumPage() {
 
                 </div>
 
-                {/* Danh sách bài hát */}
                 {(album.songs || []).map((song, index) => {
                   const isActive = currentSong?.id === song.id;
                   const isHovered = hoveredIndex === index;

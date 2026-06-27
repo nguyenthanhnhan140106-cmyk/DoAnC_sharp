@@ -176,7 +176,6 @@ export default function PlaylistPage() {
 
   useEffect(() => {
     if (id === 'liked') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPlaylist({
         id: 'liked' as unknown as number,
         name: 'Liked Songs',
@@ -206,7 +205,7 @@ export default function PlaylistPage() {
         })
         .catch(err => {
           console.error(err);
-          navigate('/'); // Về trang chủ nếu lỗi
+          navigate('/'); 
         });
     }
   }, [id, navigate, likedSongs, user]);
@@ -244,10 +243,9 @@ export default function PlaylistPage() {
         headers
       });
       if (res.ok) {
-        // Cập nhật giao diện: thêm bài hát vào danh sách playlist
         setPlaylist({
           ...playlist,
-          coverUrl: song.coverUrl, // Cập nhật hình ảnh của Playlist thành hình bài hát vừa thêm
+          coverUrl: song.coverUrl, 
           songs: [...(playlist.songs || []), song]
         });
         window.dispatchEvent(new Event('playlistUpdated'));
@@ -278,7 +276,6 @@ export default function PlaylistPage() {
     }
   };
 
-  // Xáo trộn và phát playlist
   const handleShufflePlay = () => {
     if (!playlist || (playlist.songs || []).length === 0) return;
     const shuffled = [...(playlist.songs || [])].sort(() => Math.random() - 0.5);
@@ -286,7 +283,6 @@ export default function PlaylistPage() {
     playSong(shuffled[0]);
   };
 
-  // Thêm fl_attachment vào Cloudinary URL để ép tải xuống
   const toDownloadUrl = (url: string) => {
     if (url.includes('cloudinary.com') && url.includes('/upload/')) {
       return url.replace('/upload/', '/upload/fl_attachment/');
@@ -294,7 +290,6 @@ export default function PlaylistPage() {
     return url;
   };
 
-  // Tải xuống tất cả bài hát
   const handleDownloadAll = async () => {
     if (!playlist || (playlist.songs || []).length === 0) return;
     setIsDownloading(true);
@@ -343,7 +338,6 @@ export default function PlaylistPage() {
             <div style={{ color: '#b3b3b3', padding: 40, textAlign: 'center' }}>Đang tải danh sách phát...</div>
           ) : (
             <>
-              {/* Dynamic background */}
               <div 
                 className="playlist-page-bg"
                 style={{
@@ -354,9 +348,7 @@ export default function PlaylistPage() {
               />
               {id !== 'liked' && <div className="playlist-page-bg-gradient" />}
 
-              {/* Nội dung playlist nổi lên trên nền */}
               <div className="playlist-content-top">
-                {/* Header playlist */}
                 <div className="playlist-header-container">
                   {id === 'liked' ? (
                     <div className="playlist-cover-liked">
@@ -379,7 +371,6 @@ export default function PlaylistPage() {
                   </div>
                 </div>
 
-                {/* Các nút điều khiển */}
                 <div className="playlist-action-bar">
                   <button
                     onClick={handlePlayAll}
@@ -392,7 +383,6 @@ export default function PlaylistPage() {
                     <svg viewBox="0 0 24 24" width="28" height="28" fill="#000"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z" /></svg>
                   </button>
 
-                  {/* Nút Shuffle */}
                   <button
                     className="playlist-icon-btn"
                     title="Phát ngẫu nhiên"
@@ -407,8 +397,6 @@ export default function PlaylistPage() {
                   {id !== 'liked' && (
                     <>
 
-
-                      {/* Nút Download */}
                       <button
                         className="playlist-icon-btn"
                         title={isDownloading ? 'Đang tải...' : 'Tải xuống tất cả bài hát'}
@@ -425,7 +413,6 @@ export default function PlaylistPage() {
                         <svg viewBox="0 0 16 16" width="32" height="32" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zM7.25 4v4.44l-1.47-1.47-1.06 1.06L8 11.31l3.28-3.28-1.06-1.06-1.47 1.47V4h-1.5z" /></svg>
                       </button>
 
-                      {/* Nút Toggle Privacy */}
                       {user && user.id === playlist.userId && (
                         <button
                           className="playlist-icon-btn"
@@ -446,7 +433,6 @@ export default function PlaylistPage() {
                         </button>
                       )}
 
-                      {/* Nút More Options */}
                       <div className="album-more-menu-container" ref={menuRef}>
                         <button className="playlist-icon-btn" title="Tùy chọn khác" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                           <svg viewBox="0 0 16 16" width="32" height="32" fill="currentColor"><path d="M3 8a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm6.5 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM16 8a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" /></svg>
@@ -496,14 +482,12 @@ export default function PlaylistPage() {
             </div>
 
                 <div style={{ padding: '0 32px' }}>
-                  {/* Danh sách bài hát */}
                   <div style={{ marginTop: 16 }}>
                     {(playlist.songs || []).length === 0 && (
                       <div style={{ textAlign: 'center', padding: '40px 0 20px', color: '#b3b3b3' }}>
                       </div>
                     )}
                     
-                    {/* Header Bảng */}
                     {(playlist.songs || []).length > 0 && (
                       <div style={{
                         display: 'grid', gridTemplateColumns: '50px 2fr 1.5fr 1fr 100px',
@@ -515,7 +499,6 @@ export default function PlaylistPage() {
                         <div>Album</div>
                         <div>Date added</div>
                         <div style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                          {/* Đã bỏ icon Clock theo yêu cầu */}
                         </div>
                       </div>
                     )}
@@ -523,7 +506,6 @@ export default function PlaylistPage() {
                     {(playlist.songs || []).map((song, idx) => {
                       const isCurrent = currentSong?.id === song.id;
                       
-                      // Tính toán khoảng thời gian đã thêm
                       let dateAddedText = "Just now";
                       if (song.addedAt) {
                         const dateStr = song.addedAt.endsWith('Z') ? song.addedAt : song.addedAt + 'Z';
@@ -547,7 +529,6 @@ export default function PlaylistPage() {
                           }}
                           onClick={() => handlePlayClick(song, idx)}
                         >
-                          {/* Số thứ tự hoặc Icon Play */}
                           <div style={{ color: isCurrent ? '#1ed760' : '#b3b3b3', width: 24 }}>
                             {hoveredIndex === idx ? (
                               <button style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: 0 }}>
@@ -562,7 +543,6 @@ export default function PlaylistPage() {
                             )}
                           </div>
 
-                          {/* Thông tin bài hát */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <img src={song.coverUrl} alt={song.title} style={{ width: 40, height: 40, borderRadius: 4, objectFit: 'cover' }} />
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -571,17 +551,15 @@ export default function PlaylistPage() {
                             </div>
                           </div>
 
-                          {/* Album */}
                           <div style={{ color: '#b3b3b3', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: 16 }}>
-                            {song.title} {/* Dùng tạm title làm tên Album vì CSDL chưa có bảng Album */}
+                            {song.title} 
                           </div>
 
-                          {/* Date added */}
+                          
                           <div style={{ color: '#b3b3b3', fontSize: 14 }}>
                             {dateAddedText}
                           </div>
 
-                          {/* Nút Cộng và 3 chấm */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8, gap: 16 }}>
                             {song.videoUrl && (
                               <button 
@@ -706,7 +684,6 @@ export default function PlaylistPage() {
                                           if (id === 'liked') {
                                             toggleLikeSong(song);
                                             showToast?.('Đã xóa khỏi bài hát yêu thích');
-                                            // Xóa khỏi danh sách hiển thị
                                             setPlaylist(prev => prev ? { ...prev, songs: prev.songs?.filter(s => s.id !== song.id) } : null);
                                           } else {
                                             try {
@@ -744,7 +721,6 @@ export default function PlaylistPage() {
                     })}
                   </div>
 
-                  {/* Phần tìm kiếm bài hát thêm vào Playlist (Chỉ hiện khi playlist trống) */}
                   {showSearch && (
                     <div style={{ marginTop: 20, paddingTop: 20, paddingBottom: 120 }}>
                       <h2 style={{ color: '#fff', fontSize: 24, margin: '0 0 16px', fontWeight: 700 }}>Let's find something for your playlist</h2>

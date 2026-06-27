@@ -45,7 +45,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       setPlaylists(data);
       localStorage.setItem(`sidebar_playlists_${user?.id}`, JSON.stringify(data));
     } catch {
-      // ignore
     } finally {
       setIsLoadingPlaylists(false);
     }
@@ -73,7 +72,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
   useEffect(() => {
     if (isLoggedIn && user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchPlaylists();
       fetchSavedAlbums();
       fetchFollowedArtists();
@@ -114,7 +112,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       window.removeEventListener('followUpdated', handleFollowUpdate);
       window.removeEventListener('SHOW_LIBRARY_TOAST', handleLibraryToast);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, user]);
 
   const handleCreatePlaylist = async () => {
@@ -125,7 +122,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
     setIsMenuOpen(false);
 
-    // Tính toán số thứ tự tiếp theo cho Playlist
     let maxNumber = 0;
     playlists.forEach(p => {
       const match = p.name.match(/#(\d+)$/);
@@ -203,7 +199,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
     }
   };
 
-  // Click ra ngoài đóng menu
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -262,7 +257,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
                 </div>
               )}
             </div>
-            {/* Đã xóa nút Mũi tên (Hiện thêm) */}
           </div>
         )}
       </div>
@@ -335,7 +329,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           </div>
         )}
 
-        {/* Section Albums đã lưu vào thư viện */}
         {isLoggedIn && savedAlbums.length > 0 && savedAlbums.map((album) => (
           <div
             key={`album-${album.id}`}
@@ -471,7 +464,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       )}
     </aside>
 
-      {/* TOAST THÔNG BÁO FOLLOW/UNFOLLOW */}
       {libraryToast.visible && (
         <div style={{
           position: 'fixed',
@@ -499,4 +491,4 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       )}
     </>
   );
-}
+}

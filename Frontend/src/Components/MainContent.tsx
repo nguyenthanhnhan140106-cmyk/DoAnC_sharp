@@ -182,7 +182,6 @@ export default function MainContent({ songs }: Props) {
   const [categories, setCategories] = useState<{ id: number, name: string, slug: string }[]>([]);
   const navigate = useNavigate();
 
-  // 🟢 Slider Logic
   const [currentBannerIdx, setCurrentBannerIdx] = useState(0);
 
   const promoColors = [
@@ -247,7 +246,6 @@ export default function MainContent({ songs }: Props) {
   const shuffleArray = <T,>(array: T[]): T[] => {
     const newArr = [...array];
     for (let i = newArr.length - 1; i > 0; i--) {
-      // eslint-disable-next-line react-hooks/purity
       const j = Math.floor(Math.random() * (i + 1));
       [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
     }
@@ -266,7 +264,6 @@ export default function MainContent({ songs }: Props) {
   const activeCover = songData?.coverUrl || "";
   const displayCover = hoveredCover || activeCover;
 
-  // 🟢 Đã gọt xuống ĐÚNG 5 NGHỆ SĨ để vừa vặn 1 hàng ngang
   const popularArtistsRaw = [
     {
       id: 1,
@@ -344,12 +341,10 @@ export default function MainContent({ songs }: Props) {
 
         {activeTab === "all" && (
           <>
-            {/* ── KHỐI LỜI CHÀO & BANNERS TRÊN CÙNG ── */}
             <div className="home-greeting-section">
               <h1 className="home-greeting">{greeting}</h1>
               <div className="home-banners-wrapper" style={{ overflow: 'visible', position: 'relative' }}>
 
-                {/* Nút lùi (Luôn hiển thị) */}
                 <button
                   className="promo-nav-btn left-nav"
                   onClick={handlePrevPromo}
@@ -384,7 +379,6 @@ export default function MainContent({ songs }: Props) {
                   </div>
                 </div>
 
-                {/* Nút tiến (Luôn hiển thị) */}
                 <button
                   className="promo-nav-btn right-nav"
                   onClick={handleNextPromo}
@@ -461,7 +455,6 @@ export default function MainContent({ songs }: Props) {
               );
             })}
 
-            {/* 🟢 KHỐI NGHỆ SĨ THỊNH HÀNH - ĐÃ XÓA KHỐI SỐ 2 VÀ TĂNG paddingBottom */}
             <div className="playlist-section" style={{ marginTop: "40px", paddingBottom: "60px" }}>
               <div className="section-header" style={{ marginBottom: "20px" }}>
                 <h2 className="section-title">Trending Artists</h2>
@@ -504,7 +497,6 @@ export default function MainContent({ songs }: Props) {
               <div className="playlist-section">
                 <div className="section-header">
                   <h2 className="section-title">Album của bạn</h2>
-                  {/* Nếu muốn Show All Album, có thể bấm sang Tab Album kế bên nên tạm ẩn nút */}
                 </div>
                 <div className="songs-grid">
                   {albums.slice(0, 10).map((album) => <AlbumCard key={album.id} album={album} onHover={setHoveredCover} />)}
@@ -514,7 +506,6 @@ export default function MainContent({ songs }: Props) {
           </>
         )}
 
-        {/* ── TAB DÀNH RIÊNG CHO TOÀN BỘ ALBUM ── */}
         {activeTab === "album" && (
           <div className="playlist-section">
             <div className="section-header">
@@ -533,7 +524,6 @@ export default function MainContent({ songs }: Props) {
           </div>
         )}
 
-        {/* ── TAB DÀNH RIÊNG CHO VIDEO ── */}
         {activeTab === "video" && (
           <div className="playlist-section">
             <div className="section-header">

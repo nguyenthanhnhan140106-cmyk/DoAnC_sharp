@@ -1,11 +1,10 @@
-// src/Frontend/src/components/TuneBot/MessageBubble.tsx
 import React from "react";
 import styles from "./styles/tuneBot.module.css";
 import type { Message } from "./useTuneBot";
 
 interface Props {
   message: Message;
-  isTyping?: boolean; // shows three‑dot animation when true
+  isTyping?: boolean;
 }
 
 export default function MessageBubble({ message, isTyping = false }: Props) {

@@ -25,7 +25,6 @@ export default function VideoPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Tạm dừng nhạc nếu đang phát để xem video
     pauseSong();
 
     API.get(`/songs/${id}`)
@@ -41,7 +40,6 @@ export default function VideoPage() {
         navigate('/');
       });
       
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   return (

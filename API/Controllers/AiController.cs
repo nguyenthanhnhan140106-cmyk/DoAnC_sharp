@@ -17,10 +17,6 @@ namespace API.Controllers
         {
             _mediator = mediator;
         }
-
-        
-        
-        
         
         [HttpPost("chat")]
         public async Task Chat([FromBody] ChatRequestDTO request)
@@ -39,21 +35,15 @@ namespace API.Controllers
 
             await foreach (var chunk in stream)
             {
-                
-                var dataStr = chunk.Replace("\n", "\\n"); // Thoát ký tự xuống dòng nếu cần
+                var dataStr = chunk.Replace("\n", "\\n"); 
                 await Response.WriteAsync($"data: {dataStr}\n\n");
                 await Response.Body.FlushAsync();
             }
 
-            // Gửi cờ kết thúc
             await Response.WriteAsync("data: [DONE]\n\n");
             await Response.Body.FlushAsync();
         }
 
-        /// <summary>
-        /// POST /api/ai/auto-tag/{songId}
-        /// Phân loại tự động (Auto-tagging) bài hát
-        /// </summary>
         [HttpPost("auto-tag/{songId}")]
         public async Task<IActionResult> AutoTag(int songId)
         {

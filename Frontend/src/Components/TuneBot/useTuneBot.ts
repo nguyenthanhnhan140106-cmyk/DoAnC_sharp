@@ -7,7 +7,6 @@ export interface Message {
   time: string;
 }
 
-// 1. Hàm fallback (để riêng biệt, nằm ngoài hàm chính)
 function getClientFallback(question: string): string {
   const q = question.toLowerCase();
   const fallbacks = [
@@ -34,7 +33,6 @@ function getClientFallback(question: string): string {
   return genericReplies[Math.floor(Math.random() * genericReplies.length)];
 }
 
-// 2. Hook chính
 export default function useTuneBot() {
   const [messages, setMessages] = useState<Message[]>(() => {
     if (typeof window !== "undefined") {
@@ -92,7 +90,6 @@ export default function useTuneBot() {
           buffer += chunk;
           
           const lines = buffer.split("\n\n");
-          // Giữ lại phần chưa hoàn chỉnh (không có \n\n) ở cuối buffer
           buffer = lines.pop() || "";
 
           for (const line of lines) {
@@ -116,7 +113,6 @@ export default function useTuneBot() {
       }
     } catch (e: unknown) {
       console.error("Backend lỗi, chuyển sang fallback:", e);
-      // Thay thế tin nhắn bot trống bằng fallback
       const mockReply = getClientFallback(text);
       setMessages((prev) => {
         const newMessages = [...prev];

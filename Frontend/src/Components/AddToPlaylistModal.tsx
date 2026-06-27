@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../Contexts/AuthContext';
 import { useMusic } from '../Contexts/MusicContext';
-import './Styles/HomePage.css'; // Add modal styles here later
+import './Styles/HomePage.css'; 
 
 export default function AddToPlaylistModal() {
   const { user } = useAuth();
@@ -90,12 +90,9 @@ export default function AddToPlaylistModal() {
     if (!modalPosition) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)', position: 'absolute' };
     const y = modalPosition.y;
     let x = modalPosition.x;
-    const modalWidth = 350; // Width of modal
+    const modalWidth = 350; 
     
-    // Nếu trượt ra ngoài màn hình bên phải
     if (x + modalWidth > window.innerWidth) x = window.innerWidth - modalWidth - 20;
-    
-    // Nếu click ở nửa dưới màn hình -> Canh theo bottom để nó luôn bám sát chuột
     if (y > window.innerHeight / 2) {
       return { 
         bottom: window.innerHeight - y + 10, 
@@ -104,7 +101,6 @@ export default function AddToPlaylistModal() {
       };
     }
     
-    // Nếu click ở nửa trên màn hình -> Canh theo top
     return { top: y + 20, left: x, position: 'absolute' };
   };
 

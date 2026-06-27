@@ -83,7 +83,6 @@ const CategoryPage = () => {
 
       <div className="main-view">
         <div className="content-wrapper" style={{ padding: '24px' }}>
-          {/* Nút quay lại */}
           <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#b3b3b3', cursor: 'pointer', fontSize: 24, marginBottom: 16 }}>
             ←
           </button>
