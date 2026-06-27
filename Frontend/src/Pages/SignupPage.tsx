@@ -45,10 +45,8 @@ export default function SignupPage() {
     setLoading(true);
     setError('');
     try {
-      // 1. Xác thực OTP
       await API.post('/auth/verify-otp', { Email: email, Otp: otp });
       
-      // 2. Đăng ký tài khoản nếu OTP đúng
       await API.post('/auth/register', { Username: username, Email: email, Password: password });
       
       showToast("Đăng ký thành công!");
@@ -56,7 +54,6 @@ export default function SignupPage() {
     } catch (err: unknown) {
       const errorResponse = err as { response?: { data?: { message?: string, errors?: { error: string }[] } } };
       if (errorResponse.response?.data?.errors && Array.isArray(errorResponse.response.data.errors)) {
-        // Gộp tất cả các lỗi Validation từ FluentValidation lại
         const errorMsgs = errorResponse.response.data.errors.map(e => e.error).join(" | ");
         setError(`Lỗi: ${errorMsgs}`);
       } else {

@@ -93,13 +93,11 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file || !user?.id) return;
 
-    // 1. Preview ngay lập tức (ảnh tạm trong RAM)
     const localUrl = URL.createObjectURL(file);
     setAvatarPreview(localUrl);
     setIsUploadingAvatar(true);
 
     try {
-      // 2. Upload ảnh thẳng lên endpoint avatar (POST /api/users/{id}/avatar)
       const formData = new FormData();
       formData.append('file', file);
 
@@ -110,18 +108,15 @@ export default function ProfilePage() {
 
       if (!cloudinaryUrl) throw new Error('Không nhận được URL ảnh từ server.');
 
-      // 3. Cập nhật preview bằng URL Cloudinary thật
       setAvatarPreview(cloudinaryUrl);
       alert('Ảnh đại diện đã được cập nhật!');
 
     } catch (err) {
       console.error('Lỗi upload avatar:', err);
-      // Nếu lỗi, reset về ảnh cũ
       setAvatarPreview(null);
       alert('Cập nhật ảnh thất bại. Vui lòng thử lại.');
     } finally {
       setIsUploadingAvatar(false);
-      // Reset input để có thể chọn lại cùng file
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -156,11 +151,9 @@ export default function ProfilePage() {
         API.get(`/Users/${user.id}`).then(res => setFullProfile(res.data)).catch(console.error);
         API.get(`/playlists/user/${user.id}`).then(res => setMyPlaylists(res.data)).catch(console.error);
       }
-      // eslint-disable-next-line
       fetchFollowing();
     }
 
-    // Refresh danh sách following khi có sự kiện followUpdated
     const handleFollowUpdate = () => {
       fetchFollowing();
       if (user?.id) {
@@ -174,7 +167,6 @@ export default function ProfilePage() {
     };
     window.addEventListener('followUpdated', handleFollowUpdate);
     window.addEventListener('playlistUpdated', handlePlaylistUpdate);
-    // Lấy danh sách nhạc upload
     if (user?.id) {
       API.get(`/songs/user/${user.id}`)
         .then(res => {
@@ -344,7 +336,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* SECTION YOUR PLAYLISTS */}
             {myPlaylists.length > 0 && (
               <div className="profile-section">
                 <div className="profile-section-header">
@@ -434,7 +425,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* SECTION FOLLOWING ARTISTS */}
             {followingArtists.length > 0 && (
               <div className="profile-section">
                 <div className="profile-section-header">
@@ -550,7 +540,6 @@ export default function ProfilePage() {
                         </div>
                         <div className="track-col" style={{ width: '100px', textAlign: 'right', color: '#b3b3b3', fontSize: '14px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px' }}>
                           <span>{song.createdAt ? new Date(song.createdAt).toLocaleDateString() : 'N/A'}</span>
-                          {/* Nút xóa cũ bị thay thế bởi context menu */}
                         </div>
                       </div>
                     );

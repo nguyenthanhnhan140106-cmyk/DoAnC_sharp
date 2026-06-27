@@ -20,10 +20,8 @@ export default function HomePage() {
   const { isLyricsViewOpen } = useMusic();
   const { isLoggedIn } = useAuth();
 
-  // Trạng thái thu gọn Left Sidebar
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // Trạng thái thu gọn Right Sidebar
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
   useEffect(() => {
@@ -58,10 +56,8 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* Right Sidebar luôn hiện vì đã có ProtectedRoute đảm bảo đã login */}
       <RightSidebar isCollapsed={isRightCollapsed} setIsCollapsed={setIsRightCollapsed} />
 
-      {/* TuneBot wrapped in error boundary */}
       <ErrorBoundary>
         <TuneBot />
       </ErrorBoundary>

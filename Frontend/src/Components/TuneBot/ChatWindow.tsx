@@ -19,12 +19,10 @@ export default function ChatWindow({ messages, loading, error, onSend, onClose, 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // scroll to bottom after new message
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
   useEffect(() => {
-    // focus on input when window opens
     inputRef.current?.focus();
   }, []);
 
@@ -44,7 +42,6 @@ export default function ChatWindow({ messages, loading, error, onSend, onClose, 
 
   return (
     <div className={styles.window}>
-      {/* Header */}
       <div className={styles.header}>
         <div className={styles.avatar}>🎵</div>
         <div className={styles.info}>
@@ -56,7 +53,6 @@ export default function ChatWindow({ messages, loading, error, onSend, onClose, 
           onClick={onReset}
           title="Tạo cuộc trò chuyện mới"
         >
-          {/* Pencil / New chat icon */}
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
           </svg>
@@ -64,7 +60,6 @@ export default function ChatWindow({ messages, loading, error, onSend, onClose, 
         <button className={styles.closeBtn} onClick={onClose} title="Đóng">✕</button>
       </div>
 
-      {/* Messages */}
       <div className={styles.messages}>
         {messages.length === 0 ? (
           <div className={styles.emptyState}>
@@ -93,10 +88,8 @@ export default function ChatWindow({ messages, loading, error, onSend, onClose, 
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Error banner */}
       {error && <div className={styles.error}>⚠️ {error}</div>}
 
-      {/* Input row */}
       <div className={styles.inputRow}>
         <input
           ref={inputRef}

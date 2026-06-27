@@ -20,7 +20,6 @@ export default function UploadPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(true);
 
-  // Form states
   const [title, setTitle] = useState(editSong?.title || '');
   const [artist, setArtist] = useState(editSong?.artist || '');
   const [category, setCategory] = useState<number>(editSong?.categoryId || 1);
@@ -28,12 +27,10 @@ export default function UploadPage() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   
-  // Fake file states for display in edit mode
   const [hasExistingCover, setHasExistingCover] = useState(!!editSong?.coverUrl);
   const [hasExistingMedia, setHasExistingMedia] = useState(!!editSong?.audioUrl);
   const [hasExistingVideo, setHasExistingVideo] = useState(!!editSong?.videoUrl);
 
-  // Tùy chọn (Không bắt buộc)
   const [lyricsText, setLyricsText] = useState(''); 
   const [lyricsFile, setLyricsFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -110,7 +107,6 @@ export default function UploadPage() {
         await API.put(`/songs/${editSong.id}`, updateDto);
         setUploadProgress(100);
         showToast('Sửa thông tin bài hát thành công!');
-        // dispatch event to reload profile
         window.dispatchEvent(new Event('songUpdated'));
         navigate('/profile');
       } catch (err: any) {
@@ -126,7 +122,6 @@ export default function UploadPage() {
       return;
     }
 
-    // 🔴 Kiểm tra ràng buộc bắt buộc: Phải có file ảnh bìa và file âm thanh
     if (!coverFile) {
       showToast('Vui lòng chọn ảnh bìa (Cover Image) cho bài hát!');
       return;
@@ -153,7 +148,6 @@ export default function UploadPage() {
       formData.append('coverFile', coverFile);
       formData.append('audioFile', mediaFile);
 
-      // Các trường tùy chọn: có thì gửi, không có thì bỏ qua
       if (videoFile) {
         formData.append('videoFile', videoFile);
       }
@@ -210,10 +204,8 @@ export default function UploadPage() {
             </div>
             
             <form className="upload-form" onSubmit={handleSubmit}>
-              {/* --- HÀNG NGANG CHỨA 3 KHỐI CHỌN FILE --- */}
               <div className="upload-media-row">
                 
-                {/* 1. Cover Image (Bắt buộc) */}
                 <input type="file" ref={coverInputRef} style={{ display: 'none' }} accept="image/png, image/jpeg" onChange={handleCoverSelect} />
                 <div className={`file-upload-card ${coverFile || hasExistingCover ? 'active' : ''}`} onClick={() => coverInputRef.current?.click()}>
                   {coverFile || hasExistingCover ? (
@@ -234,7 +226,6 @@ export default function UploadPage() {
                   )}
                 </div>
 
-                {/* 2. Video File (Không bắt buộc - Có đường viền dashed xanh lá khi được chọn) */}
                 <input type="file" ref={videoInputRef} style={{ display: 'none' }} accept="video/mp4, video/webm, video/mkv" onChange={handleVideoSelect} />
                 <div className={`file-upload-card video-card ${videoFile || hasExistingVideo ? 'active-video' : ''}`} onClick={() => videoInputRef.current?.click()}>
                   {videoFile || hasExistingVideo ? (
@@ -254,7 +245,6 @@ export default function UploadPage() {
                   )}
                 </div>
 
-                {/* 3. Audio File (Bắt buộc) */}
                 <input type="file" ref={mediaInputRef} style={{ display: 'none' }} accept="audio/*" onChange={handleMediaSelect} />
                 <div className={`file-upload-card ${mediaFile || hasExistingMedia ? 'active' : ''}`} onClick={() => mediaInputRef.current?.click()}>
                   {mediaFile || hasExistingMedia ? (
@@ -282,7 +272,6 @@ export default function UploadPage() {
                 </div>
               )}
 
-              {/* --- KHU VỰC ĐIỀN THÔNG TIN VĂN BẢN VÀ LỜI BÀI HÁT --- */}
               <div className="upload-metadata-section">
                 <div className="form-group">
                   <label>Title <span className="required-star">*</span></label>
@@ -317,7 +306,6 @@ export default function UploadPage() {
                   </div>
                 </div>
 
-                {/* Lyrics Area (Không bắt buộc) */}
                 <div className="form-group" style={{ marginTop: '20px' }}>
                   <div className="lyrics-label-container">
                     <label style={{ margin: 0 }}>Lyrics (Lời bài hát)</label>
@@ -335,7 +323,6 @@ export default function UploadPage() {
                 </div>
               </div>
 
-              {/* Thanh tiến trình Upload */}
               {isUploading && (
                 <div className="progress-container">
                   <div className="progress-labels">
@@ -348,7 +335,6 @@ export default function UploadPage() {
                 </div>
               )}
 
-              {/* Nút Submit nằm gọn gàng ở đáy */}
               <div className="submit-container">
                 <button type="submit" className="upload-submit-btn" disabled={isUploading}>
                   {isUploading ? (editSong ? 'Updating...' : 'Processing Media...') : (editSong ? 'Lưu thay đổi' : 'Publish Track')}

@@ -23,7 +23,6 @@ interface Props {
 export default function ChartsSection({ songs }: Props) {
     const { playSong, currentSong, setQueue, isPlaying, togglePlay } = useMusic();
 
-    // Chia songs thành các cột chart
     const charts: ChartColumn[] = [
         {
             title: 'Top 50 Trending',
@@ -62,7 +61,6 @@ export default function ChartsSection({ songs }: Props) {
                         key={ci}
                         style={{ background: `linear-gradient(180deg, ${chart.color} 0%, #181818 100%)` }}
                     >
-                        {/* Header cột */}
                         <div className="chart-col-header">
                             <span className="chart-col-title">{chart.title}</span>
                             <button 
@@ -90,7 +88,6 @@ export default function ChartsSection({ songs }: Props) {
                             </button>
                         </div>
 
-                        {/* Danh sách 5 bài */}
                         {chart.songs.map((song, idx) => {
                             const isActive = currentSong?.id === song.id;
                             return (

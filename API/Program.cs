@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = 104857600; });
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options => { options.MultipartBodyLengthLimit = 104857600; });
 

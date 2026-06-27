@@ -84,12 +84,10 @@ export default function Header() {
 
   return (
     <header className="spotify-header">
-      {/* 1. Logo */}
       <div className="header-logo" onClick={handleHomeClick} style={{ cursor: 'pointer' }}>
         <h2 style={{ margin: 0, color: '#FF5500', fontSize: '20px', fontWeight: '900' }}>TuneVault</h2>
       </div>
 
-      {/* 2. Search & Home */}
       <div className="header-search-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <button className="home-button" title="Trang chủ" onClick={handleHomeClick}>
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -97,7 +95,6 @@ export default function Header() {
           </svg>
         </button>
 
-        {/* Search */}
         <div className="search-wrapper" ref={searchRef} style={{ position: 'relative' }}>
           <span className="search-icon">
             <img src={searchIcon} alt="Search" style={{ width: '18px', height: '18px' }} />
@@ -111,17 +108,14 @@ export default function Header() {
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
             onFocus={handleFocus}
           />
-          {/* Nút tìm kiếm nâng cao */}
           <button className="search-advanced-btn" onClick={() => handleSearch()} title="Tìm kiếm">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
               <path d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5zM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5z" />
             </svg>
           </button>
 
-          {/* Dropdown: Lịch sử khi rỗng, Gợi ý khi gõ */}
           {showDropdown && query.trim() && (
             <div className="search-dropdown">
-              {/* — Hiện gợi ý khi gõ — */}
               <>
                 {suggestions.map(song => (
                   <div
@@ -154,7 +148,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Phần profile hoặc Auth buttons */}
       <div className="header-profile-container">
         {isLoggedIn ? (
           <>
@@ -169,9 +162,9 @@ export default function Header() {
               title="Thông báo"
               onClick={() => {
                 if (location.pathname === '/notifications') {
-                  navigate(-1); // Đang ở trang thông báo → quay lại
+                  navigate(-1);
                 } else {
-                  navigate('/notifications'); // Đi vào trang thông báo
+                  navigate('/notifications');
                 }
               }}
               style={{ position: 'relative' }}

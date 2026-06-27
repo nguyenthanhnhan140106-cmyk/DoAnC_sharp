@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useMusic } from '../Contexts/MusicContext';
-// 1. Đảm bảo đã import component hiển thị lời bài hát vào đây
 import { FullScreenLyrics } from "./FullScreenLyrics"; 
 import ShareModal from './ShareModal';
 
@@ -12,7 +11,7 @@ export default function PlayerBar() {
     repeatMode, cycleRepeat,
     playNext, playPrev,
     isQueueViewOpen, toggleQueueView,
-    isLyricsViewOpen, toggleLyricsView, // Biến check trạng thái đóng/mở lời bài hát từ Context
+    isLyricsViewOpen, toggleLyricsView, 
     isFriendActivityViewOpen, toggleFriendActivityView,
     isSongLiked, toggleLikeSong,
     openAddToPlaylistModal
@@ -28,7 +27,6 @@ export default function PlayerBar() {
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
   const volumePercent = volume * 100;
 
-  // Màu nút khi đang bật
   const activeColor = '#1db954';
   const inactiveColor = '#b3b3b3';
 
@@ -47,8 +45,6 @@ export default function PlayerBar() {
   return (
     <footer className="spotify-player">
 
-      {/* GÓC TRÁI: Thông tin bài hát */}
-      {/* 🟢 Gom toàn bộ khối thông tin vào 1 div chung và gắn sự kiện onClick */}
       <div 
         className="player-left" 
         style={{ gap: '12px', display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
@@ -70,13 +66,11 @@ export default function PlayerBar() {
                 {currentSong.artist}
               </p>
             </div>
-            {/* Nút Like được đặt ra ngoài khối onClick chung để không bị kích hoạt mở lời khi bấm Like */}
             <button 
               className="control-btn heart-btn" 
               title={isSongLiked(currentSong.id) ? "Đã lưu vào Liked Songs" : "Thêm vào danh sách phát"} 
               style={{ marginLeft: '16px', color: isSongLiked(currentSong.id) ? '#1db954' : '', cursor: 'pointer' }}
               onClick={(e) => {
-                // Ngăn sự kiện click lan truyền lên div cha .player-left
                 e.stopPropagation(); 
                 if (isSongLiked(currentSong.id)) {
                   openAddToPlaylistModal(currentSong, e);
@@ -114,11 +108,9 @@ export default function PlayerBar() {
         )}
       </div>
 
-      {/* GÓC GIỮA: Controls + Progress */}
       <div className="player-center">
         <div className="player-controls">
 
-          {/* ── NÚT TRỘN BÀI ── */}
           <button
             className="control-btn"
             title={isShuffle ? 'Tắt trộn bài' : 'Trộn bài'}
@@ -138,14 +130,12 @@ export default function PlayerBar() {
             )}
           </button>
 
-          {/* ── NÚT BÀI TRƯỚC ── */}
           <button className="control-btn" title="Bài trước" onClick={playPrev}>
             <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
               <path d="M3.3 1a.7.7 0 0 1 .7.7v5.15l9.95-5.744a.7.7 0 0 1 1.05.606v12.575a.7.7 0 0 1-1.05.607L4 9.149V14.3a.7.7 0 0 1-1.4 0V1.7a.7.7 0 0 1 .7-.7z" />
             </svg>
           </button>
 
-          {/* ── NÚT PLAY / PAUSE ── */}
           <button className="play-pause-btn" title="Play/Pause" onClick={togglePlay}>
             {isPlaying
               ? <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z" /></svg>
@@ -153,14 +143,12 @@ export default function PlayerBar() {
             }
           </button>
 
-          {/* ── NÚT BÀI TIẾP ── */}
           <button className="control-btn" title="Bài tiếp" onClick={playNext}>
             <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
               <path d="M12.7 1a.7.7 0 0 0-.7.7v5.15L2.05 1.107A.7.7 0 0 0 1 1.712v12.575a.7.7 0 0 0 1.05.607L12 9.149V14.3a.7.7 0 0 0 1.4 0V1.7a.7.7 0 0 0-.7-.7z" />
             </svg>
           </button>
 
-          {/* ── NÚT LẶP LẠI (3 trạng thái) ── */}
           <button
             className="control-btn"
             title={repeatMode === 'none' ? 'Lặp lại' : repeatMode === 'all' ? 'Lặp 1 bài' : 'Tắt lặp lại'}
@@ -194,7 +182,6 @@ export default function PlayerBar() {
 
         </div>
 
-        {/* Thanh progress thời gian */}
         <div className="player-playback">
           <span className="time-text">{formatTime(currentTime)}</span>
           <div 
@@ -221,10 +208,8 @@ export default function PlayerBar() {
         </div>
       </div>
 
-      {/* GÓC PHẢI: Các tiện ích & Volume */}
       <div className="player-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         
-        {/* Nút bật/tắt Lời bài hát */}
         <button 
           className="control-btn" 
           title="Lời bài hát"
@@ -240,7 +225,6 @@ export default function PlayerBar() {
           {isLyricsViewOpen && <div className="active-dot" style={{ position: 'absolute', bottom: '-4px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', backgroundColor: '#1db954', borderRadius: '50%' }}></div>}
         </button>
 
-        {/* Nút bật/tắt Danh sách chờ */}
         <button 
           className="control-btn" 
           title="Danh sách chờ" 
@@ -255,7 +239,6 @@ export default function PlayerBar() {
           {isQueueViewOpen && <div className="active-dot" style={{ position: 'absolute', bottom: '-4px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', backgroundColor: '#1db954', borderRadius: '50%' }}></div>}
         </button>
 
-        {/* Nút bật/tắt Friend Activity */}
         <button 
           className="control-btn" 
           title="Hoạt động bạn bè" 
@@ -300,7 +283,6 @@ export default function PlayerBar() {
         />
       </div>
 
-      {/* 2. Đặt Component hiển thị lời bài hát full-screen tại đây */}
       <FullScreenLyrics 
         currentSong={currentSong} 
         currentTime={currentTime} 

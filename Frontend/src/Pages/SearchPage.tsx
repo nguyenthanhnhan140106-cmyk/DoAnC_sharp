@@ -33,18 +33,17 @@ export default function SearchPage() {
     useEffect(() => {
         if (!q) return;
         setLoading(true);
-        setCurrentPage(1); // Reset page on new search
+        setCurrentPage(1);
         songService.searchSongs(q)
             .then((list: unknown) => {
                 const songList: Song[] = Array.isArray(list) ? list : [];
                 setResults(songList);
-                setCurrentPage(1); // Reset về trang 1 khi có kết quả mới
+                setCurrentPage(1);
             })
             .catch((err: unknown) => console.error("Lỗi search:", err))
             .finally(() => setLoading(false));
     }, [q]);
 
-    // Phân trang
     const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE);
     const displayed = results.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
@@ -60,7 +59,6 @@ export default function SearchPage() {
             <div className="main-view">
                 <div className="content-wrapper" style={{ padding: '24px' }}>
                     
-                    {/* Cụm tiêu đề chứa nút Back sát cạnh chữ */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
                         <button 
                             onClick={() => navigate(-1)} 
@@ -91,7 +89,6 @@ export default function SearchPage() {
                         {loading ? 'Đang tìm...' : `${results.length} kết quả`}
                     </p>
 
-                    {/* Kết quả dạng danh sách */}
                     {!loading && displayed.length === 0 ? (
                         <div style={{ textAlign: 'center', color: '#b3b3b3', marginTop: '80px' }}>
                             <p style={{ fontSize: '24px' }}>😢</p>
@@ -110,7 +107,6 @@ export default function SearchPage() {
                                             className={`search-result-row ${isActive ? 'active' : ''}`}
                                             onClick={() => handlePlay(song)}
                                         >
-                                            {/* Số thứ tự / nút play */}
                                             <div className="search-result-index">
                                                 {isActive && isPlaying ? (
                                                     <svg viewBox="0 0 24 24" width="16" height="16" fill="#1db954">
@@ -124,14 +120,12 @@ export default function SearchPage() {
                                                 </svg>
                                             </div>
 
-                                            {/* Ảnh bìa */}
                                             <img
                                                 src={getCover(song)}
                                                 alt={song.title}
                                                 className="search-result-cover"
                                             />
 
-                                            {/* Thông tin bài hát */}
                                             <div className="search-result-info">
                                                 <span className="search-result-title" style={{ color: isActive ? '#1db954' : '#fff' }}>
                                                     {song.title}
@@ -139,12 +133,10 @@ export default function SearchPage() {
                                                 <span className="search-result-artist">Bài hát • {song.artist}</span>
                                             </div>
 
-                                            {/* Badge thể loại */}
                                             {song.category && (
                                                 <span className="search-result-badge">{song.category.toUpperCase()}</span>
                                             )}
 
-                                            {/* Nút thêm vào playlist */}
                                             <button className="search-result-add" title="Thêm vào thư viện" onClick={e => e.stopPropagation()}>
                                                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                                                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
@@ -155,10 +147,8 @@ export default function SearchPage() {
                                 })}
                             </div>
 
-                            {/* --- ĐÃ SỬA: ĐỔI CHỮ THÀNH MŨI TÊN PHÂN TRANG --- */}
                             {totalPages > 1 && (
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginTop: '30px', marginBottom: '20px' }}>
-                                    {/* Nút lùi về trang trước (Dấu ‹) */}
                                     <button 
                                         disabled={currentPage === 1}
                                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -181,12 +171,9 @@ export default function SearchPage() {
                                         ‹
                                     </button>
 
-                                    {/* Hiển thị số trang */}
                                     <span style={{ color: '#b3b3b3', fontSize: '14px', fontWeight: 500, userSelect: 'none' }}>
                                         <strong style={{ color: '#fff' }}>{currentPage}</strong> / {totalPages}
                                     </span>
-
-                                    {/* Nút tiến tới trang tiếp theo (Dấu ›) */}
                                     <button 
                                         disabled={currentPage === totalPages}
                                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}

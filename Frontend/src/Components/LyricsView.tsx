@@ -11,7 +11,6 @@ export default function LyricsView() {
   const { isLyricsViewOpen, currentTime, currentSong } = useMusic();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Parse lyrics từ JSON string của bài hát hiện tại, hoặc hiển thị dạng text
   const parsedLyrics = useMemo<LyricLine[]>(() => {
     const rawLyrics = currentSong?.lyrics || (currentSong as { Lyrics?: string })?.Lyrics;
     if (!rawLyrics) return [];
@@ -21,17 +20,15 @@ export default function LyricsView() {
       if (Array.isArray(parsed)) return parsed as LyricLine[];
       return [];
     } catch {
-      // Nếu không phải JSON, tách thành các dòng text bình thường
       console.warn("Lyrics is not JSON, treating as plain text.");
       const lines = rawLyrics.split('\n');
       return lines.map((text: string, idx: number) => ({
-        time: idx * 3, // Giả lập thời gian mỗi dòng 3 giây nếu là text trơn
+        time: idx * 3, 
         text: text.trim()
       })).filter((l: LyricLine) => l.text.length > 0);
     }
   }, [currentSong]);
 
-  // Tìm dòng lời bài hát hiện tại dựa trên currentTime
   let activeIndex = -1;
   if (parsedLyrics.length > 0) {
     for (let i = 0; i < parsedLyrics.length; i++) {
@@ -43,7 +40,6 @@ export default function LyricsView() {
     }
   }
 
-  // Tự động cuộn đến dòng hiện tại
   useEffect(() => {
     if (isLyricsViewOpen && containerRef.current) {
       const activeElement = containerRef.current.querySelector('.lyric-line.active');

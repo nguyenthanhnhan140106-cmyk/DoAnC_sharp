@@ -104,7 +104,7 @@ export default function ListeningHistoryPage() {
           title: item?.title ?? item?.name ?? 'Unknown title',
           artist: item?.artist ?? item?.artistName ?? 'Unknown artist',
           album: item?.albumName ?? item?.category ?? item?.album ?? 'Không xác định',
-          albumId: item?.albumId, // Don't fallback to string category for ID
+          albumId: item?.albumId, 
           playlistId: item?.playlistId ?? undefined,
           playlistName: item?.playlistName ?? 'Playlist',
           duration: item?.duration ?? item?.length ?? '--',
@@ -172,7 +172,6 @@ export default function ListeningHistoryPage() {
   const uniqueAlbums = useMemo(() => {
     const albumsMap = new Map<number, ListeningHistorySong>();
     songs.forEach(s => {
-      // Chỉ gom nhóm các bài hát có albumId thực sự từ CSDL
       if (s.albumId && !albumsMap.has(Number(s.albumId))) {
         albumsMap.set(Number(s.albumId), s);
       }

@@ -28,19 +28,16 @@ export default function NotificationsPage() {
   }, [isQueueViewOpen, isLyricsViewOpen, isFriendActivityViewOpen]);
 
   const handleNotificationClick = async (notification: NotificationModel) => {
-    // Đánh dấu đã đọc
     if (!notification.isRead) {
       await markNotificationAsRead(notification.id);
     }
 
-    // Nếu là thông báo chia sẻ nhạc → fetch bài hát đầy đủ rồi phát
     if (notification.type === 'SharedMedia' && notification.payload) {
       try {
         const payloadObj = JSON.parse(notification.payload);
         if (payloadObj.SongId || payloadObj.songId) {
           const songId = payloadObj.SongId || payloadObj.songId;
           setLoadingSongId(songId);
-          // Fetch đầy đủ thông tin bài hát (bao gồm audioUrl) từ API
           const fullSong = await songService.getSongById(songId);
           if (fullSong && fullSong.audioUrl) {
             playSong(fullSong);
@@ -138,7 +135,6 @@ export default function NotificationsPage() {
                       position: 'relative'
                     }}
                   >
-                    {/* Ảnh bìa bài hát */}
                     <div style={{ position: 'relative', flexShrink: 0 }}>
                       {songCover ? (
                         <img src={songCover} alt="cover" style={{
@@ -154,7 +150,6 @@ export default function NotificationsPage() {
                           🎵
                         </div>
                       )}
-                      {/* Overlay icon play khi là SharedMedia */}
                       {isSharedSong && (
                         <div style={{
                           position: 'absolute', inset: 0, borderRadius: '8px',
@@ -173,7 +168,6 @@ export default function NotificationsPage() {
                       )}
                     </div>
 
-                    {/* Nội dung thông báo */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{
                         margin: '0 0 4px 0', fontSize: '15px', color: '#fff',
@@ -198,7 +192,6 @@ export default function NotificationsPage() {
                       </div>
                     </div>
 
-                    {/* Chấm xanh chưa đọc */}
                     {!notif.isRead && (
                       <div style={{
                         width: '10px', height: '10px', backgroundColor: '#1ed760',

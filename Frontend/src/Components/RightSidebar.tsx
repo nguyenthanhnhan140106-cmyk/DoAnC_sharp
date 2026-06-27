@@ -16,12 +16,11 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const location = useLocation();
   const isProfilePage = location.pathname.startsWith('/user/');
 
-  // Lấy chính xác các thuộc tính điều khiển từ MusicContext
   const musicContext = useMusic();
   const currentSong = musicContext?.currentSong;
   const isPlaying = musicContext?.isPlaying;
   const togglePlay = musicContext?.togglePlay;
-  const pauseSong = musicContext?.pauseSong; // Lấy thêm hàm pause chủ động nếu có
+  const pauseSong = musicContext?.pauseSong;
   const queue = musicContext?.queue || [];
   const isQueueViewOpen = musicContext?.isQueueViewOpen || false;
   const toggleQueueView = musicContext?.toggleQueueView;
@@ -38,7 +37,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
   const { isLoggedIn, user, openAuthModal } = useAuth();
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close more menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
@@ -92,7 +90,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     return () => window.removeEventListener('followUpdated', handleFollowUpdated);
   }, [currentSong?.artistId]);
 
-  // 🟢 Xử lý Follow/Unfollow
   const handleFollow = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isLoggedIn) {
@@ -123,10 +120,8 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
     }
   };
 
-  // Sử dụng ref để nhớ trạng thái nhạc trước khi bật MV
   const wasPlayingBeforeVideo = useRef(false);
 
-  // 🟢 Lắng nghe sự kiện bật Video từ các nơi khác (như trang chủ)
   useEffect(() => {
     const handleOpenVideoModal = () => {
       if (!isLoggedIn) {
@@ -134,9 +129,8 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
         else alert("Vui lòng đăng nhập để xem video MV!");
         return;
       }
-      wasPlayingBeforeVideo.current = true; // Lưu cờ
+      wasPlayingBeforeVideo.current = true; 
       setIsVideoOpen(true);
-      // Tạm dừng nhạc bằng hàm stable
       if (pauseSong) {
         pauseSong();
       }
@@ -162,7 +156,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
           if (res.data.length === 0 && user?.id) {
             const usersRes = await API.get('/Users');
             const allUsers = usersRes.data || [];
-            // Lọc bỏ user hiện tại, đảo ngược để lấy người dùng mới nhất, và lấy 5 người đầu tiên
             const suggestions = allUsers
               .filter((u: { id: number }) => u.id !== user.id)
               .reverse()
@@ -290,7 +283,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
           </button>
         </div>
 
-        {/* Now playing */}
         <div style={{ marginBottom: '32px' }}>
           <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 700, color: '#fff' }}>Now playing</h4>
           {currentSong && (
@@ -304,7 +296,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
           )}
         </div>
 
-        {/* Next up */}
         <div>
           <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 700, color: '#fff' }}>Next up</h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -462,31 +453,27 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
 
     : "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=240&fit=crop";
 
-  // Kiểm tra video hợp lệ
   const hasVideo = !!songData.videoUrl;
 
-  // 🟢 HÀM ĐÓNG MV THÔNG MINH - ĐÃ KHẮC PHỤC GIỰT LẶP ÂM THANH
   const handleCloseVideo = () => {
     setIsVideoOpen(false);
     setTimeout(() => {
       if (wasPlayingBeforeVideo.current && togglePlay) {
         togglePlay();
       }
-      wasPlayingBeforeVideo.current = false; // Reset cờ
+      wasPlayingBeforeVideo.current = false; 
     }, 50);
   };
 
   return (
     <aside className={`spotify-right-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
 
-      {/* NÚT MŨI TÊN KHI THU GỌN */}
       <button className="right-expand-btn" onClick={() => setIsCollapsed(false)} title="Mở rộng bảng thông tin">
         <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
           <path d="M11.03 1.97a.75.75 0 0 1 0 1.06L5.56 8l5.47 5.47a.75.75 0 1 1-1.06 1.06l-6-6a.75.75 0 0 1 0-1.06l6-6a.75.75 0 0 1 1.06 0z" />
         </svg>
       </button>
 
-      {/* KHỐI CHỨA RUỘT GAN */}
       <div className="right-sidebar-full-content">
         <div className="right-sidebar-header">
           <h3>Đang phát</h3>
@@ -512,7 +499,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
           </div>
         </div>
 
-        {/* NÚT XEM VIDEO HOẶC MV ĐÃ ĐƯỢC CHUẨN HÓA STYLE */}
         {hasVideo && (
           <div className="right-sidebar-video-action" style={{ padding: "0 16px", marginBottom: "16px" }}>
             <button
@@ -523,10 +509,8 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
                   else alert("Vui lòng đăng nhập để xem video MV!");
                   return;
                 }
-                // 1. Ghi nhớ trạng thái phát nhạc trước đó
                 wasPlayingBeforeVideo.current = isPlaying;
 
-                // 2. Tạm dừng nhạc hệ thống một cách an toàn
                 if (isPlaying) {
                   if (pauseSong) {
                     pauseSong();
@@ -534,7 +518,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
                     togglePlay();
                   }
                 }
-                // 3. Mở Dialog Video
                 setIsVideoOpen(true);
               }}
               style={{
@@ -562,7 +545,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
           </div>
         )}
 
-        {/* KHỐI ABOUT THE ARTIST */}
         <div className="spotify-about-artist-box" onClick={() => setIsDialogOpen(true)} style={{ cursor: "pointer" }}>
           <div className="about-artist-banner">
             <img src={artistBanner} alt={songData.artist} />
@@ -576,7 +558,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
           </div>
         </div>
 
-        {/* KHỐI CREDITS */}
         <div className="spotify-right-sidebar-box" style={{ backgroundColor: '#242424', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#fff' }}>Credits</h4>
@@ -618,7 +599,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
           </div>
         </div>
 
-        {/* KHỐI NEXT IN QUEUE */}
         <div className="spotify-right-sidebar-box" style={{ backgroundColor: '#242424', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#fff' }}>Next in queue</h4>
@@ -663,7 +643,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
 
       </div>
 
-      {/* 🟢 DIALOG POPUP XEM VIDEO MV XỊN SÒ */}
       {isVideoOpen && (
         <div
           className="spotify-dialog-overlay"
@@ -739,7 +718,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
                 </div>
               </div>
 
-              {/* NÚT "✕" - HOVER PHÓNG TO XANH LÁ */}
               <button
                 onClick={handleCloseVideo}
                 style={{
@@ -809,7 +787,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
         </div>
       )}
 
-      {/* DIALOG THÔNG TIN CA SĨ */}
       {isDialogOpen && (
         <div className="spotify-dialog-overlay" onClick={() => setIsDialogOpen(false)} style={{ zIndex: 10000 }}>
           <div
@@ -822,7 +799,7 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
               maxWidth: "750px",
               backgroundColor: "#181818",
               borderRadius: "12px",
-              display: "block" // ghi đè flex-direction của css cũ
+              display: "block" 
             }}
           >
             <button
@@ -846,7 +823,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
               ✕
             </button>
 
-            {/* ── TOP BANNER (Ảnh thứ 1) ── */}
             <div
               style={{
                 width: "100%",
@@ -867,10 +843,8 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
               }}></div>
             </div>
 
-            {/* ── BOTTOM INFO ── */}
             <div style={{ display: "flex", padding: "32px", gap: "48px", backgroundColor: "#181818" }}>
 
-              {/* CỘT TRÁI: THỐNG KÊ */}
               <div style={{ flex: "0 0 160px", display: "flex", flexDirection: "column", gap: "24px" }}>
                 <div>
                   <p style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: "#fff", letterSpacing: "-1px" }}>
@@ -890,7 +864,6 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
                   </p>
                 </div>
 
-                {/* Dummy Locations theo UI bạn gửi */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "16px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px" }}>
                     <span style={{ fontWeight: 600, color: "#fff" }}>Ho Chi Minh City, VN</span>
@@ -911,14 +884,12 @@ export default function RightSidebar({ isCollapsed, setIsCollapsed }: RightSideb
                 </div>
               </div>
 
-              {/* CỘT PHẢI: BIO & VERIFIED */}
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "24px" }}>
                 <p style={{ lineHeight: "1.6", fontSize: "15px", color: "#a7a7a7", margin: 0, fontWeight: 400 }}>
                   {songData.bio || "Nghệ sĩ này chưa cập nhật tiểu sử."}
                 </p>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  {/* Ảnh thứ 2 (Avatar người đăng/tác giả) */}
                   <img src={activeCover} alt="Avatar" style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover" }} />
                   <span style={{ fontWeight: 600, fontSize: "14px", color: "#fff" }}>
                     Posted By {songData.artist}

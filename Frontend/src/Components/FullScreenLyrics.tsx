@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './Styles/LyricsView.css'; 
+import './Styles/LyricsView.css';
 
 interface LyricLine {
   time: number;
