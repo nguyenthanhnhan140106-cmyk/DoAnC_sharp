@@ -5,6 +5,11 @@
 [![CI Pipeline](https://github.com/nguyenthanhnhan140106-cmyk/DoAnC_sharp/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenthanhnhan140106-cmyk/DoAnC_sharp/actions/workflows/ci.yml)
 [![Status](https://img.shields.io/badge/Status-Hoàn%20thiện-success.svg)]()
 
+**👥 Nhóm thực hiện:**
+- Chế Văn Nam
+- Nguyễn Thành Nhân
+- Vũ Lê Phước Sang
+
 > **🌐 Live Demo (Đã Deploy lên Cloud):**
 > - **Frontend (Vercel):** [https://do-an-c-sharp-x2jb.vercel.app/](https://do-an-c-sharp-x2jb.vercel.app/)
 > - **Backend API (Somee):** [http://tunevault-backend.somee.com/swagger](http://tunevault-backend.somee.com/swagger)
